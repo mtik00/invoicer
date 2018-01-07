@@ -118,23 +118,28 @@ def logout():
 def new_item(invoice_id):
     form = ItemForm()
     db = get_db()
-    # cur = db.execute('select * from invoices order by id desc')
-    # invoices = cur.fetchall()
-    # invoice_choices = [(x['id'], "%d: %s" % (x['id'], x['description'])) for x in invoices]
-    # form.invoice.choices = invoice_choices
+    cur = db.execute('select * from unit_prices')
+    unit_prices = cur.fetchall()
+    unit_price_choices = [
+        (x['id'], "%d: %s ($%.02f/%s)" % (x['id'], x['description'], x['unit_price'], x['units']))
+        for x in unit_prices
+    ]
+    form.unit_price.choices = unit_price_choices
 
     if form.validate_on_submit():
-        # invoice_id = int(request.form['invoice'])
+        cur = db.execute('select * from unit_prices where id = ?', [request.form['unit_price']])
+        unit_price_row = cur.fetchone()
 
         # Now insert
         db.execute('''
-            insert into items (invoice_id, date, description, unit_price, quantity) values (?, ?, ?, ?, ?)''',
+            insert into items (invoice_id, date, description, unit_price, quantity, units) values (?, ?, ?, ?, ?, ?)''',
             [
                 invoice_id,
                 request.form['date'].upper(),
                 request.form['description'],
-                request.form['unit_price'],
+                unit_price_row['unit_price'],
                 request.form['quantity'],
+                unit_price_row['units'],
             ]
         )
         db.commit()
@@ -168,7 +173,7 @@ def new_invoice():
         db.commit()
 
         flash('invoice added', 'success')
-        return redirect(url_for('invoices'))
+        return redirect(url_for('invoice'))
 
     return render_template('invoice_form.html', form=form)
 
@@ -177,6 +182,7 @@ def new_invoice():
 def delete_invoice(invoice_id):
     db = get_db()
     db.execute('DELETE FROM invoices WHERE id = ?', [str(invoice_id)])
+    db.execute('DELETE FROM items WHERE invoice_id = ?', [str(invoice_id)])
     db.commit()
     flash('Invoice %d has been deleted' % invoice_id, 'warning')
     return redirect(url_for('invoice'))
@@ -248,10 +254,15 @@ def invoice(invoice=None):
     else:
         show_id = invoice
 
+    db = get_db()
+    cur = db.execute('select * from invoices where id = ?', [str(invoice)])
+    invoice_obj = cur.fetchone()
+
     return render_template(
         'invoices.html',
         invoice_id=show_id,
-        max_invoices=number_of_invoices()
+        max_invoices=number_of_invoices(),
+        invoice_obj=invoice_obj
     )
 
 
@@ -300,10 +311,10 @@ def raw_invoice(invoice_id):
     if submitted:
         submitted = arrow.get(submitted, 'DD-MMM-YYYY')
     else:
-        submitted = arrow.now()
+        submitted = None  # arrow.now()
 
-    due = submitted.replace(days=+30).format('DD-MMM-YYYY')
-    submitted = submitted.format('DD-MMM-YYYY')
+    due = submitted.replace(days=+30).format('DD-MMM-YYYY') if submitted else None
+    submitted = submitted.format('DD-MMM-YYYY') if submitted else None
 
     return render_template(
         'invoice.html',

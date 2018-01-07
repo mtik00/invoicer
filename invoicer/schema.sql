@@ -30,5 +30,14 @@ CREATE TABLE items (
     'description' text,
     unit_price real,
     quantity integer,
+    'units' text
     FOREIGN KEY(invoice_id) REFERENCES invoices(id)
+);
+
+drop table if exists unit_prices;
+CREATE TABLE unit_prices (
+    id integer PRIMARY KEY,
+    'description' text,
+    unit_price real,
+    'units' text
 );

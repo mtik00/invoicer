@@ -22,7 +22,7 @@ class InvoiceForm(FlaskForm):
 
 
 class ItemForm(FlaskForm):
-    date = StringField(u'Date', validators=[DataRequired()])
+    date = StringField(u'Date', validators=[DataRequired()], id="datepicker")
     description = StringField(u'description', validators=[DataRequired()])
-    unit_price = FloatField(u'unit_price', validators=[DataRequired()])
+    unit_price = SelectField(u'unit_price', coerce=int)
     quantity = IntegerField(u'Quantity', validators=[DataRequired()])
