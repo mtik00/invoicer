@@ -9,7 +9,8 @@
 <body>
 <div class="w3-bar w3-cyan">
     <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
-    <a href="invoices" class="w3-bar-item w3-button w3-mobile">Invoices</a>
+    <a href="{{url_for('raw_invoices')}}" class="w3-bar-item w3-button w3-mobile">Invoices</a>
+    <a href="{{url_for('addresses')}}" class="w3-bar-item w3-button w3-mobile">Addresses</a>
     {% if not session.logged_in %}
       <a href="{{ url_for('login') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log In</a>
     {% else %}

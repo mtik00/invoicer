@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-<form action="{{url_for('show_invoices')}}" method="POST">
+<form action="{{url_for('raw_invoices')}}" method="POST">
     {% if invoice_id > 1 %}
     <input type="submit" value="Previous" name='previous'>
     {% else %}
@@ -14,11 +14,11 @@
     {% endif %}
 
     <input type="submit" value="Download PDF" name='pdf'>
-    <input type="submit" value="Add New Invoice" name='new' class='w3-right'>
-
+    <a href="{{url_for('new_invoice')}}" class='w3-btn w3-cyan w3-right'>Add New Invoice</a>
+    <a href="{{url_for('delete_invoice', invoice_id=invoice_id)}}" class='w3-btn w3-red w3-right'>Delete Invoice</a>
     <input type="hidden" value="{{invoice_id}}" name='current'>
 </form>
 <div class="fluidMedia">
-    <iframe src="{{url_for('show_invoice', invoice_id=invoice_id)}}" frameborder="0"></iframe>
+    <iframe src="{{url_for('raw_invoice', invoice_id=invoice_id)}}" frameborder="0"></iframe>
 </div>
 {% endblock %}

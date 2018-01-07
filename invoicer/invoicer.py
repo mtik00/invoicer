@@ -11,7 +11,7 @@ from pdfkit.configuration import Configuration
 import arrow
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
-from .forms import AddressForm
+from .forms import AddressForm, InvoiceForm
 
 
 app = Flask(__name__)
@@ -30,8 +30,6 @@ app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
 
 
-INVOICE_COUNT = 0
-
 def connect_db():
     """Connects to the specific database."""
     rv = sqlite3.connect(app.config['DATABASE'])
@@ -46,6 +44,12 @@ def get_db():
     if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
+
+
+def number_of_invoices():
+    db = get_db()
+    cur = db.execute('select count(*) from invoices')
+    return cur.fetchone()[0]
 
 
 @app.teardown_appcontext
@@ -104,21 +108,47 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
-    # db = get_db()
-    # db.execute('insert into entries (title, text) values (?, ?)',
-    #              [request.form['title'], request.form['text']])
-    # db.commit()
-    flash('New entry was successfully posted', 'success')
-    return redirect(url_for('index'))
+@app.route('/invoices/new', methods=["GET","POST"])
+def new_invoice():
+    form = InvoiceForm()
+    db = get_db()
+    cur = db.execute('select * from addresses order by id desc')
+    addresses = cur.fetchall()
+    addr_choices = [(x['id'], x['name1']) for x in addresses]
+    form.to_address.choices = addr_choices
+    import pdb; pdb.set_trace()
+
+    if form.validate_on_submit():
+        to_address_id = int(request.form['to_address'])
+
+        # Now insert
+        db.execute('''
+            insert into invoices (description, to_address) values (?, ?)''',
+            [
+                request.form['description'],
+                to_address_id,
+            ]
+        )
+        db.commit()
+
+        flash('invoice added', 'success')
+        return redirect(url_for('raw_invoices'))
+
+    return render_template('invoice_form.html', form=form)
+
+
+@app.route('/invoice/<int:invoice_id>/delete')
+def delete_invoice(invoice_id):
+    db = get_db()
+    db.execute('DELETE FROM invoices WHERE id = ?', [str(invoice_id)])
+    db.commit()
+    flash('Invoice %d has been deleted' % invoice_id, 'warning')
+    return redirect(url_for('raw_invoices'))
 
 
 @app.route('/invoice/<int:invoice_id>/pdf')
 def to_pdf(invoice_id):
-    text = show_invoice(invoice_id)
+    text = raw_invoice(invoice_id)
     fname = "invoice-%03i.pdf" % int(invoice_id)
     fpath = os.path.join(app.instance_path, fname)
     config = Configuration(app.config['WKHTMLTOPDF'])
@@ -135,25 +165,44 @@ def to_pdf(invoice_id):
     )
 
 
-@app.route('/new-invoice', methods=["GET","POST"])
-def new_invoice():
+@app.route('/addresses/new', methods=["GET","POST"])
+def new_address():
     form = AddressForm()
     if form.validate_on_submit():
+        db = get_db()
+        db.execute('''
+            insert into addresses (name1, name2, addrline1, addrline2, city, state, zip, email, terms) values (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            [
+                request.form['name1'],
+                request.form['name2'],
+                request.form['addrline1'],
+                request.form['addrline2'],
+                request.form['city'],
+                request.form['state'],
+                request.form['zipcode'],
+                request.form['email'],
+                request.form['terms'],
+            ]
+        )
+        db.commit()
+
         flash('address added', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('addresses'))
 
     return render_template('address_form.html', form=form)
 
 
+@app.route('/addresses')
+def addresses():
+    db = get_db()
+    cur = db.execute('select * from addresses')
+    addresses = cur.fetchall()
+
+    return render_template('addresses.html', addresses=addresses)
+
+
 @app.route('/invoices', methods=["GET","POST"])
-def show_invoices(current_invoice=None):
-    global INVOICE_COUNT
-
-    if not INVOICE_COUNT:
-        db = get_db()
-        cur = db.execute('select count(*) from invoices')
-        INVOICE_COUNT = cur.fetchone()[0]
-
+def raw_invoices(current_invoice=None):
     if request.method == "POST":
         current_invoice = int(request.form.get('current', 1))
         if 'next' in request.form:
@@ -168,26 +217,26 @@ def show_invoices(current_invoice=None):
         return render_template(
             'invoices.html',
             invoice_id=invoice_id,
-            max_invoices=INVOICE_COUNT
+            max_invoices=number_of_invoices()
         )
 
     # Always show the last invoice first
     if request.args.get('current_invoice'):
         show_id = int(request.args.get('current_invoice'))
     elif current_invoice is None:
-        show_id = INVOICE_COUNT
+        show_id = number_of_invoices()
     else:
         show_id = current_invoice
 
     return render_template(
         'invoices.html',
         invoice_id=show_id,
-        max_invoices=INVOICE_COUNT
+        max_invoices=number_of_invoices()
     )
 
 
-@app.route('/invoice/<int:invoice_id>')
-def show_invoice(invoice_id):
+@app.route('/raw-invoice/<int:invoice_id>')
+def raw_invoice(invoice_id):
     """
     Displays a single invoice
     """

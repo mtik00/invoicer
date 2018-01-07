@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, SelectField
 from wtforms.validators import DataRequired
+
 
 class AddressForm(FlaskForm):
     name1 = StringField('name1', validators=[DataRequired()])
@@ -12,3 +13,8 @@ class AddressForm(FlaskForm):
     zipcode = StringField('zipcode', validators=[DataRequired()])
     email = StringField('email')
     terms = StringField('terms')
+
+
+class InvoiceForm(FlaskForm):
+    description = StringField(u'description', validators=[DataRequired()])
+    to_address = SelectField(u'to_address', coerce=int)
