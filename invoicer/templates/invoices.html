@@ -13,6 +13,8 @@
     {% else %}
     <button disabled>Next</button>
     {% endif %}
+
+    <button formaction="{{ url_for('new_item', invoice_id=invoice_id) }}">Add Item</button>
 </form>
 
 <form action="{{url_for('invoices')}}" method="POST">

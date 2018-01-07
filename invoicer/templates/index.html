@@ -2,7 +2,7 @@
 {% block body %}
   <ul class=entries>
   {% for invoice in invoices %}
-    <li>{{ invoice.id }}: <a href="{{ url_for('invoices', current_invoice=invoice.id)}}">{{ invoice.description|safe }}</a>
+    <li>{{ invoice.id }}: <a href="{{ url_for('invoice', invoice=invoice.id)}}">{{ invoice.description|safe }}</a>
   {% else %}
     <li><em>Unbelievable.  No invoices here so far</em>
   {% endfor %}

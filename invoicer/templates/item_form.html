@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+{% from "_formhelpers.html" import render_field %}
+{% if form.errors %}
+{% for error in form.errors.values() %}
+      <li>{{ error }}</li>
+{% endfor %}
+{% endif %}
+<form action="{{url_for('new_item', invoice_id=invoice_id)}}" method="POST">
+  <dl>
+    {{ form.hidden_tag() }}
+    {{ render_field(form.date) }}
+    {{ render_field(form.description) }}
+    {{ render_field(form.unit_price) }}
+    {{ render_field(form.quantity) }}
+  </dl>
+  <p><input type=submit value="Add" class="w3-btn w3-cyan"></p>
+</form>
+{% endblock %}

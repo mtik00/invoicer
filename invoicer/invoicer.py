@@ -11,7 +11,7 @@ from pdfkit.configuration import Configuration
 import arrow
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
-from .forms import AddressForm, InvoiceForm
+from .forms import AddressForm, InvoiceForm, ItemForm
 from argon2 import PasswordHasher
 
 
@@ -114,6 +114,37 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/invoice/<int:invoice_id>/items/new', methods=["GET","POST"])
+def new_item(invoice_id):
+    form = ItemForm()
+    db = get_db()
+    # cur = db.execute('select * from invoices order by id desc')
+    # invoices = cur.fetchall()
+    # invoice_choices = [(x['id'], "%d: %s" % (x['id'], x['description'])) for x in invoices]
+    # form.invoice.choices = invoice_choices
+
+    if form.validate_on_submit():
+        # invoice_id = int(request.form['invoice'])
+
+        # Now insert
+        db.execute('''
+            insert into items (invoice_id, date, description, unit_price, quantity) values (?, ?, ?, ?, ?)''',
+            [
+                invoice_id,
+                request.form['date'].upper(),
+                request.form['description'],
+                request.form['unit_price'],
+                request.form['quantity'],
+            ]
+        )
+        db.commit()
+
+        flash('item added to invoice %d' % invoice_id, 'success')
+        return redirect(url_for('invoice', invoice=invoice_id))
+
+    return render_template('item_form.html', form=form, invoice_id=invoice_id)
+
+
 @app.route('/invoices/new', methods=["GET","POST"])
 def new_invoice():
     form = InvoiceForm()
@@ -122,7 +153,6 @@ def new_invoice():
     addresses = cur.fetchall()
     addr_choices = [(x['id'], x['name1']) for x in addresses]
     form.to_address.choices = addr_choices
-    import pdb; pdb.set_trace()
 
     if form.validate_on_submit():
         to_address_id = int(request.form['to_address'])
