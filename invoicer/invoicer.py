@@ -138,7 +138,7 @@ def new_invoice():
         db.commit()
 
         flash('invoice added', 'success')
-        return redirect(url_for('raw_invoices'))
+        return redirect(url_for('invoices'))
 
     return render_template('invoice_form.html', form=form)
 
@@ -149,7 +149,7 @@ def delete_invoice(invoice_id):
     db.execute('DELETE FROM invoices WHERE id = ?', [str(invoice_id)])
     db.commit()
     flash('Invoice %d has been deleted' % invoice_id, 'warning')
-    return redirect(url_for('raw_invoices'))
+    return redirect(url_for('invoices'))
 
 
 @app.route('/invoice/<int:invoice_id>/pdf')
@@ -207,15 +207,29 @@ def addresses():
     return render_template('addresses.html', addresses=addresses)
 
 
+@app.route('/invoice', defaults={'invoice': None})
+@app.route('/invoice/<int:invoice>')
+def invoice(invoice=None):
+    # Always show the last invoice first
+    if request.args.get('invoice'):
+        show_id = int(request.args.get('invoice'))
+    elif invoice is None:
+        show_id = number_of_invoices()
+    else:
+        show_id = invoice
+
+    return render_template(
+        'invoices.html',
+        invoice_id=show_id,
+        max_invoices=number_of_invoices()
+    )
+
+
 @app.route('/invoices', methods=["GET","POST"])
-def raw_invoices(current_invoice=None):
+def invoices(current_invoice=None):
     if request.method == "POST":
         current_invoice = int(request.form.get('current', 1))
-        if 'next' in request.form:
-            invoice_id = current_invoice + 1
-        elif 'previous' in request.form:
-            invoice_id = current_invoice - 1
-        elif 'pdf' in request.form:
+        if 'pdf' in request.form:
             return to_pdf(current_invoice)
         elif 'new' in request.form:
             return redirect(url_for('new_invoice'))

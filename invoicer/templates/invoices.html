@@ -1,18 +1,21 @@
 {% extends "layout.html" %}
 {% block body %}
-<form action="{{url_for('raw_invoices')}}" method="POST">
+
+<form method="GET">
     {% if invoice_id > 1 %}
-    <input type="submit" value="Previous" name='previous'>
+    <button formaction="{{ url_for('invoice', invoice=invoice_id-1)}}">Previous</button>
     {% else %}
-    <input type="submit" value="Previous" name='previous' disabled>
+    <button disabled>Previous</button>
     {% endif %}
 
     {% if invoice_id < max_invoices %}
-    <input type="submit" value="Next" name='next'>
+    <button formaction="{{ url_for('invoice', invoice=invoice_id+1)}}">Next</button>
     {% else %}
-    <input type="submit" value="Next" name='next' disabled>
+    <button disabled>Next</button>
     {% endif %}
+</form>
 
+<form action="{{url_for('invoices')}}" method="POST">
     <input type="submit" value="Download PDF" name='pdf'>
     <a href="{{url_for('new_invoice')}}" class='w3-btn w3-cyan w3-right'>Add New Invoice</a>
     <a href="{{url_for('delete_invoice', invoice_id=invoice_id)}}" class='w3-btn w3-red w3-right'>Delete Invoice</a>
