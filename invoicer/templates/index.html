@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=entries>
+  {% for invoice in invoices %}
+    <li>{{ invoice.id }}: <a href="{{ url_for('show_invoices', current_invoice=invoice.id)}}">{{ invoice.description|safe }}</a>
+  {% else %}
+    <li><em>Unbelievable.  No invoices here so far</em>
+  {% endfor %}
+  </ul>
+{% endblock %}

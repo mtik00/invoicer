@@ -1,0 +1,4 @@
+arrow
+flask
+pdfkit
+Flask-WTF

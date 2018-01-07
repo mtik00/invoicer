@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+<form action="{{url_for('show_invoices')}}" method="POST">
+    {% if invoice_id > 1 %}
+    <input type="submit" value="Previous" name='previous'>
+    {% else %}
+    <input type="submit" value="Previous" name='previous' disabled>
+    {% endif %}
+
+    {% if invoice_id < max_invoices %}
+    <input type="submit" value="Next" name='next'>
+    {% else %}
+    <input type="submit" value="Next" name='next' disabled>
+    {% endif %}
+
+    <input type="submit" value="Download PDF" name='pdf'>
+    <input type="submit" value="Add New Invoice" name='new' class='w3-right'>
+
+    <input type="hidden" value="{{invoice_id}}" name='current'>
+</form>
+<div class="fluidMedia">
+    <iframe src="{{url_for('show_invoice', invoice_id=invoice_id)}}" frameborder="0"></iframe>
+</div>
+{% endblock %}

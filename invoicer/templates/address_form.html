@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+{% from "_formhelpers.html" import render_field %}
+{% if form.errors %}
+{% for error in form.errors.values() %}
+      <li>{{ error }}</li>
+{% endfor %}
+{% endif %}
+<form action="{{url_for('new_invoice')}}" method="POST">
+  <dl>
+    {{ form.hidden_tag() }}
+    {{ render_field(form.name1) }}
+    {{ render_field(form.name2) }}
+    {{ render_field(form.addrline1) }}
+    {{ render_field(form.addrline2) }}
+    {{ render_field(form.city) }}
+    {{ render_field(form.state) }}
+    {{ render_field(form.zipcode) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.terms) }}
+  </dl>
+  <p><input type=submit value="Add"></p>
+</form>
+{% endblock %}
