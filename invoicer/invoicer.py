@@ -12,6 +12,7 @@ import arrow
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
 from .forms import AddressForm, InvoiceForm
+from argon2 import PasswordHasher
 
 
 app = Flask(__name__)
@@ -22,7 +23,7 @@ app.config.update(dict(
     DATABASE=os.path.join(app.instance_path, 'invoicer.db'),
     SECRET_KEY='development key',
     USERNAME='admin',
-    PASSWORD='default',
+    PASSWORD_HASH='$argon2i$v=19$m=512,t=2,p=2$+w4dAmcJGnaqsgob82pqcQ$4uGfP7JerZJPqAq5cWZ0bw',  # 'default'
     WKHTMLTOPDF="c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe",
     BACKUP_DIR=app.instance_path,
 ))
@@ -89,10 +90,14 @@ def index():
 def login():
     error = None
     if request.method == 'POST':
+        try:
+            ph = PasswordHasher()
+            ph.verify(app.config['PASSWORD_HASH'], request.form['password'])
+        except:
+            error = 'Invalid username/password'
+
         if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
+            error = 'Invalid username/password'
         else:
             session['logged_in'] = True
             flash('You were logged in')

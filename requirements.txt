@@ -2,3 +2,4 @@ arrow
 flask
 pdfkit
 Flask-WTF
+argon2_cffi
