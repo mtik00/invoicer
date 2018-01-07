@@ -98,7 +98,8 @@ def login():
 
         if request.form['username'] != app.config['USERNAME']:
             error = 'Invalid username/password'
-        else:
+
+        if not error:
             session['logged_in'] = True
             flash('You were logged in')
             return redirect(url_for('index'))
