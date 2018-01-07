@@ -81,7 +81,7 @@ def index():
         return redirect(url_for('login'))
 
     db = get_db()
-    cur = db.execute('select id, submitted_date, description from invoices order by id desc')
+    cur = db.execute('select id, submitted_date, description, paid_date from invoices order by id desc')
     invoices = cur.fetchall()
     return render_template('index.html', invoices=invoices)
 
@@ -179,7 +179,7 @@ def delete_invoice(invoice_id):
     db.execute('DELETE FROM invoices WHERE id = ?', [str(invoice_id)])
     db.commit()
     flash('Invoice %d has been deleted' % invoice_id, 'warning')
-    return redirect(url_for('invoices'))
+    return redirect(url_for('invoice'))
 
 
 @app.route('/invoice/<int:invoice_id>/pdf')

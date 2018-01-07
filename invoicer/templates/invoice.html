@@ -129,11 +129,6 @@
 </head>
 
 <body>
-    {% if paid %}
-	<div id="overlay">
-    <div id="text">PAID</div>
-	</div>
-    {% endif %}
     <div class="invoice-box">
         <table cellpadding="0" cellspacing="0">
             <tr class="top">
@@ -144,8 +139,13 @@
                             <td class="title"></td>
                             
                             <td>
-                                Created: {{submitted|upper}}<br>
-                                Due: {{due|upper}}
+                                Submitted: {{submitted|upper}}<br>
+                                Due: {{due|upper}}<br>
+                                {% if paid -%}
+                                <span style="color: green;">PAID: {{paid|upper}}</span>
+                                {% else -%}
+                                <span style="color: red;">NOT PAID</span>
+                                {%endif%}
                             </td>
                         </tr>
                     </table>
