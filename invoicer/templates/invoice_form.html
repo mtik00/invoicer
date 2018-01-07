@@ -9,7 +9,7 @@
 <form action="{{url_for('new_invoice')}}" method="POST">
   <dl>
     {{ form.hidden_tag() }}
-    {{ render_field(form.description) }}
+    {{ render_field(form.description, size=60) }}
     {{ render_field(form.to_address) }}
   </dl>
   <p><input type=submit value="Add" class="w3-btn w3-cyan"></p>

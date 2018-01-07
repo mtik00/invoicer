@@ -11,7 +11,7 @@ from pdfkit.configuration import Configuration
 import arrow
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
-from .forms import AddressForm, InvoiceForm, ItemForm
+from .forms import AddressForm, InvoiceForm, ItemForm, EmptyForm
 from argon2 import PasswordHasher
 
 
@@ -114,6 +114,27 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/invoice/<invoice_id>/items/delete', methods=["GET","POST"])
+def delete_items(invoice_id):
+    form = EmptyForm()
+    db = get_db()
+    cur = db.execute('select * from items where invoice_id = ?', [invoice_id])
+    items = cur.fetchall()
+
+    if form.validate_on_submit():
+        items_to_delete = [y for x, y in request.form.items() if x.startswith('item_')]
+        if not items_to_delete:
+            return redirect(url_for('invoice', invoice=invoice_id))
+
+        for item_id in items_to_delete:
+            db.execute('delete from items where id = ?', [item_id])
+
+        db.commit()
+        return redirect(url_for('invoice', invoice=invoice_id))
+
+    return render_template('delete_items_form.html', form=form, items=items, invoice_id=invoice_id)
+
+
 @app.route('/invoice/<int:invoice_id>/items/new', methods=["GET","POST"])
 def new_item(invoice_id):
     form = ItemForm()
@@ -173,7 +194,7 @@ def new_invoice():
         db.commit()
 
         flash('invoice added', 'success')
-        return redirect(url_for('invoice'))
+        return redirect(url_for('last_invoice'))
 
     return render_template('invoice_form.html', form=form)
 
@@ -185,7 +206,7 @@ def delete_invoice(invoice_id):
     db.execute('DELETE FROM items WHERE invoice_id = ?', [str(invoice_id)])
     db.commit()
     flash('Invoice %d has been deleted' % invoice_id, 'warning')
-    return redirect(url_for('invoice'))
+    return redirect(url_for('last_invoice'))
 
 
 @app.route('/invoice/<int:invoice_id>/pdf')
@@ -243,7 +264,11 @@ def addresses():
     return render_template('addresses.html', addresses=addresses)
 
 
-@app.route('/invoice', defaults={'invoice': None})
+@app.route('/invoice')
+def last_invoice():
+    return redirect(url_for('invoice', invoice=number_of_invoices()))
+
+
 @app.route('/invoice/<int:invoice>')
 def invoice(invoice=None):
     # Always show the last invoice first

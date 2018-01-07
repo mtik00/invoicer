@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<form action="{{url_for('delete_items', invoice_id=invoice_id)}}" method="POST">
+  <dl>
+    {{ form.hidden_tag() }}
+    {% for item in items -%}
+    <dd><input type="checkbox" name="item_{{item.id}}" value="{{item.id}}">{{item.date}}: {{item.description}} ({{item.quantity}} x {{item.unit_price|currency}})</dd>
+    {% endfor %}
+  </dl>
+  <input type="hidden" value="{{invoice_id}}" name='invoice_id'>
+  <p><input type=submit value="Submit" class="w3-btn w3-cyan"></p>
+</form>
+{% endblock %}

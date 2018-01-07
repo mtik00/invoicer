@@ -4,6 +4,10 @@ from wtforms import StringField, SelectField, FloatField, IntegerField
 from wtforms.validators import DataRequired
 
 
+class EmptyForm(FlaskForm):
+    pass
+
+
 class AddressForm(FlaskForm):
     name1 = StringField('name1', validators=[DataRequired()])
     name2 = StringField('name2')

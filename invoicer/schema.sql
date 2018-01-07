@@ -25,12 +25,13 @@ CREATE TABLE invoices (
 
 drop table if exists items;
 CREATE TABLE items (
+    id integer PRIMARY KEY,
     invoice_id integer,
     'date' text,
     'description' text,
     unit_price real,
     quantity integer,
-    'units' text
+    'units' text,
     FOREIGN KEY(invoice_id) REFERENCES invoices(id)
 );
 

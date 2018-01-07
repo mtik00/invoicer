@@ -13,11 +13,12 @@
     {% else %}
     <button disabled>Next</button>
     {% endif %}
-
-    {% if not invoice_obj.submitted_date -%}
+    {% if (not invoice_obj.submitted_date) or config['DEBUG'] -%}
     <button formaction="{{ url_for('new_item', invoice_id=invoice_id) }}">Add Item</button>
+    <button formaction="{{ url_for('delete_items', invoice_id=invoice_id) }}">Delete Items</button>
     {% else -%}
-    <button disabled>Add Item</button>
+    <button formaction="#" disabled>Add Item</button>
+    <button formaction="#" disabled>Delete Items</button>
     {% endif %}
 </form>
 
