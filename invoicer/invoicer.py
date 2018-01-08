@@ -83,6 +83,12 @@ def initdb_command():
     db.commit()
     click.echo('Initialized the database.')
 
+    if click.confirm('Populate with sample data?'):
+        with app.open_resource('sample-data.sql', mode='r') as fh:
+            db.cursor().executescript(fh.read())
+        db.commit()
+        click.echo('Sample data added to database.')
+
 
 @app.route('/')
 @login_required
