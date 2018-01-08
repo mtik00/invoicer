@@ -100,7 +100,7 @@ def initdb_command():
 @login_required
 def index():
     db = get_db()
-    cur = db.execute('select id, submitted_date, description, paid_date from invoices order by id desc')
+    cur = db.execute('select * from invoices order by id desc')
     invoices = cur.fetchall()
     return render_template('index.html', invoices=invoices)
 
@@ -425,6 +425,13 @@ def raw_invoice(invoice_id):
 @app.template_filter('currency')
 def currency(value):
     return "$%.2f" % float(value)
+
+
+@app.template_filter('billto')
+def billto(address_id):
+    db = get_db()
+    cur = db.execute('select name1 from addresses where id = ?', [str(address_id)])
+    return cur.fetchone()[0]
 
 
 def format_address(address_id):
