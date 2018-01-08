@@ -1,12 +1,16 @@
 {% extends "layout.html" %}
 {% block body %}
-  <ul class=entries>
-  {% for invoice in invoices %}
-    <li>{{ invoice.id }}:
-      <a href="{{ url_for('invoice', invoice=invoice.id)}}">{{ invoice.description|safe }}</a>
-      ({% if invoice.submitted_date %}SUBMITTED|{% endif %}
-      {%- if invoice.paid_date %}PAID{% else %}UNPAID{% endif -%}
-      )
-  {% endfor %}
-  </ul>
+  <table class="w3-table w3-striped w3-hoverable">
+    <tr>
+      <th>Invoice ID</th><th>Description</th><th>Submitted</th><th>Paid</th>
+    </tr>
+    {% for invoice in invoices -%}
+    <tr onclick="window.location='{{url_for('invoice', invoice=invoice.id)}}';">
+      <td>{{invoice.id}}</td>
+      <td>{{invoice.description}}</td>
+      <td>{{'X' if invoice.submitted_date else ' '}}</td>
+      <td>{{'X' if invoice.paid_date else ' '}}</td>
+    </tr>
+    {% endfor%}
+  </table>
 {% endblock %}
