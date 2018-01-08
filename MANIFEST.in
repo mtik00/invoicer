@@ -1,3 +1,4 @@
 graft invoicer/templates
 graft invoicer/static
 include invoicer/schema.sql
+include invoicer/sample-data.sql
