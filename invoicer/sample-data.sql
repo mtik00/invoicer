@@ -3,7 +3,8 @@ insert into addresses
 values
     -- The first address is assumed to be *you*
     ('Tom Smith', '1313 Mockingbird Ln', 'New York', 'NY', '11111', 'me@nowhere.com', 'NET 60 days'),
-    ('Some Employer', '111 9th Ave N', 'New York', 'NY', '11222', 'boss@company.com', 'NET 30 days');
+    ('Some Employer', '111 9th Ave N', 'New York', 'NY', '11222', 'boss@company.com', 'NET 30 days'),
+    ('Employer #2', '1234 45th St', 'New York', 'NY', '11133', 'billing@company2.com', NULL);
 
 insert into unit_prices
     (description, unit_price, units)
@@ -11,14 +12,18 @@ values
     -- These make adding items easier
     ('Design', 200, 'hr'),
     ('Development', 250, 'hr'),
-    ('Maintenance', 50, 'hr');
+    ('Maintenance', 50, 'hr'),
+    ('Employer #2: Design', 100, 'hr'),
+    ('Employer #2: Development', 150, 'hr'),
+    ('Employer #2: Maintenance', 75, 'hr');
 
 insert into invoices
     (submitted_date, description, to_address, paid_date)
 values
     ('20-JAN-2018', '2018 Website Redesign', 2, '07-FEB-2018'),
     ('20-FEB-2018', '2018 Website Development', 2, NULL),
-    (NULL, '2018 Website Maintenance', 2, NULL);
+    (NULL, '2018 Website Maintenance', 2, NULL),
+    (NULL, '2018 Website Maintenance', 3, NULL);
 
 /*
     The `items` table purposefully doesn't use foreign keys for `unit_price`
@@ -40,4 +45,9 @@ values
     (3, '01-MAR-2018', 'Website maintenance', 50, 8, 'hr'),
     (3, '04-MAR-2018', 'Website maintenance', 50, 8, 'hr'),
     (3, '05-MAR-2018', 'Website maintenance', 50, 8, 'hr'),
-    (3, '07-MAR-2018', 'Website maintenance', 50, 8, 'hr');
+    (3, '07-MAR-2018', 'Website maintenance', 50, 8, 'hr'),
+
+    (4, '01-APR-2018', 'Website maintenance', 75, 8, 'hr'),
+    (4, '04-APR-2018', 'Website maintenance', 75, 8, 'hr'),
+    (4, '05-APR-2018', 'Website maintenance', 75, 8, 'hr'),
+    (4, '07-APR-2018', 'Website maintenance', 75, 8, 'hr');
