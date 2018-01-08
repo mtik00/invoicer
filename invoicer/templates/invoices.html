@@ -1,39 +1,36 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<form method="GET">
-    {% if invoice_id > 1 %}
-    <button formaction="{{ url_for('invoice', invoice=invoice_id-1)}}">Previous</button>
-    {% else %}
-    <button disabled>Previous</button>
-    {% endif %}
+<form method="GET">        
+    <div class="w3-bar w3-cyan">
+        {% if previous_id %}
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice', invoice=previous_id)}}">Previous</button>
+        {% else %}
+        <button class="w3-bar-item w3-button" disabled>Previous</button>
+        {% endif %}
 
-    {% if invoice_id < max_invoices %}
-    <button formaction="{{ url_for('invoice', invoice=invoice_id+1)}}">Next</button>
-    {% else %}
-    <button disabled>Next</button>
-    {% endif %}
-    <button formaction="{{ url_for('update_invoice', invoice_id=invoice_id) }}">Update</button>
-    {% if (not invoice_obj.submitted_date) or config['DEBUG'] -%}
-    <button formaction="{{ url_for('new_item', invoice_id=invoice_id) }}">Add Item</button>
-    <button formaction="{{ url_for('delete_items', invoice_id=invoice_id) }}">Delete Items</button>
-    {% else -%}
-    <button formaction="#" disabled>Add Item</button>
-    <button formaction="#" disabled>Delete Items</button>
-    {% endif %}
+        {% if next_id %}
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice', invoice=next_id)}}">Next</button>
+        {% else %}
+        <button class="w3-bar-item w3-button" disabled>Next</button>
+        {% endif %}
+
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('update_invoice', invoice_id=invoice_id) }}">Edit</button>
+
+        {% if (not invoice_obj.submitted_date) or config['DEBUG'] -%}
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('new_item', invoice_id=invoice_id) }}">Add Item</button>
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('delete_items', invoice_id=invoice_id) }}">Delete Items</button>
+        {% else -%}
+        <button class="w3-bar-item w3-button" formaction="#" disabled>Add Item</button>
+        <button class="w3-bar-item w3-button" formaction="#" disabled>Delete Items</button>
+        {% endif %}
+    
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('to_pdf', invoice_id=invoice_id)}}" formtarget="_blank">Download PDF</button>
+        <button class="w3-bar-item w3-button w3-right" formaction="{{url_for('new_invoice')}}">Add New Invoice</button>
+        <button class="w3-bar-item w3-button w3-right w3-red" formaction="{{url_for('delete_invoice', invoice_id=invoice_id)}}">Delete Invoice</button>
+    </div>
 </form>
 
-<form action="{{url_for('invoices')}}" method="POST">
-    <input type="submit" value="Download PDF" name='pdf'>
-    <a href="{{url_for('new_invoice')}}" class='w3-btn w3-cyan w3-right'>Add New Invoice</a>
-
-    {% if not invoice_obj.submitted_date -%}
-    <a href="{{url_for('delete_invoice', invoice_id=invoice_id)}}" class='w3-btn w3-red w3-right'>Delete Invoice</a>
-    {% else %}
-    <a href="#" class='w3-btn w3-red w3-right w3-disabled'>Delete Invoice</a>
-    {% endif %}
-    <input type="hidden" value="{{invoice_id}}" name='current'>
-</form>
 <div class="fluidMedia">
     <iframe src="{{url_for('raw_invoice', invoice_id=invoice_id)}}" frameborder="0"></iframe>
 </div>

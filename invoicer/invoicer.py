@@ -57,12 +57,6 @@ def get_db():
     return g.sqlite_db
 
 
-def number_of_invoices():
-    db = get_db()
-    cur = db.execute('select count(*) from invoices')
-    return cur.fetchone()[0]
-
-
 @app.teardown_appcontext
 def close_db(error):
     """Closes the database again at the end of the request."""
@@ -324,20 +318,32 @@ def addresses():
     return render_template('addresses.html', addresses=addresses)
 
 
+def get_invoice_ids():
+    db = get_db()
+    cur = db.execute('select id from invoices order by id asc')
+    invoice_ids = cur.fetchall()
+    return [x[0] for x in invoice_ids]
+
+
+def last_invoice_id():
+    db = get_db()
+    cur = db.execute('select id from invoices order by id desc')
+    invoice_id = cur.fetchone()
+    return invoice_id[0]
+
+
 @app.route('/invoice')
 @login_required
 def last_invoice():
-    return redirect(url_for('invoice', invoice=number_of_invoices()))
+    return redirect(url_for('invoice', invoice=last_invoice_id()))
 
 
 @app.route('/invoice/<int:invoice>')
 @login_required
 def invoice(invoice=None):
     # Always show the last invoice first
-    if request.args.get('invoice'):
-        show_id = int(request.args.get('invoice'))
-    elif invoice is None:
-        show_id = number_of_invoices()
+    if invoice is None:
+        show_id = last_invoice_id()
     else:
         show_id = invoice
 
@@ -345,42 +351,26 @@ def invoice(invoice=None):
     cur = db.execute('select * from invoices where id = ?', [str(invoice)])
     invoice_obj = cur.fetchone()
 
-    return render_template(
-        'invoices.html',
-        invoice_id=show_id,
-        max_invoices=number_of_invoices(),
-        invoice_obj=invoice_obj
-    )
-
-
-@app.route('/invoices', methods=["GET","POST"])
-@login_required
-def invoices(current_invoice=None):
-    if request.method == "POST":
-        current_invoice = int(request.form.get('current', 1))
-        if 'pdf' in request.form:
-            return to_pdf(current_invoice)
-        elif 'new' in request.form:
-            return redirect(url_for('new_invoice'))
-
-        return render_template(
-            'invoices.html',
-            invoice_id=invoice_id,
-            max_invoices=number_of_invoices()
-        )
-
-    # Always show the last invoice first
-    if request.args.get('current_invoice'):
-        show_id = int(request.args.get('current_invoice'))
-    elif current_invoice is None:
-        show_id = number_of_invoices()
+    # Figure out next/previous
+    invoice_ids = get_invoice_ids()
+    current_pos = invoice_ids.index(show_id)
+    if current_pos == len(invoice_ids) - 1:
+        next_id = None
     else:
-        show_id = current_invoice
+        next_id = invoice_ids[current_pos + 1]
+
+    if current_pos == 0:
+        previous_id = None
+    else:
+        previous_id = invoice_ids[current_pos - 1]
 
     return render_template(
         'invoices.html',
         invoice_id=show_id,
-        max_invoices=number_of_invoices()
+        next_id=next_id,
+        previous_id=previous_id,
+        max_invoices=last_invoice_id(),
+        invoice_obj=invoice_obj
     )
 
 
@@ -400,7 +390,7 @@ def raw_invoice(invoice_id):
     if submitted:
         submitted = arrow.get(submitted, 'DD-MMM-YYYY')
     else:
-        submitted = None  # arrow.now()
+        submitted = None
 
     due = submitted.replace(days=+30).format('DD-MMM-YYYY') if submitted else None
     submitted = submitted.format('DD-MMM-YYYY') if submitted else None
