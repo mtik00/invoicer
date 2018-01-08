@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice #{{invoice_number}} from Timothy McFadden</title>
+    <title>Invoice #{{invoice_number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     
     <style>
     #overlay {
