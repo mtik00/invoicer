@@ -15,7 +15,7 @@ class AddressForm(FlaskForm):
     addrline2 = StringField('Address Line 2')
     city = StringField('City', validators=[DataRequired()])
     state = StringField('State', validators=[DataRequired()])
-    zipcode = StringField('Zipcode', validators=[DataRequired()])
+    zip = StringField('Zipcode', validators=[DataRequired()])
     email = StringField('Email')
     terms = StringField('Terms')
 

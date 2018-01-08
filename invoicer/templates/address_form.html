@@ -6,8 +6,12 @@
       <li>{{ error }}</li>
 {% endfor %}
 {% endif %}
-<form class="w3-container w3-col m5" action="{{url_for('new_invoice')}}" method="POST">
-  <dl>
+
+{% if address_id %}
+<form class="w3-container w3-col m5" action="{{url_for('update_address', address_id=address_id)}}" method="POST">
+{% else %}
+<form class="w3-container w3-col m5" action="{{url_for('new_address')}}" method="POST"></form>
+{% endif %}
     {{ form.hidden_tag() }}
     {{ render_field(form.name1) }}
     {{ render_field(form.name2) }}
@@ -15,10 +19,11 @@
     {{ render_field(form.addrline2) }}
     {{ render_field(form.city) }}
     {{ render_field(form.state) }}
-    {{ render_field(form.zipcode) }}
+    {{ render_field(form.zip) }}
     {{ render_field(form.email) }}
     {{ render_field(form.terms) }}
-  </dl>
-  <p><input type=submit value="Add"></p>
+  <p>
+      {% if address_id %}<input class="w3-btn w3-cyan" type=submit value="Update">{% else %}<input class="w3-btn w3-cyan" type=submit value="Add">{% endif %}
+  </p>
 </form>
 {% endblock %}

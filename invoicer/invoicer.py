@@ -291,6 +291,57 @@ def to_pdf(invoice_id):
         mimetype='application/pdf'
     )
 
+@app.route('/addresses/<address_id>/update', methods=["GET","POST"])
+@login_required
+def update_address(address_id):
+    db = get_db()
+    form = AddressForm()
+    if form.validate_on_submit():
+        db.execute('''
+            update addresses
+            set name1 = ?,
+                name2 = ?,
+                addrline1 = ?,
+                addrline2 = ?,
+                city = ?,
+                state = ?,
+                zip = ?,
+                email = ?,
+                terms = ?
+                where id = ?''',
+            [
+                form['name1'].data,
+                form['name2'].data,
+                form['addrline1'].data,
+                form['addrline2'].data,
+                form['city'].data,
+                form['state'].data,
+                form['zip'].data,
+                form['email'].data,
+                form['terms'].data,
+                address_id
+            ]
+        )
+        db.commit()
+        flash('address updated', 'success')
+        return redirect(url_for('addresses'))
+
+    cur = db.execute('select * from addresses where id = ?', [str(address_id)])
+    address = cur.fetchone()
+    form = AddressForm(
+        name1=address['name1'],
+        name2=address['name2'],
+        addrline1=address['addrline1'],
+        addrline2=address['addrline2'],
+        city=address['city'],
+        state=address['state'],
+        zip=address['zip'],
+        email=address['email'],
+        terms=address['terms'],
+    )
+
+    return render_template('address_form.html', form=form, address_id=address_id)
+
 
 @app.route('/addresses/new', methods=["GET","POST"])
 @login_required
@@ -307,7 +358,7 @@ def new_address():
                 request.form['addrline2'],
                 request.form['city'],
                 request.form['state'],
-                request.form['zipcode'],
+                request.form['zip'],
                 request.form['email'],
                 request.form['terms'],
             ]
