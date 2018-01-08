@@ -9,24 +9,24 @@ class EmptyForm(FlaskForm):
 
 
 class AddressForm(FlaskForm):
-    name1 = StringField('name1', validators=[DataRequired()])
-    name2 = StringField('name2')
-    addrline1 = StringField('addrline1', validators=[DataRequired()])
-    addrline2 = StringField('addrline2')
-    city = StringField('city', validators=[DataRequired()])
-    state = StringField('state', validators=[DataRequired()])
-    zipcode = StringField('zipcode', validators=[DataRequired()])
-    email = StringField('email')
-    terms = StringField('terms')
+    name1 = StringField('Name 1', validators=[DataRequired()])
+    name2 = StringField('Name 2')
+    addrline1 = StringField('Address Line 1', validators=[DataRequired()])
+    addrline2 = StringField('Address Line 2')
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
+    zipcode = StringField('Zipcode', validators=[DataRequired()])
+    email = StringField('Email')
+    terms = StringField('Terms')
 
 
 class InvoiceForm(FlaskForm):
-    description = StringField(u'description', validators=[DataRequired()])
-    to_address = SelectField(u'to_address', coerce=int)
+    description = StringField(u'Description', validators=[DataRequired()])
+    to_address = SelectField(u'Bill To Address', coerce=int)
 
 
 class ItemForm(FlaskForm):
     date = StringField(u'Date', validators=[DataRequired()], id="datepicker")
-    description = StringField(u'description', validators=[DataRequired()])
-    unit_price = SelectField(u'unit_price', coerce=int)
+    description = StringField(u'Description', validators=[DataRequired()])
+    unit_price = SelectField(u'Unit Price', coerce=int)
     quantity = IntegerField(u'Quantity', validators=[DataRequired()])

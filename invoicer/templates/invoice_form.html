@@ -7,15 +7,14 @@
 {% endfor %}
 {% endif %}
 {% if invoice_id %}
-<form action="{{url_for('update_invoice', invoice_id=invoice_id)}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('update_invoice', invoice_id=invoice_id)}}" method="POST">
 {% else %}
-<form action="{{url_for('new_invoice')}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('new_invoice')}}" method="POST">
 {% endif%}
-  <dl>
     {{ form.hidden_tag() }}
     {{ render_field(form.description, size=60) }}
+
     {{ render_field(form.to_address) }}
-  </dl>
   <p>
     {% if invoice_id -%}
     <input type=submit value="Update" class="w3-btn w3-cyan">

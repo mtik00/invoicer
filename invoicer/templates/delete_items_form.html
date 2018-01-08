@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<form action="{{url_for('delete_items', invoice_id=invoice_id)}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('delete_items', invoice_id=invoice_id)}}" method="POST">
   <dl>
     {{ form.hidden_tag() }}
     {% for item in items -%}
