@@ -4,6 +4,7 @@ import json
 import time
 import sqlite3
 import zipfile
+from functools import wraps
 
 import click
 import pdfkit
@@ -29,6 +30,15 @@ app.config.update(dict(
 ))
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def connect_db():
@@ -75,11 +85,8 @@ def initdb_command():
 
 
 @app.route('/')
+@login_required
 def index():
-    if not session.get('logged_in'):
-        flash('You must log in first', 'error')
-        return redirect(url_for('login'))
-
     db = get_db()
     cur = db.execute('select id, submitted_date, description, paid_date from invoices order by id desc')
     invoices = cur.fetchall()
@@ -102,12 +109,17 @@ def login():
         if not error:
             session['logged_in'] = True
             flash('You were logged in')
+
+            if 'next' in request.form:
+                return redirect(request.form['next'])
+
             return redirect(url_for('index'))
 
     return render_template('login.html', error=error)
 
 
 @app.route('/logout')
+@login_required
 def logout():
     session.pop('logged_in', None)
     flash('You were logged out', 'info')
@@ -115,6 +127,7 @@ def logout():
 
 
 @app.route('/invoice/<invoice_id>/items/delete', methods=["GET","POST"])
+@login_required
 def delete_items(invoice_id):
     form = EmptyForm()
     db = get_db()
@@ -136,6 +149,7 @@ def delete_items(invoice_id):
 
 
 @app.route('/invoice/<int:invoice_id>/items/new', methods=["GET","POST"])
+@login_required
 def new_item(invoice_id):
     form = ItemForm()
     db = get_db()
@@ -172,6 +186,7 @@ def new_item(invoice_id):
 
 
 @app.route('/invoices/new', methods=["GET","POST"])
+@login_required
 def new_invoice():
     form = InvoiceForm()
     db = get_db()
@@ -200,6 +215,7 @@ def new_invoice():
 
 
 @app.route('/invoice/<int:invoice_id>/delete')
+@login_required
 def delete_invoice(invoice_id):
     db = get_db()
     db.execute('DELETE FROM invoices WHERE id = ?', [str(invoice_id)])
@@ -210,6 +226,7 @@ def delete_invoice(invoice_id):
 
 
 @app.route('/invoice/<int:invoice_id>/pdf')
+@login_required
 def to_pdf(invoice_id):
     text = raw_invoice(invoice_id)
     fname = "invoice-%03i.pdf" % int(invoice_id)
@@ -229,6 +246,7 @@ def to_pdf(invoice_id):
 
 
 @app.route('/addresses/new', methods=["GET","POST"])
+@login_required
 def new_address():
     form = AddressForm()
     if form.validate_on_submit():
@@ -256,6 +274,7 @@ def new_address():
 
 
 @app.route('/addresses')
+@login_required
 def addresses():
     db = get_db()
     cur = db.execute('select * from addresses')
@@ -265,11 +284,13 @@ def addresses():
 
 
 @app.route('/invoice')
+@login_required
 def last_invoice():
     return redirect(url_for('invoice', invoice=number_of_invoices()))
 
 
 @app.route('/invoice/<int:invoice>')
+@login_required
 def invoice(invoice=None):
     # Always show the last invoice first
     if request.args.get('invoice'):
@@ -292,6 +313,7 @@ def invoice(invoice=None):
 
 
 @app.route('/invoices', methods=["GET","POST"])
+@login_required
 def invoices(current_invoice=None):
     if request.method == "POST":
         current_invoice = int(request.form.get('current', 1))
@@ -322,6 +344,7 @@ def invoices(current_invoice=None):
 
 
 @app.route('/raw-invoice/<int:invoice_id>')
+@login_required
 def raw_invoice(invoice_id):
     """
     Displays a single invoice

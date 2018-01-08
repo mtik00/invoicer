@@ -9,6 +9,7 @@
       <dt>Password:
       <dd><input type=password name=password>
       <dd><input type=submit value=Login>
+      <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
     </dl>
   </form>
 {% endblock %}
