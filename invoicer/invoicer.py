@@ -185,7 +185,42 @@ def new_item(invoice_id):
     return render_template('item_form.html', form=form, invoice_id=invoice_id)
 
 
-@app.route('/invoices/new', methods=["GET","POST"])
+@app.route('/invoice/<invoice_id>/update', methods=["GET","POST"])
+@login_required
+def update_invoice(invoice_id):
+    db = get_db()
+    cur = db.execute('select * from addresses order by id desc')
+    addresses = cur.fetchall()
+    addr_choices = [(x['id'], x['name1']) for x in addresses]
+
+    cur = db.execute('select * from invoices where id = ?', [invoice_id])
+    invoice = cur.fetchone()
+
+    form = InvoiceForm(description=invoice['description'])
+    form.to_address.choices = addr_choices
+    form.to_address.process_data(invoice['to_address'])
+
+    if form.validate_on_submit():
+        to_address_id = int(request.form['to_address'])
+
+        # Now insert
+        db.execute('''
+            update invoices set description = ?, to_address = ? where id = ?''',
+            [
+                request.form['description'],
+                to_address_id,
+                invoice_id
+            ]
+        )
+        db.commit()
+
+        flash('invoice updated', 'success')
+        return redirect(url_for('invoice', invoice=invoice_id))
+
+    return render_template('invoice_form.html', form=form, invoice_id=invoice_id)
+
+
+@app.route('/invoice/new', methods=["GET","POST"])
 @login_required
 def new_invoice():
     form = InvoiceForm()

@@ -6,12 +6,22 @@
       <li>{{ error }}</li>
 {% endfor %}
 {% endif %}
+{% if invoice_id %}
+<form action="{{url_for('update_invoice', invoice_id=invoice_id)}}" method="POST">
+{% else %}
 <form action="{{url_for('new_invoice')}}" method="POST">
+{% endif%}
   <dl>
     {{ form.hidden_tag() }}
     {{ render_field(form.description, size=60) }}
     {{ render_field(form.to_address) }}
   </dl>
-  <p><input type=submit value="Add" class="w3-btn w3-cyan"></p>
+  <p>
+    {% if invoice_id -%}
+    <input type=submit value="Update" class="w3-btn w3-cyan">
+    {% else -%}
+    <input type=submit value="Add" class="w3-btn w3-cyan">
+    {% endif %}
+  </p>
 </form>
 {% endblock %}
