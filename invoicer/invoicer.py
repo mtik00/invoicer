@@ -5,6 +5,7 @@ import time
 import sqlite3
 import zipfile
 from functools import wraps
+from datetime import timedelta
 
 import click
 import pdfkit
@@ -28,6 +29,7 @@ app.config.update(dict(
     NAME='John Doe',
     WKHTMLTOPDF="c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe",
     BACKUP_DIR=app.instance_path,
+    SESSION_TIMEOUT_MINUTES=30,
 ))
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
@@ -57,6 +59,15 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
+
+# Expire the session if the user sets `SESSION_TIMEOUT_MINUTES` ###############
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=app.config.get('SESSION_TIMEOUT_MINUTES'))
+
+if app.config.get('SESSION_TIMEOUT_MINUTES'):
+    app.before_request(make_session_permanent)
+###############################################################################
 
 @app.teardown_appcontext
 def close_db(error):

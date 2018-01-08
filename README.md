@@ -12,6 +12,8 @@ Set the following parameters:
     *argon2* hash of the password.  Once you install the project requirements,
     you can generate this with the following code:  
     `python -c "from argon2 import PasswordHasher; ph = PasswordHasher(); print ph.hash('mysecretpassword')"`
+*   `SESSION_TIMEOUT_MINUTES`: The number of minutes before you are
+    automatically logged out.  Set this to `None` or `0` to stay logged in.
 *   `WKHTMLTOPDF`: The path to the `wkhtmltopdf` binary used for converting the
     HTML invoice to a PDF.
 *   `NAME` (optional): Your full name.  This is used as the `<title>` for the
