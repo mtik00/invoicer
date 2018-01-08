@@ -208,7 +208,11 @@ def update_invoice(invoice_id):
     cur = db.execute('select * from invoices where id = ?', [invoice_id])
     invoice = cur.fetchone()
 
-    form = InvoiceForm(description=invoice['description'])
+    form = InvoiceForm(
+        description=invoice['description'],
+        submitted_date=invoice['submitted_date'],
+        paid_date=invoice['paid_date'],
+        )
     form.to_address.choices = addr_choices
     form.to_address.process_data(invoice['to_address'])
 
@@ -217,10 +221,18 @@ def update_invoice(invoice_id):
 
         # Now insert
         db.execute('''
-            update invoices set description = ?, to_address = ? where id = ?''',
+            update invoices
+                set description = ?,
+                to_address = ?,
+                submitted_date = ?,
+                paid_date = ?
+                where id = ?
+        ''',
             [
                 request.form['description'],
                 to_address_id,
+                request.form['submitted_date'].upper(),
+                request.form['paid_date'].upper(),
                 invoice_id
             ]
         )
@@ -432,7 +444,6 @@ def invoice(invoice=None):
         invoice_id=show_id,
         next_id=next_id,
         previous_id=previous_id,
-        max_invoices=last_invoice_id(),
         invoice_obj=invoice_obj
     )
 
