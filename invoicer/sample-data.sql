@@ -16,9 +16,9 @@ values
 insert into invoices
     (submitted_date, description, to_address, paid_date)
 values
-    ('20-JAN-2018', '2018 Website Redesign', 2, NULL),
+    ('20-JAN-2018', '2018 Website Redesign', 2, '07-FEB-2018'),
     ('20-FEB-2018', '2018 Website Development', 2, NULL),
-    ('20-MAR-2018', '2018 Website Maintenance', 2, NULL);
+    (NULL, '2018 Website Maintenance', 2, NULL);
 
 /*
     The `items` table purposefully doesn't use foreign keys for `unit_price`
