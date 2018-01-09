@@ -8,6 +8,15 @@ class EmptyForm(FlaskForm):
     pass
 
 
+class ProfileForm(FlaskForm):
+    full_name = StringField('Full Name*', validators=[DataRequired()])
+    email = StringField('Email')
+    street = StringField('Street Address')
+    city = StringField('City')
+    state = StringField('State')
+    zip = StringField('Zipcode')
+    terms = StringField('Terms')
+
 class CustomerForm(FlaskForm):
     name1 = StringField('Name 1*', validators=[DataRequired()])
     name2 = StringField('Name 2')

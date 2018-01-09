@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+{% from "_formhelpers.html" import render_field %}
+{% if form.errors %}
+{% for error in form.errors.values() %}
+      <li>{{ error }}</li>
+{% endfor %}
+{% endif %}
+
+<form class="w3-container w3-col m5" action="{{url_for('update_profile')}}" method="POST">
+    {{ form.hidden_tag() }}
+    {{ render_field(form.full_name) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.street) }}
+    {{ render_field(form.city) }}
+    {{ render_field(form.state) }}
+    {{ render_field(form.zip) }}
+    {{ render_field(form.terms) }}
+  <p>
+      <input class="w3-btn w3-cyan" type=submit value="Update">
+  </p>
+</form>
+{% endblock %}

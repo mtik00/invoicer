@@ -16,7 +16,7 @@ from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
 from premailer import Premailer
 
-from .forms import CustomerForm, InvoiceForm, ItemForm, EmptyForm
+from .forms import CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm
 from .submitter import sendmail
 
 
@@ -63,11 +63,23 @@ def get_db():
     return g.sqlite_db
 
 
-def get_user_info():
-    if not hasattr(g, '_userinfo'):
+def get_user_info(update=False):
+    if update or (not hasattr(g, '_userinfo')):
         db = get_db()
         cur = db.execute('select * from addresses where id = 1')
-        g._userinfo = dict(cur.fetchone())
+        info = cur.fetchone()
+        if info:
+            g._userinfo = dict(info)
+        else:
+            g._userinfo = {
+                'full_name': '',
+                'street': '',
+                'city': '',
+                'state': '',
+                'zip': '',
+                'email': '',
+                'terms': 'NET 30 days'
+            }
 
     return g._userinfo
 
@@ -278,7 +290,7 @@ def new_invoice():
 
         # Now insert
         db.execute('''
-            insert into invoices (description, customer, number) values (?, ?, ?)''',
+            insert into invoices (description, customer_id, number) values (?, ?, ?)''',
             [
                 request.form['description'],
                 customer_id,
@@ -502,6 +514,50 @@ def customers():
     return render_template('customers.html', customers=customers)
 
 
+@app.route('/profile/update', methods=["GET","POST"])
+@login_required
+def update_profile():
+    db = get_db()
+    form = ProfileForm()
+    profile = get_user_info()
+
+    if form.validate_on_submit():
+        db.execute('''
+            -- update addresses
+            insert or replace
+            into addresses
+            values (?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            [
+                '1',
+                form['full_name'].data,
+                form['street'].data,
+                form['city'].data,
+                form['state'].data.upper(),
+                form['zip'].data,
+                form['email'].data,
+                form['terms'].data,
+            ]
+        )
+
+        db.commit()
+        get_user_info(update=True)
+        flash('profile updated', 'success')
+        return redirect(url_for('update_profile'))
+
+    form = ProfileForm(
+        full_name=profile['full_name'],
+        email=profile['email'],
+        street=profile['street'],
+        city=profile['city'],
+        state=profile['state'],
+        zip=profile['zip'],
+        terms=profile['terms'],
+    )
+
+    return render_template('profile_form.html', form=form)
+
+
 def get_invoice_ids():
     db = get_db()
     cur = db.execute('select id from invoices order by id asc')
@@ -513,7 +569,7 @@ def last_invoice_id():
     db = get_db()
     cur = db.execute('select id from invoices order by id desc')
     invoice_id = cur.fetchone()
-    return invoice_id[0]
+    return invoice_id[0] if invoice_id else 0
 
 
 def next_invoice_number(customer_id):
@@ -561,16 +617,21 @@ def invoice(invoice=None):
 
     # Figure out next/previous
     invoice_ids = get_invoice_ids()
-    current_pos = invoice_ids.index(show_id)
-    if current_pos == len(invoice_ids) - 1:
-        next_id = None
+    if not invoice_ids:
+        current_pos = next_id = previous_id = 0
+        to_emails = None
     else:
-        next_id = invoice_ids[current_pos + 1]
+        to_emails = ', '.join(get_address_emails(invoice_obj['customer_id']))
+        current_pos = invoice_ids.index(show_id)
+        if current_pos == len(invoice_ids) - 1:
+            next_id = None
+        else:
+            next_id = invoice_ids[current_pos + 1]
 
-    if current_pos == 0:
-        previous_id = None
-    else:
-        previous_id = invoice_ids[current_pos - 1]
+        if current_pos == 0:
+            previous_id = None
+        else:
+            previous_id = invoice_ids[current_pos - 1]
 
     return render_template(
         'invoices.html',
@@ -578,7 +639,7 @@ def invoice(invoice=None):
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice_obj,
-        to_emails=', '.join(get_address_emails(invoice_obj['customer_id']))
+        to_emails=to_emails
     )
 
 
@@ -594,7 +655,12 @@ def raw_invoice(invoice_id):
     db = get_db()
     cur = db.execute('select * from items where invoice_id=?', invoice_id)
     items = cur.fetchall()
-    invoice_id, submitted, description, customer_id, paid, number, invoice_total = db.execute('select * from invoices where id=?', invoice_id).fetchone()
+    invoice_obj = db.execute('select * from invoices where id=?', invoice_id).fetchone()
+    if not invoice_obj:
+        return render_template('w3-invoice.html')
+
+    invoice_id, submitted, description, customer_id, paid, number, invoice_total = list(invoice_obj)
+
     customer = format_address(customer_id)
     submit_address = format_my_address()
 
