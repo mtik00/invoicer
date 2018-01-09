@@ -2,9 +2,9 @@ insert into addresses
     (name1, addrline1, city, state, zip, email, terms)
 values
     -- The first address is assumed to be *you*
-    ('Tom Smith', '1313 Mockingbird Ln', 'New York', 'NY', '11111', 'me@nowhere.com', 'NET 60 days'),
-    ('Some Employer', '111 9th Ave N', 'New York', 'NY', '11222', 'boss@company.com', 'NET 30 days'),
-    ('Employer #2', '1234 45th St', 'New York', 'NY', '11133', 'billing@company2.com', NULL);
+    ('Tom Smith', '1313 Mockingbird Ln', 'New York', 'NY', '11111', 'me@example.com', 'NET 60 days'),
+    ('Some Employer', '111 9th Ave N', 'New York', 'NY', '11222', 'boss|mike|larry@example.com', 'NET 30 days'),
+    ('Employer #2', '1234 45th St', 'New York', 'NY', '11133', 'billing@example.com', NULL);
 
 insert into unit_prices
     (description, unit_price, units)

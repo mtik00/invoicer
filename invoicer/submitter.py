@@ -22,7 +22,8 @@ __creationDate__ = '08-JAN-2018'
 # Globals #####################################################################
 def sendmail(
     sender, to, subject, body, server, body_type="html",
-    attachments=None, username=None, password=None, cc=None, starttls=False
+    attachments=None, username=None, password=None, cc=None, starttls=False,
+    encode_body=True
 ):
     '''Send an email message using the specified mail server using Python's
     standard `smtplib` library and some extras (e.g. attachments).
@@ -41,6 +42,9 @@ def sendmail(
     :param str username: The username used to log in to the SMTP server
     :param str password: The password used to log in to the SMTP server
     :param list(str) cc: One or more email addresses to CC the message
+    :param bool starttls: Whether or not to call `starttls` on the SMTP server
+        object.
+    :param bool encode_body: Whether or not to base64 encode the message body
     '''
     attachments = [] if attachments is None else attachments
 
@@ -62,7 +66,14 @@ def sendmail(
     else:
         cc = []
 
-    outer.attach(MIMEText(body, body_type))
+    if encode_body:
+        msg = MIMEBase('text', body_type)
+        msg.set_payload(body)
+        encoders.encode_base64(msg)
+    else:
+        msg = MIMEText(body, body_type)
+
+    outer.attach(msg)
 
     for path in attachments:
         if not os.path.isfile(path):

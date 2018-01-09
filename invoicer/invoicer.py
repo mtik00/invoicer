@@ -305,6 +305,68 @@ def to_pdf(invoice_id):
         mimetype='application/pdf'
     )
 
+
+def get_address_emails(address_id):
+    # if app.config['DEBUG']:
+    #     return (app.config['EMAIL_USERNAME'],)
+
+    db = get_db()
+    cur = db.execute('select email from addresses where id = ?', [str(address_id)])
+    email = cur.fetchone()[0]
+
+    if '|' in email:
+        name, domain = email.split('@')
+        return ['%s@%s' % (x, domain) for x in name.split('|')]
+
+    return [email]
+
+@app.route('/invoice/<invoice_id>/submit')
+@login_required
+def submit_invoice(invoice_id):
+    db = get_db()
+    db.execute(
+        'update invoices set submitted_date = ? where id = ?',
+        [arrow.now().format('DD-MMM-YYYY').upper(), invoice_id]
+    )
+    db.commit()
+
+    text = raw_invoice(invoice_id)
+    fname = "invoice-%03d.pdf" % int(invoice_id)
+    fpath = os.path.join(app.instance_path, fname)
+    config = Configuration(app.config['WKHTMLTOPDF'])
+    options = {
+        'print-media-type': None,
+        'page-size': 'letter',
+        'no-outline': None,
+        'quiet': None
+    }
+    pdfkit.from_string(text, fpath, options=options, configuration=config)
+
+    cur = db.execute('select to_address from invoices where id = ?', [invoice_id])
+    to_address = cur.fetchone()[0]
+
+    email_to = get_address_emails(to_address)
+
+    sendmail(
+        sender='invoicer@host.com',
+        to=email_to,
+        cc=[app.config['EMAIL_USERNAME']],
+        subject='Invoice #%s from %s' % (invoice_id, app.config['NAME']),
+        body=text,
+        server=app.config['EMAIL_SERVER'],
+        body_type="html",
+        attachments=[fpath],
+        username=app.config['EMAIL_USERNAME'],
+        password=app.config['EMAIL_PASSWORD'],
+        starttls=True
+    )
+
+    os.unlink(fpath)
+
+    flash('invoice was submitted', 'success')
+    return redirect(url_for('invoice', invoice=invoice_id))
+
+
 @app.route('/addresses/<address_id>/update', methods=["GET","POST"])
 @login_required
 def update_address(address_id):
