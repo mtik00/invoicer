@@ -31,6 +31,14 @@
         </div>
     
         <button class="w3-bar-item w3-button" formaction="{{ url_for('to_pdf', invoice_id=invoice_id)}}" formtarget="_blank">Download PDF</button>
+        {% if config['DEBUG'] -%}
+        <button class="w3-bar-item w3-button" formaction="{{url_for('submit_invoice', invoice_id=invoice_id)}}">Submit Invoice To Self</button>
+        {% elif (not invoice_obj.submitted_date) -%}
+        <button class="w3-bar-item w3-button" formaction="{{url_for('submit_invoice', invoice_id=invoice_id)}}">Submit Invoice</button>
+        {% else %}
+        <button class="w3-bar-item w3-button" formaction="#" disabled>Submit Invoice</button>
+        {% endif -%}
+        
         <button class="w3-bar-item w3-button w3-right" formaction="{{url_for('new_invoice')}}">Add New Invoice</button>
     </div>
 </form>
