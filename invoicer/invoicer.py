@@ -308,7 +308,7 @@ def to_pdf(invoice_id):
 
 def get_address_emails(address_id):
     if app.config['DEBUG']:
-        return (app.config['EMAIL_USERNAME'],)
+        return [app.config['EMAIL_USERNAME']]
 
     db = get_db()
     cur = db.execute('select email from addresses where id = ?', [str(address_id)])
@@ -363,7 +363,7 @@ def submit_invoice(invoice_id):
 
     os.unlink(fpath)
 
-    flash('invoice was submitted', 'success')
+    flash('invoice was submitted to ' + ', '.join(email_to), 'success')
     return redirect(url_for('invoice', invoice=invoice_id))
 
 
@@ -508,7 +508,8 @@ def invoice(invoice=None):
         invoice_id=show_id,
         next_id=next_id,
         previous_id=previous_id,
-        invoice_obj=invoice_obj
+        invoice_obj=invoice_obj,
+        to_emails=', '.join(get_address_emails(invoice_obj['to_address']))
     )
 
 

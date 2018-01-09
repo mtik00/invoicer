@@ -29,12 +29,11 @@
                 <button class="w3-bar-item w3-button w3-right w3-red" formaction="{{url_for('delete_invoice', invoice_id=invoice_id)}}">Delete Invoice</button>
             </div>
         </div>
-    
+
         <button class="w3-bar-item w3-button" formaction="{{ url_for('to_pdf', invoice_id=invoice_id)}}" formtarget="_blank">Download PDF</button>
-        {% if config['DEBUG'] and invoice_obj.submitted_date -%}
-        <button class="w3-bar-item w3-button" formaction="{{url_for('submit_invoice', invoice_id=invoice_id)}}">Submit Invoice To Self</button>
-        {% elif (not invoice_obj.submitted_date) -%}
-        <button class="w3-bar-item w3-button" formaction="{{url_for('submit_invoice', invoice_id=invoice_id)}}">Submit Invoice</button>
+
+        {% if (config['DEBUG'] and invoice_obj.submitted_date) or (not invoice_obj.submitted_date) -%}
+        <span onclick="document.getElementById('id01').style.display='block'" class="w3-bar-item w3-button">Submit Invoice</span>
         {% else %}
         <button class="w3-bar-item w3-button" formaction="#" disabled>Submit Invoice</button>
         {% endif -%}
@@ -43,7 +42,28 @@
     </div>
 </form>
 
+<!-- The Modal -->
+<div id="id01" class="w3-modal">
+    <div class="w3-modal-content">
+        <header class="w3-container w3-blue"> 
+            <span onclick="document.getElementById('id01').style.display='none'" 
+            class="w3-button w3-blue w3-xlarge w3-display-topright">&times;</span>
+            <h2>Submit Invoice</h2>
+        </header>
+
+        <div class="w3-container">
+            <p>Really submit the invoice to: {{to_emails}}?</p>
+        </div>
+
+        <div class="w3-container w3-light-grey w3-padding">
+            <button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('submit_invoice', invoice_id=invoice_id)}}';">Yes</button>
+            <button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('id01').style.display='none'">Close</button>
+        </div>
+    </div>
+</div>
+        
 <div class="fluidMedia">
     <iframe src="{{url_for('raw_invoice', invoice_id=invoice_id)}}" frameborder="0"></iframe>
 </div>
+
 {% endblock %}
