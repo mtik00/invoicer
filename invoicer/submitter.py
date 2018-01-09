@@ -67,11 +67,11 @@ def sendmail(
         cc = []
 
     if encode_body:
-        msg = MIMEBase('text', body_type)
-        msg.set_payload(body)
+        msg = MIMEBase('text', body_type, _charset='utf-8')
+        msg.set_payload(body.encode('utf-8'))
         encoders.encode_base64(msg)
     else:
-        msg = MIMEText(body, body_type)
+        msg = MIMEText(body.encode('utf-8'), body_type, 'utf-8')
 
     outer.attach(msg)
 

@@ -14,6 +14,7 @@ import arrow
 from argon2 import PasswordHasher
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
+from premailer import Premailer
 
 from .forms import AddressForm, InvoiceForm, ItemForm, EmptyForm
 from .submitter import sendmail
@@ -346,19 +347,19 @@ def submit_invoice(invoice_id):
     to_address = cur.fetchone()[0]
 
     email_to = get_address_emails(to_address)
-
     sendmail(
         sender='invoicer@host.com',
         to=email_to,
         cc=[app.config['EMAIL_USERNAME']],
         subject='Invoice #%s from %s' % (invoice_id, app.config['NAME']),
-        body=text,
+        body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
         server=app.config['EMAIL_SERVER'],
         body_type="html",
         attachments=[fpath],
         username=app.config['EMAIL_USERNAME'],
         password=app.config['EMAIL_PASSWORD'],
-        starttls=True
+        starttls=True,
+        encode_body=True
     )
 
     os.unlink(fpath)
@@ -535,7 +536,7 @@ def raw_invoice(invoice_id):
     submitted = submitted.format('DD-MMM-YYYY') if submitted else None
 
     return render_template(
-        'invoice.html',
+        'w3-invoice.html',
         invoice_number=invoice_id,
         invoice_description=description,
         items=items,
