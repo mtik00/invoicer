@@ -16,7 +16,7 @@ from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
 from premailer import Premailer
 
-from .forms import AddressForm, InvoiceForm, ItemForm, EmptyForm
+from .forms import CustomerForm, InvoiceForm, ItemForm, EmptyForm
 from .submitter import sendmail
 
 
@@ -204,7 +204,7 @@ def new_item(invoice_id):
 @login_required
 def update_invoice(invoice_id):
     db = get_db()
-    cur = db.execute('select * from addresses order by id desc')
+    cur = db.execute('select * from customers order by id desc')
     addresses = cur.fetchall()
     addr_choices = [(x['id'], x['name1']) for x in addresses]
 
@@ -252,20 +252,22 @@ def update_invoice(invoice_id):
 def new_invoice():
     form = InvoiceForm()
     db = get_db()
-    cur = db.execute('select * from addresses order by id desc')
+    cur = db.execute('select * from customers order by id desc')
     addresses = cur.fetchall()
     addr_choices = [(x['id'], x['name1']) for x in addresses]
     form.to_address.choices = addr_choices
 
     if form.validate_on_submit():
         to_address_id = int(request.form['to_address'])
+        number = next_invoice_number(to_address_id)
 
         # Now insert
         db.execute('''
-            insert into invoices (description, to_address) values (?, ?)''',
+            insert into invoices (description, to_address, number) values (?, ?, ?)''',
             [
                 request.form['description'],
                 to_address_id,
+                number
             ]
         )
         db.commit()
@@ -312,7 +314,7 @@ def get_address_emails(address_id):
         return [app.config['EMAIL_USERNAME']]
 
     db = get_db()
-    cur = db.execute('select email from addresses where id = ?', [str(address_id)])
+    cur = db.execute('select email from customers where id = ?', [str(address_id)])
     email = cur.fetchone()[0]
 
     if '|' in email:
@@ -343,15 +345,15 @@ def submit_invoice(invoice_id):
     }
     pdfkit.from_string(text, fpath, options=options, configuration=config)
 
-    cur = db.execute('select to_address from invoices where id = ?', [invoice_id])
-    to_address = cur.fetchone()[0]
+    cur = db.execute('select to_address, number from invoices where id = ?', [invoice_id])
+    to_address, invoice_number = cur.fetchone()
 
     email_to = get_address_emails(to_address)
     sendmail(
         sender='invoicer@host.com',
         to=email_to,
         cc=[app.config['EMAIL_USERNAME']],
-        subject='Invoice #%s from %s' % (invoice_id, app.config['NAME']),
+        subject='Invoice %s from %s' % (invoice_number, app.config['NAME']),
         body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
         server=app.config['EMAIL_SERVER'],
         body_type="html",
@@ -368,14 +370,14 @@ def submit_invoice(invoice_id):
     return redirect(url_for('invoice', invoice=invoice_id))
 
 
-@app.route('/addresses/<address_id>/update', methods=["GET","POST"])
+@app.route('/customers/<customer_id>/update', methods=["GET","POST"])
 @login_required
-def update_address(address_id):
+def update_customer(customer_id):
     db = get_db()
-    form = AddressForm()
+    form = CustomerForm()
     if form.validate_on_submit():
         db.execute('''
-            update addresses
+            update customers
             set name1 = ?,
                 name2 = ?,
                 addrline1 = ?,
@@ -396,16 +398,16 @@ def update_address(address_id):
                 form['zip'].data,
                 form['email'].data,
                 form['terms'].data,
-                address_id
+                customer_id
             ]
         )
         db.commit()
         flash('address updated', 'success')
-        return redirect(url_for('addresses'))
+        return redirect(url_for('customers'))
 
-    cur = db.execute('select * from addresses where id = ?', [str(address_id)])
+    cur = db.execute('select * from customers where id = ?', [str(customer_id)])
     address = cur.fetchone()
-    form = AddressForm(
+    form = CustomerForm(
         name1=address['name1'],
         name2=address['name2'],
         addrline1=address['addrline1'],
@@ -417,17 +419,17 @@ def update_address(address_id):
         terms=address['terms'],
     )
 
-    return render_template('address_form.html', form=form, address_id=address_id)
+    return render_template('customer_form.html', form=form, customer_id=customer_id)
 
 
-@app.route('/addresses/new', methods=["GET","POST"])
+@app.route('/customers/new', methods=["GET","POST"])
 @login_required
-def new_address():
-    form = AddressForm()
+def new_customer():
+    form = CustomerForm()
     if form.validate_on_submit():
         db = get_db()
         db.execute('''
-            insert into addresses (name1, name2, addrline1, addrline2, city, state, zip, email, terms) values (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            insert into customers (name1, name2, addrline1, addrline2, city, state, zip, email, terms) values (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             [
                 request.form['name1'],
                 request.form['name2'],
@@ -443,19 +445,19 @@ def new_address():
         db.commit()
 
         flash('address added', 'success')
-        return redirect(url_for('addresses'))
+        return redirect(url_for('customers'))
 
-    return render_template('address_form.html', form=form)
+    return render_template('customer_form.html', form=form)
 
 
-@app.route('/addresses')
+@app.route('/customers')
 @login_required
-def addresses():
+def customers():
     db = get_db()
-    cur = db.execute('select * from addresses')
-    addresses = cur.fetchall()
+    cur = db.execute('select * from customers')
+    customers = cur.fetchall()
 
-    return render_template('addresses.html', addresses=addresses)
+    return render_template('customers.html', customers=customers)
 
 
 def get_invoice_ids():
@@ -470,6 +472,30 @@ def last_invoice_id():
     cur = db.execute('select id from invoices order by id desc')
     invoice_id = cur.fetchone()
     return invoice_id[0]
+
+
+def next_invoice_number(customer_id):
+    """
+    Returns the next available invoice number in the format:
+        YYYY-<customer number>-<invoice number>
+    """
+    db = get_db()
+    cur = db.execute('select number from customers where id = ?', str(customer_id))
+    number = cur.fetchone()[0]
+
+    this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
+    cur = db.execute("select number from invoices where number like '%s%%'" % this_years_invoice_numbers)
+    numbers = cur.fetchall()
+
+    last = 0
+    for number in [x[0] for x in numbers]:
+        match = re.search('%s-(\d+)' % this_years_invoice_numbers, number)
+        if match:
+            value = int(match.group(1))
+            if value > last:
+                last = value
+
+    return '%s-%03d' % (this_years_invoice_numbers, last + 1)
 
 
 @app.route('/invoice')
@@ -514,18 +540,18 @@ def invoice(invoice=None):
     )
 
 
-@app.route('/raw-invoice/<int:invoice_id>')
+@app.route('/raw-invoice/<invoice_id>')
 @login_required
 def raw_invoice(invoice_id):
     """
     Displays a single invoice
     """
     db = get_db()
-    cur = db.execute('select * from items where invoice_id=?', str(invoice_id))
+    cur = db.execute('select * from items where invoice_id=?', invoice_id)
     items = cur.fetchall()
-    invoice_id, submitted, description, to_address_id, paid = db.execute('select * from invoices where id=?', str(invoice_id)).fetchone()
-    to_address = format_address(str(to_address_id))
-    submit_address = format_address("1")
+    invoice_id, submitted, description, to_address_id, paid, number = db.execute('select * from invoices where id=?', invoice_id).fetchone()
+    to_address = format_address(to_address_id)
+    submit_address = format_my_address()
 
     if submitted:
         submitted = arrow.get(submitted, 'DD-MMM-YYYY')
@@ -537,7 +563,7 @@ def raw_invoice(invoice_id):
 
     return render_template(
         'w3-invoice.html',
-        invoice_number=invoice_id,
+        invoice_number=number,
         invoice_description=description,
         items=items,
         total=sum([x['quantity'] * x['unit_price'] for x in items]),
@@ -558,13 +584,13 @@ def currency(value):
 @app.template_filter('billto')
 def billto(address_id):
     db = get_db()
-    cur = db.execute('select name1 from addresses where id = ?', [str(address_id)])
+    cur = db.execute('select name1 from customers where id = ?', [str(address_id)])
     return cur.fetchone()[0]
 
 
 def format_address(address_id):
     db = get_db()
-    _, name1, name2, addrline1, addrline2, city, state, zipcode, email, _ = db.execute('select * from addresses where id=?', str(address_id)).fetchone()
+    _, name1, name2, addrline1, addrline2, city, state, zipcode, email, _, _ = db.execute('select * from customers where id=?', str(address_id)).fetchone()
 
     name = '<br>'.join([x for x in [name1, name2] if x])
     street = '<br>'.join([x for x in [addrline1, addrline2] if x])
@@ -572,14 +598,27 @@ def format_address(address_id):
 
     return '<br>'.join([name, street, city, email])
 
+
+def format_my_address():
+    db = get_db()
+    address = db.execute('select * from addresses where id=1').fetchone()
+
+    return '<br>'.join([
+        address['full_name'],
+        address['street'],
+        '%s %s, %s' % (address['city'], address['state'], address['zip']),
+        address['email']
+    ])
+
+
 def get_terms(address_id):
     db = get_db()
-    terms = db.execute('select terms from addresses where id=?', str(address_id)).fetchone()
+    terms = db.execute('select terms from customers where id=?', str(address_id)).fetchone()
 
     if terms[0]:
         return terms[0]
 
-    return db.execute('select terms from addresses where id=?', '1').fetchone()[0]
+    return db.execute('select terms from customers where id=?', '1').fetchone()[0]
 
 
 def last_backup():

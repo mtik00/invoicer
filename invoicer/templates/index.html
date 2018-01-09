@@ -3,7 +3,7 @@
 <div class="w3-col m8">
   <table class="w3-table w3-striped w3-hoverable">
     <tr>
-      <th>Invoice ID</th><th>Bill To</th><th>Description</th><th class="w3-center">Submitted</th><th class="w3-center">Paid</th>
+      <th>Invoice</th><th>Bill To</th><th>Description</th><th class="w3-center">Submitted</th><th class="w3-center">Paid</th>
     </tr>
     {% for invoice in invoices -%}
     <tr onclick="window.location='{{url_for('invoice', invoice=invoice.id)}}';"
@@ -11,7 +11,7 @@
     {%- elif invoice.submitted_date and invoice.paid_date %} class="w3-pale-green"
     {%- endif -%}
     >
-      <td>{{invoice.id}}</td>
+      <td>{{invoice.number}}</td>
       <td>{{invoice.to_address|billto}}</td>
       <td>{{invoice.description}}</td>
       <td class="w3-center">{{'X' if invoice.submitted_date else ' '}}</td>

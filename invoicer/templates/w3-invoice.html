@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice #{{invoice_number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
+    <title>Invoice {{invoice_number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
@@ -14,7 +14,7 @@
 <body>
     <div class="w3-container">
         <div class="w3-row w3-padding">
-            <h2 class="text-left">Invoice #{{invoice_number}}: {{invoice_description}}</h2>
+            <h2 class="text-left">Invoice {{invoice_number}}<br>{{invoice_description}}</h2>
         </div>
 
         <div class="w3-row w3-padding-large">
@@ -46,7 +46,7 @@
 
         <div class="w3-row w3-padding">
             <div class="w3-col">
-            <table class="w3-table w3-striped">
+            <table class="w3-table w3-striped w3-bordered">
                 <tr class="w3-cyan">
                     <th>Item</th>
                     <th>Unit Price</th>

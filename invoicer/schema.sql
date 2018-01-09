@@ -2,6 +2,18 @@
 drop table if exists addresses;
 CREATE TABLE addresses (
     id INTEGER PRIMARY KEY,
+    full_name text,
+    street text,
+    city text,
+    'state' text,
+    zip text,
+    email text,
+    terms text
+);
+
+drop table if exists customers;
+CREATE TABLE customers (
+    id INTEGER PRIMARY KEY,
     name1 text,
     name2 text,
     addrline1 text,
@@ -10,7 +22,8 @@ CREATE TABLE addresses (
     'state' text,
     zip text,
     email text,
-    terms text
+    terms text,
+    'number' text
 );
 
 drop table if exists invoices;
@@ -20,6 +33,7 @@ CREATE TABLE invoices (
     'description' text,
     to_address integer,
     paid_date text,
+    'number' text,
     FOREIGN KEY(to_address) REFERENCES addresses(id)
 );
 

@@ -8,7 +8,7 @@ class EmptyForm(FlaskForm):
     pass
 
 
-class AddressForm(FlaskForm):
+class CustomerForm(FlaskForm):
     name1 = StringField('Name 1', validators=[DataRequired()])
     name2 = StringField('Name 2')
     addrline1 = StringField('Address Line 1', validators=[DataRequired()])
