@@ -244,7 +244,7 @@ def update_invoice(invoice_id):
         paid_date=invoice['paid_date'],
         )
     form.customer.choices = addr_choices
-    form.customer.process_data(invoice['customer'])
+    form.customer.process_data(invoice['customer_id'])
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
@@ -253,7 +253,7 @@ def update_invoice(invoice_id):
         db.execute('''
             update invoices
                 set description = ?,
-                customer = ?,
+                customer_id = ?,
                 submitted_date = ?,
                 paid_date = ?
                 where id = ?
@@ -534,17 +534,22 @@ def update_unit(unit_id):
     )
 
     if form.validate_on_submit():
-        db.execute('''
-        update unit_prices
-        set description = ?, unit_price = ?, units = ?
-        where id = ?''',
-        [form['description'].data,
-        form['unit_price'].data,
-        form['units'].data,
-        unit_id])
+        if 'delete' in request.form:
+            db.execute('delete from unit_prices where id = ?', unit_id)
+            flash('unit deleted', 'warning')
+        else:
+            db.execute('''
+            update unit_prices
+            set description = ?, unit_price = ?, units = ?
+            where id = ?''',
+            [form['description'].data,
+            form['unit_price'].data,
+            form['units'].data,
+            unit_id])
+            flash('unit updated', 'success')
+
         db.commit()
 
-        flash('unit updated', 'success')
         return redirect(url_for('units'))
 
     return render_template('unit_form.html', form=form, unit=unit)

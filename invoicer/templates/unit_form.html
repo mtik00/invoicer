@@ -9,6 +9,7 @@
 
 {% if unit %}
 <form class="w3-container w3-col m5" action="{{url_for('update_unit', unit_id=unit.id)}}" method="POST">
+    <p>NOTE: Changing this will only change <i>future</i> invoice items</p>
 {% else %}
 <form class="w3-container w3-col m5" action="{{url_for('new_unit')}}" method="POST">
 {% endif %}
@@ -18,8 +19,12 @@
     {{ render_field(form.units) }}
   <p>
       <input class="w3-btn w3-cyan" type=submit value=
-      {% if unit %}"Update"{% else %}"Add"{% endif %}
+      {%- if unit %}"Update"{% else %}"Add"{% endif -%}
      >
+
+     {%- if unit %}
+     <input class="w3-btn w3-red w3-right" type="submit" value="Delete" name="delete">
+     {% endif %}
   </p>
 </form>
 {% endblock %}
