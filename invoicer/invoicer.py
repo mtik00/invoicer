@@ -34,6 +34,10 @@ app.config.update(dict(
     WKHTMLTOPDF="c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe",
     BACKUP_DIR=app.instance_path,
     SESSION_TIMEOUT_MINUTES=30,
+
+    EMAIL_USERNAME=None,
+    EMAIL_PASSWORD=None,
+    EMAIL_SERVER=None
 ))
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
@@ -145,7 +149,7 @@ def login():
 
         if not error:
             session['logged_in'] = True
-            flash('You were logged in')
+            flash('You were logged in', 'success')
 
             if 'next' in request.form:
                 return redirect(request.form['next'])
@@ -337,8 +341,8 @@ def to_pdf(invoice_id):
 
 
 def get_address_emails(address_id):
-    if app.config['DEBUG']:
-        return [app.config['EMAIL_USERNAME']]
+    if app.config['DEBUG'] and ('EMAIL_USERNAME' in app.config):
+        return [app.config['EMAIL_USERNAME'] or '']
 
     db = get_db()
     cur = db.execute('select email from customers where id = ?', [str(address_id)])
@@ -702,7 +706,8 @@ def invoice(invoice=None):
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice_obj,
-        to_emails=to_emails
+        to_emails=to_emails,
+        can_submit=to_emails and invoice_obj and can_submit(invoice_obj['customer_id'])
     )
 
 
@@ -848,6 +853,26 @@ def remove_older_backups(days=30):
         if s.st_ctime < oldest:
             print "deleting", fpath
             os.unlink(fpath)
+
+
+def can_submit(customer_id):
+    """
+    Returns `True` if we can submit an invoice by email to a customer, `False`
+    otherwise.
+    """
+    if not (
+        app.config.get('EMAIL_PASSWORD') and
+        app.config.get('EMAIL_USERNAME') and
+        app.config.get('EMAIL_SERVER')
+    ):
+        return False
+
+    db = get_db()
+    customer = db.execute('select * from customers where id = ?', str(customer_id)).fetchone()
+    if not (customer and customer['email']):
+        return False
+
+    return True
 
 
 @app.cli.command('rotate')
