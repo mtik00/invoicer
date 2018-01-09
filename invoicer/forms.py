@@ -42,3 +42,8 @@ class ItemForm(FlaskForm):
     description = StringField(u'Description', validators=[DataRequired()])
     unit_price = SelectField(u'Unit Price', coerce=int)
     quantity = IntegerField(u'Quantity', validators=[DataRequired()])
+
+class UnitForm(FlaskForm):
+    description = StringField(u'Description', validators=[DataRequired()])
+    unit_price = FloatField(u'Unit Price', validators=[DataRequired()])
+    units = StringField(u'Units (e.g. hr, day, etc)')

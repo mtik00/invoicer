@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  <a href="{{url_for('new_unit')}}" class="w3-btn w3-cyan">New unit</a>
+  <ul>
+  {% for unit in units %}
+    <li>{{ unit.id }}: <a href="{{ url_for('update_unit', unit_id=unit.id) }}">{{unit.description}}</a>
+        <ul>
+            <li>{{unit.unit_price|currency}}{% if unit.units %}/{{unit.units}}{% endif %}</li>
+        </ul>
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

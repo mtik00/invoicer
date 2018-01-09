@@ -16,7 +16,8 @@ from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
 from premailer import Premailer
 
-from .forms import CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm
+from .forms import (
+    CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm, UnitForm)
 from .submitter import sendmail
 
 
@@ -187,7 +188,7 @@ def delete_items(invoice_id):
 @app.route('/invoice/<int:invoice_id>/items/new', methods=["GET","POST"])
 @login_required
 def new_item(invoice_id):
-    form = ItemForm()
+    form = ItemForm(quantity=1)
     db = get_db()
     cur = db.execute('select * from unit_prices')
     unit_prices = cur.fetchall()
@@ -201,7 +202,6 @@ def new_item(invoice_id):
         cur = db.execute('select * from unit_prices where id = ?', [request.form['unit_price']])
         unit_price_row = cur.fetchone()
 
-        # Now insert
         db.execute('''
             insert into items (invoice_id, date, description, unit_price, quantity, units) values (?, ?, ?, ?, ?, ?)''',
             [
@@ -512,6 +512,64 @@ def customers():
     customers = cur.fetchall()
 
     return render_template('customers.html', customers=customers)
+
+
+@app.route('/units')
+def units():
+    db = get_db()
+    cur =  db.execute('select * from unit_prices')
+    units = cur.fetchall()
+    return render_template('units.html', units=units)
+
+
+@app.route('/units/<unit_id>/update', methods=["GET","POST"])
+def update_unit(unit_id):
+    db = get_db()
+    cur = db.execute('select * from unit_prices where id = ?', unit_id)
+    unit = cur.fetchone()
+    form = UnitForm(
+        description=unit['description'],
+        unit_price=unit['unit_price'],
+        units=unit['units']
+    )
+
+    if form.validate_on_submit():
+        db.execute('''
+        update unit_prices
+        set description = ?, unit_price = ?, units = ?
+        where id = ?''',
+        [form['description'].data,
+        form['unit_price'].data,
+        form['units'].data,
+        unit_id])
+        db.commit()
+
+        flash('unit updated', 'success')
+        return redirect(url_for('units'))
+
+    return render_template('unit_form.html', form=form, unit=unit)
+
+
+@app.route('/units/new', methods=["GET","POST"])
+@login_required
+def new_unit():
+    form = UnitForm()
+    if form.validate_on_submit():
+        db = get_db()
+        db.execute('''
+            insert into unit_prices (description, unit_price, units) values (?, ?, ?)''',
+            [
+                request.form['description'],
+                request.form['unit_price'],
+                request.form['units'],
+            ]
+        )
+        db.commit()
+
+        flash('unit added', 'success')
+        return redirect(url_for('units'))
+
+    return render_template('unit_form.html', form=form)
 
 
 @app.route('/profile/update', methods=["GET","POST"])

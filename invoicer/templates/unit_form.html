@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+{% from "_formhelpers.html" import render_field %}
+{% if form.errors %}
+{% for error in form.errors.values() %}
+      <li>{{ error }}</li>
+{% endfor %}
+{% endif %}
+
+{% if unit %}
+<form class="w3-container w3-col m5" action="{{url_for('update_unit', unit_id=unit.id)}}" method="POST">
+{% else %}
+<form class="w3-container w3-col m5" action="{{url_for('new_unit')}}" method="POST">
+{% endif %}
+    {{ form.hidden_tag() }}
+    {{ render_field(form.description) }}
+    {{ render_field(form.unit_price) }}
+    {{ render_field(form.units) }}
+  <p>
+      <input class="w3-btn w3-cyan" type=submit value=
+      {% if unit %}"Update"{% else %}"Add"{% endif %}
+     >
+  </p>
+</form>
+{% endblock %}
