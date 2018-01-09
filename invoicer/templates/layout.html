@@ -25,7 +25,11 @@
 <div class=w3-container>
   <h1>Invoicer</h1>
   {% for category, message in get_flashed_messages(with_categories=True) %}
-    <div class="w3-panel {{category}}">{{ message }}</div>
+    <div class="w3-panel w3-display-container {{category}}">
+        <span onclick="this.parentElement.style.display='none'"
+        class="w3-button {{category}} w3-large w3-display-topright">&times;</span>
+        <p>{{ message }}</p>
+    </div>
   {% endfor %}
   {% block body %}{% endblock %}
 </div>
