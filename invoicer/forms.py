@@ -23,7 +23,7 @@ class CustomerForm(FlaskForm):
 
 class InvoiceForm(FlaskForm):
     description = StringField(u'Description', validators=[DataRequired()])
-    to_address = SelectField(u'Bill To Address', coerce=int)
+    customer = SelectField(u'Bill To Address', coerce=int)
     submitted_date = StringField(u'Submitted Date', id="datepicker1")
     paid_date = StringField(u'Paid Date', id="datepicker2")
 

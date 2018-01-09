@@ -231,24 +231,24 @@ def update_invoice(invoice_id):
         submitted_date=invoice['submitted_date'],
         paid_date=invoice['paid_date'],
         )
-    form.to_address.choices = addr_choices
-    form.to_address.process_data(invoice['to_address'])
+    form.customer.choices = addr_choices
+    form.customer.process_data(invoice['customer'])
 
     if form.validate_on_submit():
-        to_address_id = int(request.form['to_address'])
+        customer_id = int(request.form['customer'])
 
         # Now insert
         db.execute('''
             update invoices
                 set description = ?,
-                to_address = ?,
+                customer = ?,
                 submitted_date = ?,
                 paid_date = ?
                 where id = ?
         ''',
             [
                 request.form['description'],
-                to_address_id,
+                customer_id,
                 request.form['submitted_date'].upper(),
                 request.form['paid_date'].upper(),
                 invoice_id
@@ -270,18 +270,18 @@ def new_invoice():
     cur = db.execute('select * from customers order by id desc')
     addresses = cur.fetchall()
     addr_choices = [(x['id'], x['name1']) for x in addresses]
-    form.to_address.choices = addr_choices
+    form.customer.choices = addr_choices
 
     if form.validate_on_submit():
-        to_address_id = int(request.form['to_address'])
-        number = next_invoice_number(to_address_id)
+        customer_id = int(request.form['customer'])
+        number = next_invoice_number(customer_id)
 
         # Now insert
         db.execute('''
-            insert into invoices (description, to_address, number) values (?, ?, ?)''',
+            insert into invoices (description, customer, number) values (?, ?, ?)''',
             [
                 request.form['description'],
-                to_address_id,
+                customer_id,
                 number
             ]
         )
@@ -360,10 +360,10 @@ def submit_invoice(invoice_id):
     }
     pdfkit.from_string(text, fpath, options=options, configuration=config)
 
-    cur = db.execute('select to_address, number from invoices where id = ?', [invoice_id])
-    to_address, invoice_number = cur.fetchone()
+    cur = db.execute('select customer_id, number from invoices where id = ?', [invoice_id])
+    customer_id, invoice_number = cur.fetchone()
 
-    email_to = get_address_emails(to_address)
+    email_to = get_address_emails(customer_id)
     sendmail(
         sender='invoicer@host.com',
         to=email_to,
@@ -578,7 +578,7 @@ def invoice(invoice=None):
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice_obj,
-        to_emails=', '.join(get_address_emails(invoice_obj['to_address']))
+        to_emails=', '.join(get_address_emails(invoice_obj['customer_id']))
     )
 
 
@@ -594,8 +594,8 @@ def raw_invoice(invoice_id):
     db = get_db()
     cur = db.execute('select * from items where invoice_id=?', invoice_id)
     items = cur.fetchall()
-    invoice_id, submitted, description, to_address_id, paid, number, invoice_total = db.execute('select * from invoices where id=?', invoice_id).fetchone()
-    to_address = format_address(to_address_id)
+    invoice_id, submitted, description, customer_id, paid, number, invoice_total = db.execute('select * from invoices where id=?', invoice_id).fetchone()
+    customer = format_address(customer_id)
     submit_address = format_my_address()
 
     if submitted:
@@ -614,9 +614,9 @@ def raw_invoice(invoice_id):
         total=invoice_total,
         submitted=submitted,
         due=due,
-        to_address=to_address,
+        customer=customer,
         submit_address=submit_address,
-        terms=get_terms(to_address_id),
+        terms=get_terms(customer_id),
         paid=paid
     )
 
@@ -657,7 +657,7 @@ def format_my_address():
 
 def customer_has_invoices(customer_id):
     db = get_db()
-    return db.execute('select id from invoices where to_address = ?', str(customer_id)).fetchall()
+    return db.execute('select id from invoices where customer_id = ?', str(customer_id)).fetchall()
 
 
 def get_terms(address_id):

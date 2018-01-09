@@ -31,11 +31,10 @@ CREATE TABLE invoices (
     id integer PRIMARY KEY,
     submitted_date text,
     'description' text,
-    to_address integer,
+    customer_id integer,
     paid_date text,
     'number' text,
-    total real,
-    FOREIGN KEY(to_address) REFERENCES addresses(id)
+    total real
 );
 
 drop table if exists items;
@@ -46,8 +45,7 @@ CREATE TABLE items (
     'description' text,
     unit_price real,
     quantity integer,
-    'units' text,
-    FOREIGN KEY(invoice_id) REFERENCES invoices(id)
+    'units' text
 );
 
 drop table if exists unit_prices;

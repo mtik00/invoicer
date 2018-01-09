@@ -12,7 +12,7 @@
     {%- endif -%}
     >
       <td>{{invoice.number}}</td>
-      <td>{{invoice.to_address|billto}}</td>
+      <td>{{invoice.customer_id|billto}}</td>
       <td>{{invoice.description}}</td>
       <td class="w3-center">{{'X' if invoice.submitted_date else ' '}}</td>
       <td class="w3-center">{{'X' if invoice.paid_date else ' '}}</td>
