@@ -23,7 +23,7 @@ CREATE TABLE customers (
     zip text,
     email text,
     terms text,
-    'number' text
+    'number' INTEGER
 );
 
 drop table if exists invoices;

@@ -9,15 +9,16 @@ class EmptyForm(FlaskForm):
 
 
 class CustomerForm(FlaskForm):
-    name1 = StringField('Name 1', validators=[DataRequired()])
+    name1 = StringField('Name 1*', validators=[DataRequired()])
     name2 = StringField('Name 2')
-    addrline1 = StringField('Address Line 1', validators=[DataRequired()])
+    addrline1 = StringField('Address Line 1*', validators=[DataRequired()])
     addrline2 = StringField('Address Line 2')
-    city = StringField('City', validators=[DataRequired()])
-    state = StringField('State', validators=[DataRequired()])
-    zip = StringField('Zipcode', validators=[DataRequired()])
+    city = StringField('City*', validators=[DataRequired()])
+    state = StringField('State*', validators=[DataRequired()])
+    zip = StringField('Zipcode*', validators=[DataRequired()])
     email = StringField('Email')
     terms = StringField('Terms')
+    number = IntegerField('Number*', validators=[DataRequired()])
 
 
 class InvoiceForm(FlaskForm):

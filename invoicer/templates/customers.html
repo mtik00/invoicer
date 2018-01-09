@@ -3,7 +3,7 @@
   <a href="{{url_for('new_customer')}}" class="w3-btn w3-cyan">New customer</a>
   <ul class=entries>
   {% for customer in customers %}
-    <li>{{ customer.id }}: <a href="{{ url_for('update_customer', customer_id=customer.id) }}">{{customer.name1}}</a>
+    <li>{{ customer.number }}: <a href="{{ url_for('update_customer', customer_id=customer.id) }}">{{customer.name1}}</a>
         <ul>
             {% if customer.name2 %}<li>{{customer.name2}}</li>{% endif %}
             <li>{{customer.addrline1}}</li>

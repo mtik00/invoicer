@@ -32,7 +32,7 @@
 
         <button class="w3-bar-item w3-button" formaction="{{ url_for('to_pdf', invoice_id=invoice_id)}}" formtarget="_blank">Download PDF</button>
 
-        {% if (config['DEBUG'] and invoice_obj.submitted_date) or (not invoice_obj.submitted_date) -%}
+        {% if to_emails and ((config['DEBUG'] and invoice_obj.submitted_date) or (not invoice_obj.submitted_date)) -%}
         <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button">Submit Invoice</span>
         {% else %}
         <button class="w3-bar-item w3-button" formaction="#" disabled>Submit Invoice</button>
@@ -52,11 +52,17 @@
         </header>
 
         <div class="w3-container">
+            {% if to_emails -%}
             <p>Really submit the invoice to: {{to_emails}}?</p>
+            {% else -%}
+            <p>ERROR: No emails to submit to</p>
+            {% endif -%}
         </div>
 
         <div class="w3-container w3-light-grey w3-padding">
+            {% if to_emails -%}
             <button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('submit_invoice', invoice_id=invoice_id)}}';">Yes</button>
+            {% endif -%}
             <button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('submit-modal').style.display='none'">Close</button>
         </div>
     </div>

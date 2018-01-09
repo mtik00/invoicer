@@ -385,11 +385,30 @@ def submit_invoice(invoice_id):
     return redirect(url_for('invoice', invoice=invoice_id))
 
 
+def get_next_customer_number(starting=4000, increment=10):
+    db = get_db()
+    cur = db.execute('select number from customers')
+    numbers = [round(float(x[0]), -1) for x in cur.fetchall()]
+
+    customer_number = starting
+    for number in numbers:
+        if number > customer_number:
+            customer_number = number
+
+    return int(customer_number + increment)
+
+
+def get_customer(customer_id):
+    db = get_db()
+    return db.execute('select * from customers where id = ?', str(customer_id)).fetchone()
+
 @app.route('/customers/<customer_id>/update', methods=["GET","POST"])
 @login_required
 def update_customer(customer_id):
     db = get_db()
     form = CustomerForm()
+    customer = get_customer(customer_id)
+
     if form.validate_on_submit():
         db.execute('''
             update customers
@@ -416,6 +435,12 @@ def update_customer(customer_id):
                 customer_id
             ]
         )
+
+        if customer_has_invoices(customer_id) and (form['number'].data != customer['number']):
+            flash('cannot change customer numbers if they have invoices', 'warning')
+        elif form['number'].data != customer['number']:
+            db.execute('update customers set number = ? where id = ?', [form['number'].data, customer_id])
+
         db.commit()
         flash('address updated', 'success')
         return redirect(url_for('customers'))
@@ -432,6 +457,7 @@ def update_customer(customer_id):
         zip=address['zip'],
         email=address['email'],
         terms=address['terms'],
+        number=address['number'],
     )
 
     return render_template('customer_form.html', form=form, customer_id=customer_id)
@@ -440,11 +466,11 @@ def update_customer(customer_id):
 @app.route('/customers/new', methods=["GET","POST"])
 @login_required
 def new_customer():
-    form = CustomerForm()
+    form = CustomerForm(number=get_next_customer_number())
     if form.validate_on_submit():
         db = get_db()
         db.execute('''
-            insert into customers (name1, name2, addrline1, addrline2, city, state, zip, email, terms) values (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            insert into customers (name1, name2, addrline1, addrline2, city, state, zip, email, terms, number) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             [
                 request.form['name1'],
                 request.form['name2'],
@@ -455,6 +481,7 @@ def new_customer():
                 request.form['zip'],
                 request.form['email'],
                 request.form['terms'],
+                request.form['number'],
             ]
         )
         db.commit()
@@ -596,7 +623,7 @@ def raw_invoice(invoice_id):
 
 @app.template_filter('currency')
 def currency(value):
-    return "$%.2f" % float(value)
+    return "$%.2f" % float(value or 0.0)
 
 
 @app.template_filter('billto')
@@ -626,6 +653,11 @@ def format_my_address():
         '%s %s, %s' % (address['city'], address['state'], address['zip']),
         address['email']
     ])
+
+
+def customer_has_invoices(customer_id):
+    db = get_db()
+    return db.execute('select id from invoices where to_address = ?', str(customer_id)).fetchall()
 
 
 def get_terms(address_id):
