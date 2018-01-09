@@ -63,6 +63,15 @@ def get_db():
     return g.sqlite_db
 
 
+def get_user_info():
+    if not hasattr(g, '_userinfo'):
+        db = get_db()
+        cur = db.execute('select * from addresses where id = 1')
+        g._userinfo = dict(cur.fetchone())
+
+    return g._userinfo
+
+
 # Expire the session if the user sets `SESSION_TIMEOUT_MINUTES` ###############
 def make_session_permanent():
     session.permanent = True
@@ -192,6 +201,12 @@ def new_item(invoice_id):
                 unit_price_row['units'],
             ]
         )
+        db.commit()
+
+        cur = db.execute('select * from items where invoice_id=?', str(invoice_id))
+        items = cur.fetchall()
+        item_total = sum([x['quantity'] * x['unit_price'] for x in items])
+        db.execute('update invoices set total = ? where id=?', [item_total, str(invoice_id)])
         db.commit()
 
         flash('item added to invoice %d' % invoice_id, 'success')
@@ -353,7 +368,7 @@ def submit_invoice(invoice_id):
         sender='invoicer@host.com',
         to=email_to,
         cc=[app.config['EMAIL_USERNAME']],
-        subject='Invoice %s from %s' % (invoice_number, app.config['NAME']),
+        subject='Invoice %s from %s' % (invoice_number, get_user_info()['full_name']),
         body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
         server=app.config['EMAIL_SERVER'],
         body_type="html",
@@ -546,10 +561,13 @@ def raw_invoice(invoice_id):
     """
     Displays a single invoice
     """
+    if not isinstance(invoice_id, basestring):
+        invoice_id = str(invoice_id)
+
     db = get_db()
     cur = db.execute('select * from items where invoice_id=?', invoice_id)
     items = cur.fetchall()
-    invoice_id, submitted, description, to_address_id, paid, number = db.execute('select * from invoices where id=?', invoice_id).fetchone()
+    invoice_id, submitted, description, to_address_id, paid, number, invoice_total = db.execute('select * from invoices where id=?', invoice_id).fetchone()
     to_address = format_address(to_address_id)
     submit_address = format_my_address()
 
@@ -566,7 +584,7 @@ def raw_invoice(invoice_id):
         invoice_number=number,
         invoice_description=description,
         items=items,
-        total=sum([x['quantity'] * x['unit_price'] for x in items]),
+        total=invoice_total,
         submitted=submitted,
         due=due,
         to_address=to_address,
@@ -600,8 +618,7 @@ def format_address(address_id):
 
 
 def format_my_address():
-    db = get_db()
-    address = db.execute('select * from addresses where id=1').fetchone()
+    address = get_user_info()
 
     return '<br>'.join([
         address['full_name'],

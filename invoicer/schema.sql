@@ -34,6 +34,7 @@ CREATE TABLE invoices (
     to_address integer,
     paid_date text,
     'number' text,
+    total real,
     FOREIGN KEY(to_address) REFERENCES addresses(id)
 );
 

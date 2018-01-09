@@ -26,12 +26,12 @@ values
 ;
 
 insert into invoices
-    (submitted_date, description, to_address, paid_date, 'number')
+    (submitted_date, description, to_address, paid_date, 'number', total)
 values
-    ('20-JAN-2018', '2018 Website Redesign', 1, '07-FEB-2018', '4010-2018-001')
-    ,('20-FEB-2018', '2018 Website Development', 1, NULL, '4010-2018-002')
-    ,(NULL, '2018 Website Maintenance', 1, NULL, '4010-2018-003')
-    ,(NULL, '2018 Website Maintenance', 2, NULL, '4020-2018-001')
+    ('20-JAN-2018', '2018 Website Redesign', 1, '07-FEB-2018', '4010-2018-001', 6400)
+    ,('20-FEB-2018', '2018 Website Development', 1, NULL, '4010-2018-002', 8000)
+    ,(NULL, '2018 Website Maintenance', 1, NULL, '4010-2018-003', 1600)
+    ,(NULL, '2018 Website Maintenance', 2, NULL, '4020-2018-001', 2400)
 ;
 
 /*
