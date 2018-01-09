@@ -11,10 +11,12 @@ import click
 import pdfkit
 from pdfkit.configuration import Configuration
 import arrow
+from argon2 import PasswordHasher
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
+
 from .forms import AddressForm, InvoiceForm, ItemForm, EmptyForm
-from argon2 import PasswordHasher
+from .submitter import sendmail
 
 
 app = Flask(__name__)
@@ -578,3 +580,19 @@ def rotate(days):
     """
     create_backup()
     remove_older_backups(days)
+
+
+@app.cli.command('test-email')
+def test_email():
+    sendmail(
+        sender='invoicer@host.com',
+        to=[app.config['EMAIL_USERNAME']],
+        subject='Test email from Invoicer',
+        body="<h1>Hello, World!</h1>",
+        server='%s:%d' % (app.config['EMAIL_SERVER'], app.config['EMAIL_PORT']),
+        body_type="html",
+        attachments=None,
+        username=app.config['EMAIL_USERNAME'],
+        password=app.config['EMAIL_PASSWORD'],
+        starttls=True
+    )
