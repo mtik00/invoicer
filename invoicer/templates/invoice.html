@@ -5,20 +5,6 @@
     <title>Invoice #{{invoice_number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     
     <style>
-    #overlay {
-        position: fixed;
-        display: none;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 2;
-        cursor: pointer;
-    }
-
     #text{
         position: absolute;
         top: 50%;
@@ -62,7 +48,7 @@
     }
     
     .invoice-box table tr.top table td {
-        padding-bottom: 20px;
+        padding-bottom: 40px;
     }
     
     .invoice-box table tr.top table td.title {
@@ -98,20 +84,6 @@
         font-weight: bold;
     }
     
-    @media only screen and (max-width: 1px) {
-        .invoice-box table tr.top table td {
-            width: 100%;
-            display: block;
-            text-align: center;
-        }
-        
-        .invoice-box table tr.information table td {
-            width: 100%;
-            display: block;
-            text-align: center;
-        }
-    }
-    
     /** RTL **/
     .rtl {
         direction: rtl;
@@ -136,7 +108,7 @@
                     <h2 class="text-left">Invoice #{{invoice_number}}: {{invoice_description}}</h2>
                     <table>
                         <tr>
-                            <td class="title"></td>
+                            <td style="width: 50%;">&nbsp;</td>
                             
                             <td>
                                 Submitted: {{submitted|upper}}<br>

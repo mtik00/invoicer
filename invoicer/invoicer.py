@@ -307,8 +307,8 @@ def to_pdf(invoice_id):
 
 
 def get_address_emails(address_id):
-    # if app.config['DEBUG']:
-    #     return (app.config['EMAIL_USERNAME'],)
+    if app.config['DEBUG']:
+        return (app.config['EMAIL_USERNAME'],)
 
     db = get_db()
     cur = db.execute('select email from addresses where id = ?', [str(address_id)])
