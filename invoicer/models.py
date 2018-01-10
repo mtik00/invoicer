@@ -29,7 +29,7 @@ class Customer(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.String(120))
-    number = db.Column(db.String(50))
+    number = db.Column(db.Integer)
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
 

@@ -17,6 +17,7 @@ def init_db(sample_data=False):
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms='NET 30 days'
         )
+        db.session.add_all([addr])
 
         customer1 = models.Customer(
             name1='Some Employer', addrline1='111 9th Ave N', city='New York',
@@ -151,5 +152,13 @@ def init_db(sample_data=False):
             ),
         ])
 
-        db.session.add_all([addr])
+        db.session.add_all([
+            models.UnitPrice(description='Design', unit_price=200, units='hr'),
+            models.UnitPrice(description='Development', unit_price=250, units='hr'),
+            models.UnitPrice(description='Maintenance', unit_price=50, units='hr'),
+            models.UnitPrice(description='Employer #2: Design', unit_price=100, units='hr'),
+            models.UnitPrice(description='Employer #2: Development', unit_price=150, units='hr'),
+            models.UnitPrice(description='Employer #2: Maintenance', unit_price=75, units='hr'),
+        ])
+
         db.session.commit()

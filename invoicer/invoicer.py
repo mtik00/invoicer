@@ -20,7 +20,7 @@ from .forms import (
     CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm, UnitForm)
 from .submitter import sendmail
 from .database import db, init_db
-from .models import Item, Invoice, Customer, Address
+from .models import Item, Invoice, Customer, Address, UnitPrice
 
 
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def login_required(f):
 
 def get_user_info(update=False):
     if update or (not hasattr(g, '_userinfo')):
-        info = Address.query.first()
+        info = Address.query.get(1)
         if info:
             g._userinfo = info
         else:
@@ -142,19 +142,18 @@ def logout():
 @login_required
 def delete_items(invoice_id):
     form = EmptyForm()
-    db = get_db()
-    cur = db.execute('select * from items where invoice_id = ?', [invoice_id])
-    items = cur.fetchall()
+    items = Item.query.filter(Item.invoice_id == invoice_id)
 
     if form.validate_on_submit():
-        items_to_delete = [y for x, y in request.form.items() if x.startswith('item_')]
-        if not items_to_delete:
+        item_ids_to_delete = [y for x, y in request.form.items() if x.startswith('item_')]
+        items = Item.query.filter(Item.id.in_(item_ids_to_delete)).all()
+        if not items:
             return redirect(url_for('invoice', invoice=invoice_id))
 
-        for item_id in items_to_delete:
-            db.execute('delete from items where id = ?', [item_id])
+        for item in items:
+            db.session.delete(item)
 
-        db.commit()
+        db.session.commit()
         return redirect(url_for('invoice', invoice=invoice_id))
 
     return render_template('delete_items_form.html', form=form, items=items, invoice_id=invoice_id)
@@ -164,37 +163,35 @@ def delete_items(invoice_id):
 @login_required
 def new_item(invoice_id):
     form = ItemForm(quantity=1)
-    db = get_db()
-    cur = db.execute('select * from unit_prices')
-    unit_prices = cur.fetchall()
+    unit_prices = UnitPrice.query.all()
+
     unit_price_choices = [
-        (x['id'], "%d: %s ($%.02f/%s)" % (x['id'], x['description'], x['unit_price'], x['units']))
+        (x.id, "%d: %s ($%.02f/%s)" % (x.id, x.description, x.unit_price, x.units))
         for x in unit_prices
     ]
     form.unit_price.choices = unit_price_choices
+    invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
 
     if form.validate_on_submit():
-        cur = db.execute('select * from unit_prices where id = ?', [request.form['unit_price']])
-        unit_price_row = cur.fetchone()
+        unit_price = UnitPrice.query.filter(UnitPrice.id == request.form['unit_price']).first()
 
-        db.execute('''
-            insert into items (invoice_id, date, description, unit_price, quantity, units) values (?, ?, ?, ?, ?, ?)''',
-            [
-                invoice_id,
-                request.form['date'].upper(),
-                request.form['description'],
-                unit_price_row['unit_price'],
-                request.form['quantity'],
-                unit_price_row['units'],
-            ]
-        )
-        db.commit()
+        db.session.add(Item(
+            invoice_id=invoice_id,
+            date=request.form['date'].upper(),
+            description=request.form['description'],
+            unit_price=unit_price.unit_price,
+            quantity=request.form['quantity'],
+            units=unit_price.units,
+            customer=invoice.customer
+        ))
 
-        cur = db.execute('select * from items where invoice_id=?', str(invoice_id))
-        items = cur.fetchall()
-        item_total = sum([x['quantity'] * x['unit_price'] for x in items])
-        db.execute('update invoices set total = ? where id=?', [item_total, str(invoice_id)])
-        db.commit()
+        db.session.commit()
+
+        items = Item.query.filter(Item.invoice_id == invoice_id).all()
+        item_total = sum([x.quantity * x.unit_price for x in items])
+        Invoice.query.filter(Invoice.id == invoice_id).update({'total': item_total})
+
+        db.session.commit()
 
         flash('item added to invoice %d' % invoice_id, 'success')
         return redirect(url_for('invoice', invoice=invoice_id))
@@ -205,43 +202,29 @@ def new_item(invoice_id):
 @app.route('/invoice/<invoice_id>/update', methods=["GET","POST"])
 @login_required
 def update_invoice(invoice_id):
-    db = get_db()
-    cur = db.execute('select * from customers order by id desc')
-    addresses = cur.fetchall()
-    addr_choices = [(x['id'], x['name1']) for x in addresses]
+    customers = Customer.query.all()
+    addr_choices = [(x.id, x.name1) for x in customers]
 
-    cur = db.execute('select * from invoices where id = ?', [invoice_id])
-    invoice = cur.fetchone()
+    invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
 
     form = InvoiceForm(
-        description=invoice['description'],
-        submitted_date=invoice['submitted_date'],
-        paid_date=invoice['paid_date'],
+        description=invoice.description,
+        submitted_date=invoice.submitted_date,
+        paid_date=invoice.paid_date,
         )
     form.customer.choices = addr_choices
-    form.customer.process_data(invoice['customer_id'])
+    form.customer.process_data(invoice.customer_id)
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
+        Invoice.query.filter(Invoice.id == invoice_id).update({
+            'description': request.form['description'],
+            'customer_id': customer_id,
+            'submitted_date': request.form['submitted_date'].upper(),
+            'paid_date': request.form['paid_date'].upper()
+        })
 
-        # Now insert
-        db.execute('''
-            update invoices
-                set description = ?,
-                customer_id = ?,
-                submitted_date = ?,
-                paid_date = ?
-                where id = ?
-        ''',
-            [
-                request.form['description'],
-                customer_id,
-                request.form['submitted_date'].upper(),
-                request.form['paid_date'].upper(),
-                invoice_id
-            ]
-        )
-        db.commit()
+        db.session.commit()
 
         flash('invoice updated', 'success')
         return redirect(url_for('invoice', invoice=invoice_id))
@@ -253,26 +236,21 @@ def update_invoice(invoice_id):
 @login_required
 def new_invoice():
     form = InvoiceForm()
-    db = get_db()
-    cur = db.execute('select * from customers order by id desc')
-    addresses = cur.fetchall()
-    addr_choices = [(x['id'], x['name1']) for x in addresses]
+    customers = Customer.query.all()
+    addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
         number = next_invoice_number(customer_id)
-
-        # Now insert
-        db.execute('''
-            insert into invoices (description, customer_id, number) values (?, ?, ?)''',
-            [
-                request.form['description'],
-                customer_id,
-                number
-            ]
+        db.session.add(
+            Invoice(
+                description=request.form['description'],
+                customer_id=customer_id,
+                number=number
+            )
         )
-        db.commit()
+        db.session.commit()
 
         flash('invoice added', 'success')
         return redirect(url_for('last_invoice'))
@@ -283,10 +261,15 @@ def new_invoice():
 @app.route('/invoice/<int:invoice_id>/delete')
 @login_required
 def delete_invoice(invoice_id):
-    db = get_db()
-    db.execute('DELETE FROM invoices WHERE id = ?', [str(invoice_id)])
-    db.execute('DELETE FROM items WHERE invoice_id = ?', [str(invoice_id)])
-    db.commit()
+    invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
+    items = Item.query.filter(Item.invoice == invoice).all()
+
+    db.session.delete(invoice)
+
+    for item in items:
+        db.session.delete(item)
+
+    db.session.commit()
     flash('Invoice %d has been deleted' % invoice_id, 'warning')
     return redirect(url_for('last_invoice'))
 
@@ -311,13 +294,11 @@ def to_pdf(invoice_id):
     )
 
 
-def get_address_emails(address_id):
+def get_address_emails(customer_id):
     if app.config['DEBUG'] and ('EMAIL_USERNAME' in app.config):
         return [app.config['EMAIL_USERNAME'] or '']
 
-    db = get_db()
-    cur = db.execute('select email from customers where id = ?', [str(address_id)])
-    email = cur.fetchone()[0]
+    email = Customer.query.get(customer_id).email
 
     if '|' in email:
         name, domain = email.split('@')
@@ -328,12 +309,10 @@ def get_address_emails(address_id):
 @app.route('/invoice/<invoice_id>/submit')
 @login_required
 def submit_invoice(invoice_id):
-    db = get_db()
-    db.execute(
-        'update invoices set submitted_date = ? where id = ?',
-        [arrow.now().format('DD-MMM-YYYY').upper(), invoice_id]
-    )
-    db.commit()
+    invoice = Invoice.query.get(invoice_id)
+    invoice.submitted_date = arrow.now().format('DD-MMM-YYYY').upper()
+    db.session.add(invoice)
+    db.session.commit()
 
     text = raw_invoice(invoice_id)
     fname = "invoice-%03d.pdf" % int(invoice_id)
@@ -347,15 +326,12 @@ def submit_invoice(invoice_id):
     }
     pdfkit.from_string(text, fpath, options=options, configuration=config)
 
-    cur = db.execute('select customer_id, number from invoices where id = ?', [invoice_id])
-    customer_id, invoice_number = cur.fetchone()
-
-    email_to = get_address_emails(customer_id)
+    email_to = get_address_emails(invoice.customer_id)
     sendmail(
         sender='invoicer@host.com',
         to=email_to,
         cc=[app.config['EMAIL_USERNAME']],
-        subject='Invoice %s from %s' % (invoice_number, get_user_info()['full_name']),
+        subject='Invoice %s from %s' % (invoice.number, get_user_info().full_name),
         body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
         server=app.config['EMAIL_SERVER'],
         body_type="html",
@@ -373,9 +349,7 @@ def submit_invoice(invoice_id):
 
 
 def get_next_customer_number(starting=4000, increment=10):
-    db = get_db()
-    cur = db.execute('select number from customers')
-    numbers = [round(float(x[0]), -1) for x in cur.fetchall()]
+    numbers = [round(float(x.number), -1) for x in Customer.query.all()]
 
     customer_number = starting
     for number in numbers:
@@ -386,66 +360,32 @@ def get_next_customer_number(starting=4000, increment=10):
 
 
 def get_customer(customer_id):
-    db = get_db()
-    return db.execute('select * from customers where id = ?', str(customer_id)).fetchone()
+    return Customer.query.get(customer_id)
 
 @app.route('/customers/<customer_id>/update', methods=["GET","POST"])
 @login_required
 def update_customer(customer_id):
-    db = get_db()
-    form = CustomerForm()
-    customer = get_customer(customer_id)
+    customer = Customer.query.get(customer_id)
+    form = CustomerForm(request.form, obj=customer)
 
     if form.validate_on_submit():
-        db.execute('''
-            update customers
-            set name1 = ?,
-                name2 = ?,
-                addrline1 = ?,
-                addrline2 = ?,
-                city = ?,
-                state = ?,
-                zip = ?,
-                email = ?,
-                terms = ?
-                where id = ?''',
-            [
-                form['name1'].data,
-                form['name2'].data,
-                form['addrline1'].data,
-                form['addrline2'].data,
-                form['city'].data,
-                form['state'].data,
-                form['zip'].data,
-                form['email'].data,
-                form['terms'].data,
-                customer_id
-            ]
-        )
+        form['state'].data = form['state'].data.upper()
 
-        if customer_has_invoices(customer_id) and (form['number'].data != customer['number']):
+        # Only change the customer number there are no invoices and the new
+        # number isn't already taken.
+        number = form['number'].data
+        if (number != customer.number) and customer_has_invoices(customer_id):
             flash('cannot change customer numbers if they have invoices', 'warning')
-        elif form['number'].data != customer['number']:
-            db.execute('update customers set number = ? where id = ?', [form['number'].data, customer_id])
+            form['number'].data = customer.number
+        elif (number != customer.number) and Customer.query.filter(Customer.number == number):
+            flash('that customer number is already in use', 'warning')
+            form['number'].data = customer.number
 
-        db.commit()
+        form.populate_obj(customer)
+        db.session.add(customer)
+        db.session.commit()
         flash('address updated', 'success')
         return redirect(url_for('customers'))
-
-    cur = db.execute('select * from customers where id = ?', [str(customer_id)])
-    address = cur.fetchone()
-    form = CustomerForm(
-        name1=address['name1'],
-        name2=address['name2'],
-        addrline1=address['addrline1'],
-        addrline2=address['addrline2'],
-        city=address['city'],
-        state=address['state'],
-        zip=address['zip'],
-        email=address['email'],
-        terms=address['terms'],
-        number=address['number'],
-    )
 
     return render_template('customer_form.html', form=form, customer_id=customer_id)
 
@@ -453,25 +393,12 @@ def update_customer(customer_id):
 @app.route('/customers/new', methods=["GET","POST"])
 @login_required
 def new_customer():
-    form = CustomerForm(number=get_next_customer_number())
+    form = CustomerForm(request.form, number=get_next_customer_number())
     if form.validate_on_submit():
-        db = get_db()
-        db.execute('''
-            insert into customers (name1, name2, addrline1, addrline2, city, state, zip, email, terms, number) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-            [
-                request.form['name1'],
-                request.form['name2'],
-                request.form['addrline1'],
-                request.form['addrline2'],
-                request.form['city'],
-                request.form['state'],
-                request.form['zip'],
-                request.form['email'],
-                request.form['terms'],
-                request.form['number'],
-            ]
-        )
-        db.commit()
+        customer = Customer()
+        form.populate_obj(customer)
+        db.session.add(customer)
+        db.session.commit()
 
         flash('address added', 'success')
         return redirect(url_for('customers'))
@@ -482,48 +409,31 @@ def new_customer():
 @app.route('/customers')
 @login_required
 def customers():
-    db = get_db()
-    cur = db.execute('select * from customers')
-    customers = cur.fetchall()
-
+    customers = Customer.query.all()
     return render_template('customers.html', customers=customers)
 
 
 @app.route('/units')
 def units():
-    db = get_db()
-    cur =  db.execute('select * from unit_prices')
-    units = cur.fetchall()
+    units = UnitPrice.query.all()
     return render_template('units.html', units=units)
 
 
 @app.route('/units/<unit_id>/update', methods=["GET","POST"])
 def update_unit(unit_id):
-    db = get_db()
-    cur = db.execute('select * from unit_prices where id = ?', unit_id)
-    unit = cur.fetchone()
-    form = UnitForm(
-        description=unit['description'],
-        unit_price=unit['unit_price'],
-        units=unit['units']
-    )
+    unit = UnitPrice.query.get(unit_id)
+    form = UnitForm(request.form, obj=unit)
 
     if form.validate_on_submit():
         if 'delete' in request.form:
-            db.execute('delete from unit_prices where id = ?', unit_id)
+            db.session.delete(unit)
             flash('unit deleted', 'warning')
         else:
-            db.execute('''
-            update unit_prices
-            set description = ?, unit_price = ?, units = ?
-            where id = ?''',
-            [form['description'].data,
-            form['unit_price'].data,
-            form['units'].data,
-            unit_id])
+            form.populate_obj(unit)
+            db.session.add(unit)
             flash('unit updated', 'success')
 
-        db.commit()
+        db.session.commit()
 
         return redirect(url_for('units'))
 
@@ -533,18 +443,13 @@ def update_unit(unit_id):
 @app.route('/units/new', methods=["GET","POST"])
 @login_required
 def new_unit():
-    form = UnitForm()
+    form = UnitForm(request.form)
+
     if form.validate_on_submit():
-        db = get_db()
-        db.execute('''
-            insert into unit_prices (description, unit_price, units) values (?, ?, ?)''',
-            [
-                request.form['description'],
-                request.form['unit_price'],
-                request.form['units'],
-            ]
-        )
-        db.commit()
+        unit = UnitPrice()
+        form.populate_obj(unit)
+        db.session.add(unit)
+        db.session.commit()
 
         flash('unit added', 'success')
         return redirect(url_for('units'))
@@ -555,59 +460,32 @@ def new_unit():
 @app.route('/profile/update', methods=["GET","POST"])
 @login_required
 def update_profile():
-    db = get_db()
-    form = ProfileForm()
-    profile = get_user_info()
+    profile = Address.query.get(1)
+    form = ProfileForm(request.form, obj=profile)
 
     if form.validate_on_submit():
-        db.execute('''
-            -- update addresses
-            insert or replace
-            into addresses
-            values (?, ?, ?, ?, ?, ?, ?, ?)
-            ''',
-            [
-                '1',
-                form['full_name'].data,
-                form['street'].data,
-                form['city'].data,
-                form['state'].data.upper(),
-                form['zip'].data,
-                form['email'].data,
-                form['terms'].data,
-            ]
-        )
+        form['state'].data = form['state'].data.upper()
+        form.populate_obj(profile)
+        db.session.add(profile)
+        db.session.commit()
 
-        db.commit()
         get_user_info(update=True)
         flash('profile updated', 'success')
         return redirect(url_for('update_profile'))
-
-    form = ProfileForm(
-        full_name=profile['full_name'],
-        email=profile['email'],
-        street=profile['street'],
-        city=profile['city'],
-        state=profile['state'],
-        zip=profile['zip'],
-        terms=profile['terms'],
-    )
 
     return render_template('profile_form.html', form=form)
 
 
 def get_invoice_ids():
-    db = get_db()
-    cur = db.execute('select id from invoices order by id asc')
-    invoice_ids = cur.fetchall()
-    return [x[0] for x in invoice_ids]
+    return [x.id for x in Invoice.query.all()]
 
 
 def last_invoice_id():
-    db = get_db()
-    cur = db.execute('select id from invoices order by id desc')
-    invoice_id = cur.fetchone()
-    return invoice_id[0] if invoice_id else 0
+    invoice = Invoice.query.order_by(Invoice.id.desc()).first()
+    if invoice:
+        return invoice.id
+
+    return 0
 
 
 def next_invoice_number(customer_id):
@@ -615,16 +493,15 @@ def next_invoice_number(customer_id):
     Returns the next available invoice number in the format:
         YYYY-<customer number>-<invoice number>
     """
-    db = get_db()
-    cur = db.execute('select number from customers where id = ?', str(customer_id))
-    number = cur.fetchone()[0]
+    customer = Customer.query.filter(Customer.id == customer_id).first()
+    number = customer.number
 
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
-    cur = db.execute("select number from invoices where number like '%s%%'" % this_years_invoice_numbers)
-    numbers = cur.fetchall()
+    ilike = '%s%%' % this_years_invoice_numbers
+    numbers = [x.number for x in Invoice.query.filter(Invoice.number.ilike(ilike)).all()]
 
     last = 0
-    for number in [x[0] for x in numbers]:
+    for number in numbers:
         match = re.search('%s-(\d+)' % this_years_invoice_numbers, number)
         if match:
             value = int(match.group(1))
@@ -649,9 +526,10 @@ def invoice(invoice=None):
     else:
         show_id = invoice
 
-    db = get_db()
-    cur = db.execute('select * from invoices where id = ?', [str(invoice)])
-    invoice_obj = cur.fetchone()
+    invoice = Invoice.query.get(show_id)
+    if not invoice:
+        flash('Unknown invoice', 'error')
+        return redirect(url_for('index'))
 
     # Figure out next/previous
     invoice_ids = get_invoice_ids()
@@ -659,7 +537,7 @@ def invoice(invoice=None):
         current_pos = next_id = previous_id = 0
         to_emails = None
     else:
-        to_emails = ', '.join(get_address_emails(invoice_obj['customer_id']))
+        to_emails = ', '.join(get_address_emails(invoice.customer_id))
         current_pos = invoice_ids.index(show_id)
         if current_pos == len(invoice_ids) - 1:
             next_id = None
@@ -676,9 +554,9 @@ def invoice(invoice=None):
         invoice_id=show_id,
         next_id=next_id,
         previous_id=previous_id,
-        invoice_obj=invoice_obj,
+        invoice_obj=invoice,
         to_emails=to_emails,
-        can_submit=to_emails and invoice_obj and can_submit(invoice_obj['customer_id'])
+        can_submit=to_emails and invoice and can_submit(invoice.customer_id)
     )
 
 
@@ -691,38 +569,33 @@ def raw_invoice(invoice_id):
     if not isinstance(invoice_id, basestring):
         invoice_id = str(invoice_id)
 
-    db = get_db()
-    cur = db.execute('select * from items where invoice_id=?', invoice_id)
-    items = cur.fetchall()
-    invoice_obj = db.execute('select * from invoices where id=?', invoice_id).fetchone()
-    if not invoice_obj:
+    invoice = Invoice.query.get(invoice_id)
+    if not invoice:
         return render_template('w3-invoice.html')
 
-    invoice_id, submitted, description, customer_id, paid, number, invoice_total = list(invoice_obj)
-
-    customer = format_address(customer_id)
+    customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
 
-    if submitted:
-        submitted = arrow.get(submitted, 'DD-MMM-YYYY')
+    if invoice.submitted_date:
+        submitted = arrow.get(invoice.submitted_date, 'DD-MMM-YYYY')
+        due = submitted.replace(days=+30).format('DD-MMM-YYYY')
+        submitted = submitted.format('DD-MMM-YYYY')
     else:
         submitted = None
-
-    due = submitted.replace(days=+30).format('DD-MMM-YYYY') if submitted else None
-    submitted = submitted.format('DD-MMM-YYYY') if submitted else None
+        due = None
 
     return render_template(
         'w3-invoice.html',
-        invoice_number=number,
-        invoice_description=description,
-        items=items,
-        total=invoice_total,
+        invoice_number=invoice.number,
+        invoice_description=invoice.description,
+        items=invoice.items,
+        total=invoice.total,
         submitted=submitted,
         due=due,
-        customer=customer,
+        customer_address=customer_address,
         submit_address=submit_address,
-        terms=get_terms(customer_id),
-        paid=paid
+        terms=get_terms(invoice.customer_id),
+        paid=invoice.paid_date,
     )
 
 
