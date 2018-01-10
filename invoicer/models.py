@@ -1,4 +1,6 @@
-from sqlalchemy.orm import relationship
+import re
+
+from sqlalchemy.orm import relationship, validates
 from .database import db
 
 
@@ -35,6 +37,16 @@ class Customer(db.Model):
 
     def __repr__(self):
         return '<Customer %r>' % (self.name1)
+
+    @validates('terms')
+    def validate_terms(self, key, terms):
+        """
+        If terms is defined, it must have '\d+ days' in it.
+        """
+        if terms:
+            assert re.search('\d+ days', terms, re.IGNORECASE)
+
+        return terms
 
 
 class Item(db.Model):

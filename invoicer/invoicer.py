@@ -575,10 +575,11 @@ def raw_invoice(invoice_id):
 
     customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
+    terms_description, terms_days = get_terms(invoice.customer_id)
 
     if invoice.submitted_date:
         submitted = arrow.get(invoice.submitted_date, 'DD-MMM-YYYY')
-        due = submitted.replace(days=+30).format('DD-MMM-YYYY')
+        due = submitted.replace(days=+terms_days).format('DD-MMM-YYYY')
         submitted = submitted.format('DD-MMM-YYYY')
     else:
         submitted = None
@@ -594,7 +595,7 @@ def raw_invoice(invoice_id):
         due=due,
         customer_address=customer_address,
         submit_address=submit_address,
-        terms=get_terms(invoice.customer_id),
+        terms=terms_description,
         paid=invoice.paid_date,
     )
 
@@ -634,11 +635,20 @@ def customer_has_invoices(customer_id):
 
 
 def get_terms(customer_id):
-    terms = Customer.query.filter(Customer.id == customer_id).first().terms
-    if terms:
-        return terms
+    terms_description = 'NET 30 days'
+    terms_days = 30
 
-    return Address.query.first().terms
+    customer_terms = Customer.query.filter(Customer.id == customer_id).first().terms
+    if customer_terms:
+        terms_description = customer_terms
+    else:
+        terms_description = Address.query.get(1).terms or terms_description
+
+    match = re.search('(\d+).*?days', terms_description, re.IGNORECASE)
+    if match:
+        terms_days = int(match.group(1))
+
+    return (terms_description, terms_days)
 
 
 def last_backup():

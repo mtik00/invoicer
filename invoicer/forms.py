@@ -1,7 +1,8 @@
 #!/bin/env python2.7
+import re
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, FloatField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, ValidationError
 
 
 class EmptyForm(FlaskForm):
@@ -28,6 +29,10 @@ class CustomerForm(FlaskForm):
     email = StringField('Email')
     terms = StringField('Terms')
     number = IntegerField('Number*', validators=[DataRequired()])
+
+    def validate_terms(form, field):
+        if not re.search('\d+\s*?days', field.data, re.IGNORECASE):
+            raise ValidationError('Terms must be in the form: ...## days...')
 
 
 class InvoiceForm(FlaskForm):
