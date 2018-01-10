@@ -4,13 +4,13 @@
 <form method="GET">        
     <div class="w3-bar w3-cyan">
         {% if previous_id %}
-        <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice', invoice=previous_id)}}">Previous</button>
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_by_number', invoice_number=previous_id)}}">Previous</button>
         {% else %}
         <button class="w3-bar-item w3-button" disabled>Previous</button>
         {% endif %}
 
         {% if next_id %}
-        <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice', invoice=next_id)}}">Next</button>
+        <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_by_number', invoice_number=next_id)}}">Next</button>
         {% else %}
         <button class="w3-bar-item w3-button" disabled>Next</button>
         {% endif %}

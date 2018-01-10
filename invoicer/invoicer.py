@@ -15,6 +15,7 @@ from argon2 import PasswordHasher
 from flask import (Flask, request, session, g, redirect, url_for, abort,
      render_template, flash, send_file, Response)
 from premailer import Premailer
+from werkzeug.routing import BaseConverter
 
 from .forms import (
     CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm, UnitForm)
@@ -49,6 +50,15 @@ app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
 
 db.init_app(app)
+
+
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
+
+
+app.url_map.converters['regex'] = RegexConverter
 
 
 def login_required(f):
@@ -231,6 +241,42 @@ def update_invoice(invoice_id):
 
     return render_template('invoice_form.html', form=form, invoice_id=invoice_id)
 
+
+@app.route('/invoice/<regex("\d+-\d+-\d+"):invoice_number>')
+@login_required
+def invoice_by_number(invoice_number):
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first()
+    if not invoice:
+        flash('Unknown invoice', 'error')
+        return redirect(url_for('index'))
+
+    # Figure out next/previous
+    invoice_numbers = [x.number for x in Invoice.query.all()]
+    if not invoice_numbers:
+        current_pos = next_id = previous_id = 0
+        to_emails = None
+    else:
+        to_emails = ', '.join(get_address_emails(invoice.customer_id))
+        current_pos = invoice_numbers.index(invoice_number)
+        if current_pos == len(invoice_numbers) - 1:
+            next_id = None
+        else:
+            next_id = invoice_numbers[current_pos + 1]
+
+        if current_pos == 0:
+            previous_id = None
+        else:
+            previous_id = invoice_numbers[current_pos - 1]
+
+    return render_template(
+        'invoices.html',
+        invoice_id=invoice.id,
+        next_id=next_id,
+        previous_id=previous_id,
+        invoice_obj=invoice,
+        to_emails=to_emails,
+        can_submit=to_emails and invoice and can_submit(invoice.customer_id)
+    )
 
 @app.route('/invoice/new', methods=["GET","POST"])
 @login_required
@@ -515,49 +561,6 @@ def next_invoice_number(customer_id):
 @login_required
 def last_invoice():
     return redirect(url_for('invoice', invoice=last_invoice_id()))
-
-
-@app.route('/invoice/<int:invoice>')
-@login_required
-def invoice(invoice=None):
-    # Always show the last invoice first
-    if invoice is None:
-        show_id = last_invoice_id()
-    else:
-        show_id = invoice
-
-    invoice = Invoice.query.get(show_id)
-    if not invoice:
-        flash('Unknown invoice', 'error')
-        return redirect(url_for('index'))
-
-    # Figure out next/previous
-    invoice_ids = get_invoice_ids()
-    if not invoice_ids:
-        current_pos = next_id = previous_id = 0
-        to_emails = None
-    else:
-        to_emails = ', '.join(get_address_emails(invoice.customer_id))
-        current_pos = invoice_ids.index(show_id)
-        if current_pos == len(invoice_ids) - 1:
-            next_id = None
-        else:
-            next_id = invoice_ids[current_pos + 1]
-
-        if current_pos == 0:
-            previous_id = None
-        else:
-            previous_id = invoice_ids[current_pos - 1]
-
-    return render_template(
-        'invoices.html',
-        invoice_id=show_id,
-        next_id=next_id,
-        previous_id=previous_id,
-        invoice_obj=invoice,
-        to_emails=to_emails,
-        can_submit=to_emails and invoice and can_submit(invoice.customer_id)
-    )
 
 
 @app.route('/raw-invoice/<invoice_id>')

@@ -31,7 +31,7 @@ class Customer(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.String(120))
-    number = db.Column(db.Integer)
+    number = db.Column(db.Integer, unique=True, nullable=False)
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
 
@@ -74,7 +74,7 @@ class Invoice(db.Model):
     submitted_date = db.Column(db.String(50))
     description = db.Column(db.String(150))
     paid_date = db.Column(db.String(50))
-    number = db.Column(db.String(50))
+    number = db.Column(db.String(50), unique=True, nullable=False)
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
 
