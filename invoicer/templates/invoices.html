@@ -79,11 +79,12 @@
 
         <div class="w3-container">
             <p>WARNING: This action cannot be undone</p>
-            <p>Really delete this invoice?</p>
+            <p>Enter DELETE in the input box below to really delete this invoice</p>
+            <input id="validate_delete">
         </div>
 
         <div class="w3-container w3-light-grey w3-padding">
-            <button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('delete_invoice', invoice_id=invoice_id)}}';">Yes</button>
+            <button disabled class="w3-button w3-left w3-white w3-border" id="delete_invoice_button" onclick="location.href='{{url_for('delete_invoice', invoice_id=invoice_id)}}';">Yes</button>
             <button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('delete-modal').style.display='none'">Close</button>
         </div>
     </div>
@@ -94,3 +95,17 @@
 </div>
 
 {% endblock %}
+
+{% block extrascripts %}
+<script>
+    document.getElementById("validate_delete").onkeyup = function() {myFunction()};
+
+    function myFunction() {
+        if (document.getElementById('validate_delete').value.toLowerCase() == 'delete') {
+            document.getElementById('delete_invoice_button').disabled = false;
+        } else {
+            document.getElementById('delete_invoice_button').disabled = true;
+        };
+    }
+</script>
+{% endblock%}
