@@ -1,0 +1,162 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+engine = create_engine('sqlite:///instance/test.db', convert_unicode=True)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()
+
+def init_db(sample_data=False):
+    # import all modules here that might define models so that
+    # they will be registered properly on the metadata.  Otherwise
+    # you will have to import them first before calling init_db()
+    # import invoicer.models
+    import models
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+    if sample_data:
+        addr = models.Address(
+            full_name='Tom Smith', email='me@example.com',
+            street='1313 Mockingbird Ln', city='New York',
+            state='NY', zip='11111', terms='NET 30 days'
+        )
+
+        customer1 = models.Customer(
+            name1='Some Employer', addrline1='111 9th Ave N', city='New York',
+            state='NY', zip='11222', email='boss|mike|larry@example.com',
+            terms='NET 30 days', number='4010')
+
+        invoice1 = models.Invoice(
+            customer=customer1,
+            submitted_date='20-JAN-2018',
+            description='2018 Website Redesign',
+            paid_date='07-FEB-2018',
+            number='4010-2018-001',
+            total=6400)
+
+        db_session.add_all([
+            models.Item(
+                date='01-JAN-2018',
+                description='Backend design', unit_price=200.0, units='hr',
+                quantity=8, invoice=invoice1, customer=customer1
+            ),
+            models.Item(
+                date='04-JAN-2018',
+                description='Backend design', unit_price=200.0, units='hr',
+                quantity=8, invoice=invoice1, customer=customer1
+            ),
+            models.Item(
+                date='06-JAN-2018',
+                description='Frontend design', unit_price=200.0, units='hr',
+                quantity=8, invoice=invoice1, customer=customer1
+            ),
+            models.Item(
+                date='10-JAN-2018',
+                description='Frontend design', unit_price=200.0, units='hr',
+                quantity=8, invoice=invoice1, customer=customer1
+            ),
+        ])
+
+        invoice2 = models.Invoice(
+            customer=customer1,
+            submitted_date='20-FEB-2018',
+            description='2018 Website Development',
+            paid_date=None,
+            number='4010-2018-002',
+            total=8000)
+
+        db_session.add_all([
+            models.Item(
+                date='01-FEB-2018',
+                description='Backend development', unit_price=250, units='hr',
+                quantity=8, invoice=invoice2, customer=customer1
+            ),
+            models.Item(
+                date='04-FEB-2018',
+                description='Backend development', unit_price=250, units='hr',
+                quantity=8, invoice=invoice2, customer=customer1
+            ),
+            models.Item(
+                date='05-FEB-2018',
+                description='Frontend development', unit_price=250, units='hr',
+                quantity=8, invoice=invoice2, customer=customer1
+            ),
+            models.Item(
+                date='06-FEB-2018',
+                description='Frontend development', unit_price=250, units='hr',
+                quantity=8, invoice=invoice2, customer=customer1
+            ),
+        ])
+
+        invoice3 = models.Invoice(
+            customer=customer1,
+            submitted_date=None,
+            description='2018 Website Maintenance',
+            paid_date=None,
+            number='4010-2018-003',
+            total=1600)
+
+        db_session.add_all([
+            models.Item(
+                date='01-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='04-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='05-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+        ])
+
+        customer2 = models.Customer(
+            name1='Employer #2', addrline1='1234 45th St', city='New York',
+            state='NY', zip='11133', email='billing@example.com', number='4020')
+
+        invoice4 = models.Invoice(
+            customer=customer2,
+            submitted_date=None,
+            description='2018 Website Maintenance',
+            paid_date=None,
+            number='4020-2018-001',
+            total=2400)
+
+        db_session.add_all([
+            models.Item(
+                date='01-MAR-2018',
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=invoice4, customer=customer2
+            ),
+            models.Item(
+                date='04-MAR-2018',
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=invoice4, customer=customer2
+            ),
+            models.Item(
+                date='05-MAR-2018',
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=invoice4, customer=customer2
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=invoice4, customer=customer2
+            ),
+        ])
+
+        db_session.add_all([addr])
+        db_session.commit()

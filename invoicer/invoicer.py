@@ -19,6 +19,8 @@ from premailer import Premailer
 from .forms import (
     CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm, UnitForm)
 from .submitter import sendmail
+from .database import db_session, init_db
+from .models import Item, Invoice, Customer, Address
 
 
 app = Flask(__name__)
@@ -42,6 +44,11 @@ app.config.update(dict(
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
 
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 def login_required(f):
     @wraps(f)
@@ -70,21 +77,11 @@ def get_db():
 
 def get_user_info(update=False):
     if update or (not hasattr(g, '_userinfo')):
-        db = get_db()
-        cur = db.execute('select * from addresses where id = 1')
-        info = cur.fetchone()
+        info = Address.query.first()
         if info:
-            g._userinfo = dict(info)
+            g._userinfo = info
         else:
-            g._userinfo = {
-                'full_name': '',
-                'street': '',
-                'city': '',
-                'state': '',
-                'zip': '',
-                'email': '',
-                'terms': 'NET 30 days'
-            }
+            g._userinfo = Address()
 
     return g._userinfo
 
@@ -112,26 +109,29 @@ def initdb_command():
     if not click.confirm('Do you want to continue?'):
         return
 
-    db = get_db()
-    with app.open_resource('schema.sql', mode='r') as fh:
-        db.cursor().executescript(fh.read())
-    db.commit()
-    click.echo('Initialized the database.')
+    # db = get_db()
+    # with app.open_resource('schema.sql', mode='r') as fh:
+    #     db.cursor().executescript(fh.read())
+    # db.commit()
 
     if click.confirm('Populate with sample data?'):
-        with app.open_resource('sample-data.sql', mode='r') as fh:
-            db.cursor().executescript(fh.read())
-        db.commit()
+        init_db(True)
         click.echo('Sample data added to database.')
+    else:
+        init_db(False)
+        # with app.open_resource('sample-data.sql', mode='r') as fh:
+        #     db.cursor().executescript(fh.read())
+        # db.commit()
+    click.echo('Initialized the database.')
 
 
 @app.route('/')
 @login_required
 def index():
-    db = get_db()
-    cur = db.execute('select * from invoices order by id desc')
-    invoices = cur.fetchall()
-    return render_template('index.html', invoices=invoices)
+    return render_template(
+        'index.html',
+        invoices=Invoice.query.order_by(Invoice.id.desc()).all()
+    )
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -761,47 +761,40 @@ def currency(value):
 
 
 @app.template_filter('billto')
-def billto(address_id):
-    db = get_db()
-    cur = db.execute('select name1 from customers where id = ?', [str(address_id)])
-    return cur.fetchone()[0]
+def billto(customer_id):
+    return Customer.query.filter(Customer.id == customer_id).first().name1
 
 
-def format_address(address_id):
-    db = get_db()
-    _, name1, name2, addrline1, addrline2, city, state, zipcode, email, _, _ = db.execute('select * from customers where id=?', str(address_id)).fetchone()
+def format_address(customer_id):
+    customer = Customer.query.filter(Customer.id == customer_id).first()
+    name = '<br>'.join([x for x in [customer.name1, customer.name2] if x])
+    street = '<br>'.join([x for x in [customer.addrline1, customer.addrline2] if x])
+    city = '%s, %s %s' % (customer.city, customer.state.upper(), customer.zip)
 
-    name = '<br>'.join([x for x in [name1, name2] if x])
-    street = '<br>'.join([x for x in [addrline1, addrline2] if x])
-    city = '%s, %s %s' % (city, state.upper(), zipcode)
-
-    return '<br>'.join([name, street, city, email])
+    return '<br>'.join([name, street, city, customer.email])
 
 
 def format_my_address():
-    address = get_user_info()
+    address = Address.query.first()
 
     return '<br>'.join([
-        address['full_name'],
-        address['street'],
-        '%s %s, %s' % (address['city'], address['state'], address['zip']),
-        address['email']
+        address.full_name,
+        address.street,
+        '%s %s, %s' % (address.city, address.state, address.zip),
+        address.email
     ])
 
 
 def customer_has_invoices(customer_id):
-    db = get_db()
-    return db.execute('select id from invoices where customer_id = ?', str(customer_id)).fetchall()
+    return Invoice.query.filter(Customer.id == 1).count() > 0
 
 
-def get_terms(address_id):
-    db = get_db()
-    terms = db.execute('select terms from customers where id=?', str(address_id)).fetchone()
+def get_terms(customer_id):
+    terms = Customer.query.filter(Customer.id == customer_id).first().terms
+    if terms:
+        return terms
 
-    if terms[0]:
-        return terms[0]
-
-    return db.execute('select terms from customers where id=?', '1').fetchone()[0]
+    return Address.query.first().terms
 
 
 def last_backup():
@@ -867,9 +860,8 @@ def can_submit(customer_id):
     ):
         return False
 
-    db = get_db()
-    customer = db.execute('select * from customers where id = ?', str(customer_id)).fetchone()
-    if not (customer and customer['email']):
+    customer = Customer.query.filter(Customer.id == customer_id).first()
+    if not (customer and customer.email):
         return False
 
     return True
