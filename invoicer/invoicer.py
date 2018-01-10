@@ -19,7 +19,7 @@ from premailer import Premailer
 from .forms import (
     CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm, UnitForm)
 from .submitter import sendmail
-from .database import db_session, init_db
+from .database import db, init_db
 from .models import Item, Invoice, Customer, Address
 
 
@@ -41,14 +41,15 @@ app.config.update(dict(
     EMAIL_PASSWORD=None,
     EMAIL_SERVER=None
 ))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
 
+db.init_app(app)
 
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
 
 def login_required(f):
     @wraps(f)
@@ -57,22 +58,6 @@ def login_required(f):
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
-
-
-def connect_db():
-    """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
-    return rv
-
-
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
 
 
 def get_user_info(update=False):
@@ -95,12 +80,6 @@ if app.config.get('SESSION_TIMEOUT_MINUTES'):
     app.before_request(make_session_permanent)
 ###############################################################################
 
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
-
 
 @app.cli.command('initdb')
 def initdb_command():
@@ -109,19 +88,11 @@ def initdb_command():
     if not click.confirm('Do you want to continue?'):
         return
 
-    # db = get_db()
-    # with app.open_resource('schema.sql', mode='r') as fh:
-    #     db.cursor().executescript(fh.read())
-    # db.commit()
-
     if click.confirm('Populate with sample data?'):
         init_db(True)
         click.echo('Sample data added to database.')
     else:
         init_db(False)
-        # with app.open_resource('sample-data.sql', mode='r') as fh:
-        #     db.cursor().executescript(fh.read())
-        # db.commit()
     click.echo('Initialized the database.')
 
 

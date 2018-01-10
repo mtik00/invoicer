@@ -1,13 +1,6 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from flask_sqlalchemy import SQLAlchemy
 
-engine = create_engine('sqlite:///instance/test.db', convert_unicode=True)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
-Base = declarative_base()
-Base.query = db_session.query_property()
+db = SQLAlchemy()
 
 def init_db(sample_data=False):
     # import all modules here that might define models so that
@@ -15,8 +8,8 @@ def init_db(sample_data=False):
     # you will have to import them first before calling init_db()
     # import invoicer.models
     import models
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    db.drop_all()
+    db.create_all()
 
     if sample_data:
         addr = models.Address(
@@ -38,7 +31,7 @@ def init_db(sample_data=False):
             number='4010-2018-001',
             total=6400)
 
-        db_session.add_all([
+        db.session.add_all([
             models.Item(
                 date='01-JAN-2018',
                 description='Backend design', unit_price=200.0, units='hr',
@@ -69,7 +62,7 @@ def init_db(sample_data=False):
             number='4010-2018-002',
             total=8000)
 
-        db_session.add_all([
+        db.session.add_all([
             models.Item(
                 date='01-FEB-2018',
                 description='Backend development', unit_price=250, units='hr',
@@ -100,7 +93,7 @@ def init_db(sample_data=False):
             number='4010-2018-003',
             total=1600)
 
-        db_session.add_all([
+        db.session.add_all([
             models.Item(
                 date='01-MAR-2018',
                 description='Website maintenance', unit_price=50, units='hr',
@@ -135,7 +128,7 @@ def init_db(sample_data=False):
             number='4020-2018-001',
             total=2400)
 
-        db_session.add_all([
+        db.session.add_all([
             models.Item(
                 date='01-MAR-2018',
                 description='Website maintenance', unit_price=75, units='hr',
@@ -158,5 +151,5 @@ def init_db(sample_data=False):
             ),
         ])
 
-        db_session.add_all([addr])
-        db_session.commit()
+        db.session.add_all([addr])
+        db.session.commit()
