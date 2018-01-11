@@ -15,13 +15,13 @@ from flask import (
 from premailer import Premailer
 from werkzeug.routing import BaseConverter
 
-from .forms import (
-    CustomerForm, InvoiceForm, ItemForm, EmptyForm, UnitForm)
+from .forms import (CustomerForm, InvoiceForm, ItemForm, EmptyForm)
 from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
 from .common import login_required
 from ._profile import profile_page
+from ._units import unit_page
 
 
 app = Flask(__name__)
@@ -49,6 +49,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
 app.register_blueprint(profile_page, url_prefix='/profile')
+app.register_blueprint(unit_page, url_prefix='/units')
 db.init_app(app)
 
 
@@ -452,48 +453,48 @@ def customers():
     return render_template('customers.html', customers=customers)
 
 
-@app.route('/units')
-def units():
-    units = UnitPrice.query.all()
-    return render_template('units.html', units=units)
+# @app.route('/units')
+# def units():
+#     units = UnitPrice.query.all()
+#     return render_template('units.html', units=units)
 
 
-@app.route('/units/<unit_id>/update', methods=["GET", "POST"])
-def update_unit(unit_id):
-    unit = UnitPrice.query.get(unit_id)
-    form = UnitForm(request.form, obj=unit)
+# @app.route('/units/<unit_id>/update', methods=["GET", "POST"])
+# def update_unit(unit_id):
+#     unit = UnitPrice.query.get(unit_id)
+#     form = UnitForm(request.form, obj=unit)
 
-    if form.validate_on_submit():
-        if 'delete' in request.form:
-            db.session.delete(unit)
-            flash('unit deleted', 'warning')
-        else:
-            form.populate_obj(unit)
-            db.session.add(unit)
-            flash('unit updated', 'success')
+#     if form.validate_on_submit():
+#         if 'delete' in request.form:
+#             db.session.delete(unit)
+#             flash('unit deleted', 'warning')
+#         else:
+#             form.populate_obj(unit)
+#             db.session.add(unit)
+#             flash('unit updated', 'success')
 
-        db.session.commit()
+#         db.session.commit()
 
-        return redirect(url_for('units'))
+#         return redirect(url_for('units'))
 
-    return render_template('unit_form.html', form=form, unit=unit)
+#     return render_template('unit_form.html', form=form, unit=unit)
 
 
-@app.route('/units/new', methods=["GET", "POST"])
-@login_required
-def new_unit():
-    form = UnitForm(request.form)
+# @app.route('/units/new', methods=["GET", "POST"])
+# @login_required
+# def new_unit():
+#     form = UnitForm(request.form)
 
-    if form.validate_on_submit():
-        unit = UnitPrice()
-        form.populate_obj(unit)
-        db.session.add(unit)
-        db.session.commit()
+#     if form.validate_on_submit():
+#         unit = UnitPrice()
+#         form.populate_obj(unit)
+#         db.session.add(unit)
+#         db.session.commit()
 
-        flash('unit added', 'success')
-        return redirect(url_for('units'))
+#         flash('unit added', 'success')
+#         return redirect(url_for('units'))
 
-    return render_template('unit_form.html', form=form)
+#     return render_template('unit_form.html', form=form)
 
 
 # @app.route('/profile/update', methods=["GET", "POST"])

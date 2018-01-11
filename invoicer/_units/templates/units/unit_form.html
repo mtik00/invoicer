@@ -8,10 +8,10 @@
 {% endif %}
 
 {% if unit %}
-<form class="w3-container w3-col m5" action="{{url_for('update_unit', unit_id=unit.id)}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('unit_page.update', unit_id=unit.id)}}" method="POST">
     <p>NOTE: Changing this will only change <i>future</i> invoice items</p>
 {% else %}
-<form class="w3-container w3-col m5" action="{{url_for('new_unit')}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('unit_page.create')}}" method="POST">
 {% endif %}
     {{ form.hidden_tag() }}
     {{ render_field(form.description) }}

@@ -23,4 +23,4 @@ def update():
         flash('profile updated', 'success')
         return redirect(url_for('profile_page.update'))
 
-    return render_template('profile_form.html', form=form)
+    return render_template('profile/profile_form.html', form=form)
