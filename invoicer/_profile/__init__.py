@@ -7,9 +7,16 @@ from .forms import ProfileForm
 profile_page = Blueprint('profile_page', __name__, template_folder='templates')
 
 
-@profile_page.route('/update', methods=["GET", "POST"])
+@profile_page.route('/')
 @login_required
-def update():
+def index():
+    profile = Address.query.get(1)
+    return render_template('profile/index.html', profile=profile)
+
+
+@profile_page.route('/edit', methods=["GET", "POST"])
+@login_required
+def edit():
     profile = Address.query.get(1)
     form = ProfileForm(request.form, obj=profile)
 
@@ -21,6 +28,6 @@ def update():
 
         g._userinfo = profile
         flash('profile updated', 'success')
-        return redirect(url_for('profile_page.update'))
+        return redirect(url_for('profile_page.index'))
 
     return render_template('profile/profile_form.html', form=form)

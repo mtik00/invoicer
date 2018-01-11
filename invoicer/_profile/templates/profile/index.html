@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+<dl>
+    <dd>{{profile.full_name}}</dd>
+    <dd>{{profile.street}}</dd>
+    <dd>{{profile.city}}, {{profile.state}} {{profile.zip}}</dd>
+    <dd>{{profile.email}}</dd>
+    <dd>&nbsp;</dd>
+    <dd>Terms: {{profile.terms}}</dd>
+</dl>
+
+<a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-cyan">Edit</a>
+
+{% endblock %}
