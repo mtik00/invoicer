@@ -12,7 +12,7 @@
 <div class="w3-bar w3-cyan">
     <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
     <a href="{{url_for('last_invoice')}}" class="w3-bar-item w3-button w3-mobile">Invoices</a>
-    <a href="{{url_for('customers')}}" class="w3-bar-item w3-button w3-mobile">Customers</a>
+    <a href="{{url_for('customers_page.index')}}" class="w3-bar-item w3-button w3-mobile">Customers</a>
     <a href="{{url_for('unit_page.units')}}" class="w3-bar-item w3-button w3-mobile">Billable Units</a>
 
     {% if not session.logged_in %}

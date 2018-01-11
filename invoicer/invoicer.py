@@ -15,13 +15,14 @@ from flask import (
 from premailer import Premailer
 from werkzeug.routing import BaseConverter
 
-from .forms import (CustomerForm, InvoiceForm, ItemForm, EmptyForm)
+from .forms import InvoiceForm, ItemForm, EmptyForm
 from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
 from .common import login_required
 from ._profile import profile_page
 from ._units import unit_page
+from ._customers import customers_page
 
 
 app = Flask(__name__)
@@ -50,6 +51,7 @@ app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
 app.register_blueprint(profile_page, url_prefix='/profile')
 app.register_blueprint(unit_page, url_prefix='/units')
+app.register_blueprint(customers_page, url_prefix='/customers')
 db.init_app(app)
 
 
@@ -387,133 +389,70 @@ def submit_invoice(invoice_id):
     return redirect(url_for('invoice', invoice=invoice_id))
 
 
-def get_next_customer_number(starting=4000, increment=10):
-    numbers = [round(float(x.number), -1) for x in Customer.query.all()]
+# def get_next_customer_number(starting=4000, increment=10):
+#     numbers = [round(float(x.number), -1) for x in Customer.query.all()]
 
-    customer_number = starting
-    for number in numbers:
-        if number > customer_number:
-            customer_number = number
+#     customer_number = starting
+#     for number in numbers:
+#         if number > customer_number:
+#             customer_number = number
 
-    return int(customer_number + increment)
-
-
-def get_customer(customer_id):
-    return Customer.query.get(customer_id)
+#     return int(customer_number + increment)
 
 
-@app.route('/customers/<customer_id>/update', methods=["GET", "POST"])
-@login_required
-def update_customer(customer_id):
-    customer = Customer.query.get(customer_id)
-    form = CustomerForm(request.form, obj=customer)
-
-    if form.validate_on_submit():
-        form['state'].data = form['state'].data.upper()
-
-        # Only change the customer number there are no invoices and the new
-        # number isn't already taken.
-        number = form['number'].data
-        if (number != customer.number) and customer_has_invoices(customer_id):
-            flash('cannot change customer numbers if they have invoices', 'warning')
-            form['number'].data = customer.number
-        elif (number != customer.number) and Customer.query.filter(Customer.number == number):
-            flash('that customer number is already in use', 'warning')
-            form['number'].data = customer.number
-
-        form.populate_obj(customer)
-        db.session.add(customer)
-        db.session.commit()
-        flash('address updated', 'success')
-        return redirect(url_for('customers'))
-
-    return render_template('customer_form.html', form=form, customer_id=customer_id)
+# def get_customer(customer_id):
+#     return Customer.query.get(customer_id)
 
 
-@app.route('/customers/new', methods=["GET", "POST"])
-@login_required
-def new_customer():
-    form = CustomerForm(request.form, number=get_next_customer_number())
-    if form.validate_on_submit():
-        customer = Customer()
-        form.populate_obj(customer)
-        db.session.add(customer)
-        db.session.commit()
-
-        flash('address added', 'success')
-        return redirect(url_for('customers'))
-
-    return render_template('customer_form.html', form=form)
-
-
-@app.route('/customers')
-@login_required
-def customers():
-    customers = Customer.query.all()
-    return render_template('customers.html', customers=customers)
-
-
-# @app.route('/units')
-# def units():
-#     units = UnitPrice.query.all()
-#     return render_template('units.html', units=units)
-
-
-# @app.route('/units/<unit_id>/update', methods=["GET", "POST"])
-# def update_unit(unit_id):
-#     unit = UnitPrice.query.get(unit_id)
-#     form = UnitForm(request.form, obj=unit)
-
-#     if form.validate_on_submit():
-#         if 'delete' in request.form:
-#             db.session.delete(unit)
-#             flash('unit deleted', 'warning')
-#         else:
-#             form.populate_obj(unit)
-#             db.session.add(unit)
-#             flash('unit updated', 'success')
-
-#         db.session.commit()
-
-#         return redirect(url_for('units'))
-
-#     return render_template('unit_form.html', form=form, unit=unit)
-
-
-# @app.route('/units/new', methods=["GET", "POST"])
+# @app.route('/customers/<customer_id>/update', methods=["GET", "POST"])
 # @login_required
-# def new_unit():
-#     form = UnitForm(request.form)
-
-#     if form.validate_on_submit():
-#         unit = UnitPrice()
-#         form.populate_obj(unit)
-#         db.session.add(unit)
-#         db.session.commit()
-
-#         flash('unit added', 'success')
-#         return redirect(url_for('units'))
-
-#     return render_template('unit_form.html', form=form)
-
-
-# @app.route('/profile/update', methods=["GET", "POST"])
-# @login_required
-# def update_profile():
-#     profile = Address.query.get(1)
-#     form = ProfileForm(request.form, obj=profile)
+# def update_customer(customer_id):
+#     customer = Customer.query.get(customer_id)
+#     form = CustomerForm(request.form, obj=customer)
 
 #     if form.validate_on_submit():
 #         form['state'].data = form['state'].data.upper()
-#         form.populate_obj(profile)
-#         db.session.add(profile)
+
+#         # Only change the customer number there are no invoices and the new
+#         # number isn't already taken.
+#         number = form['number'].data
+#         if (number != customer.number) and customer_has_invoices(customer_id):
+#             flash('cannot change customer numbers if they have invoices', 'warning')
+#             form['number'].data = customer.number
+#         elif (number != customer.number) and Customer.query.filter(Customer.number == number):
+#             flash('that customer number is already in use', 'warning')
+#             form['number'].data = customer.number
+
+#         form.populate_obj(customer)
+#         db.session.add(customer)
+#         db.session.commit()
+#         flash('address updated', 'success')
+#         return redirect(url_for('customers'))
+
+#     return render_template('customer_form.html', form=form, customer_id=customer_id)
+
+
+# @app.route('/customers/new', methods=["GET", "POST"])
+# @login_required
+# def new_customer():
+#     form = CustomerForm(request.form, number=get_next_customer_number())
+#     if form.validate_on_submit():
+#         customer = Customer()
+#         form.populate_obj(customer)
+#         db.session.add(customer)
 #         db.session.commit()
 
-#         get_user_info(update=True)
-#         flash('profile updated', 'success')
-#         return redirect(url_for('update_profile'))
+#         flash('address added', 'success')
+#         return redirect(url_for('customers'))
 
-#     return render_template('profile_form.html', form=form)
+#     return render_template('customer_form.html', form=form)
+
+
+# @app.route('/customers')
+# @login_required
+# def customers():
+#     customers = Customer.query.all()
+#     return render_template('customers.html', customers=customers)
 
 
 def get_invoice_ids():
@@ -625,10 +564,6 @@ def format_my_address():
         '%s %s, %s' % (address.city, address.state, address.zip),
         address.email
     ])
-
-
-def customer_has_invoices(customer_id):
-    return Invoice.query.filter(Customer.id == 1).count() > 0
 
 
 def get_terms(customer_id):
