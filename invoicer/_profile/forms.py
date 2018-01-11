@@ -11,3 +11,7 @@ class ProfileForm(FlaskForm):
     state = StringField('State')
     zip = StringField('Zipcode')
     terms = StringField('Terms')
+
+    def validate_terms(form, field):
+        if field.data and (not re.search('\d+\s*?days', field.data, re.IGNORECASE)):
+            raise ValidationError('Terms must be in the form: ...## days... (e.g. NET 45 days)')

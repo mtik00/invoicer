@@ -18,6 +18,16 @@ class Address(db.Model):
     def __repr__(self):
         return '<Address %r>' % (self.full_name)
 
+    @validates('terms')
+    def validate_terms(self, key, terms):
+        """
+        If terms is defined, it must have '\d+ days' in it.
+        """
+        if terms:
+            assert re.search('\d+ days', terms, re.IGNORECASE)
+
+        return terms
+
 
 class Customer(db.Model):
     __tablename__ = 'customers'
