@@ -9,50 +9,18 @@ import pdfkit
 from pdfkit.configuration import Configuration
 import arrow
 from flask import (
-    Flask, request, session, g, redirect, url_for, render_template, flash,
-    Response)
+    request, session, g, redirect, url_for, render_template, flash, Response)
 from premailer import Premailer
 from werkzeug.routing import BaseConverter
 
+from .app import create_app
 from .forms import InvoiceForm, ItemForm, EmptyForm
 from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
 from .common import login_required
-from ._login import login_page
-from ._profile import profile_page
-from ._units import unit_page
-from ._customers import customers_page
 
-
-app = Flask(__name__)
-app.config.from_object(__name__)
-
-# Load default config and override config from an environment variable
-app.config.update(dict(
-    DATABASE=os.path.join(app.instance_path, 'invoicer.db'),
-    SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD_HASH='$argon2i$v=19$m=512,t=2,p=2$+w4dAmcJGnaqsgob82pqcQ$4uGfP7JerZJPqAq5cWZ0bw',  # 'default'
-    WKHTMLTOPDF="c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe",
-    BACKUP_DIR=app.instance_path,
-    SESSION_TIMEOUT_MINUTES=30,
-
-    EMAIL_USERNAME=None,
-    EMAIL_PASSWORD=None,
-    EMAIL_SERVER=None
-))
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-app.config.from_envvar('INVOICER_SETTINGS', silent=True)
-app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
-app.register_blueprint(profile_page, url_prefix='/profile')
-app.register_blueprint(unit_page, url_prefix='/units')
-app.register_blueprint(customers_page, url_prefix='/customers')
-app.register_blueprint(login_page)
-db.init_app(app)
+app = create_app()
 
 
 class RegexConverter(BaseConverter):
@@ -84,21 +52,6 @@ def make_session_permanent():
 if app.config.get('SESSION_TIMEOUT_MINUTES'):
     app.before_request(make_session_permanent)
 ###############################################################################
-
-
-@app.cli.command('initdb')
-def initdb_command():
-    """Initializes the database."""
-    click.echo("WARNING: Continue will delete all data in the databse")
-    if not click.confirm('Do you want to continue?'):
-        return
-
-    if click.confirm('Populate with sample data?'):
-        init_db(True)
-        click.echo('Sample data added to database.')
-    else:
-        init_db(False)
-    click.echo('Initialized the database.')
 
 
 @app.route('/')
@@ -562,6 +515,21 @@ def can_submit(customer_id):
     return True
 
 
+@app.cli.command('initdb')
+def initdb_command():
+    """Initializes the database."""
+    click.echo("WARNING: Continue will delete all data in the databse")
+    if not click.confirm('Do you want to continue?'):
+        return
+
+    if click.confirm('Populate with sample data?'):
+        init_db(True)
+        click.echo('Sample data added to database.')
+    else:
+        init_db(False)
+    click.echo('Initialized the database.')
+
+
 @app.cli.command('rotate')
 @click.argument('days', default=30)
 def rotate(days):
@@ -582,7 +550,7 @@ def test_email():
         to=[app.config['EMAIL_USERNAME']],
         subject='Test email from Invoicer',
         body="<h1>Hello, World!</h1>",
-        server='%s:%d' % (app.config['EMAIL_SERVER'], app.config['EMAIL_PORT']),
+        server=app.config['EMAIL_SERVER'],
         body_type="html",
         attachments=None,
         username=app.config['EMAIL_USERNAME'],
