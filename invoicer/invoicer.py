@@ -8,7 +8,6 @@ import click
 import pdfkit
 from pdfkit.configuration import Configuration
 import arrow
-from argon2 import PasswordHasher
 from flask import (
     Flask, request, session, g, redirect, url_for, render_template, flash,
     Response)
@@ -20,6 +19,7 @@ from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
 from .common import login_required
+from ._login import login_page
 from ._profile import profile_page
 from ._units import unit_page
 from ._customers import customers_page
@@ -52,6 +52,7 @@ app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silen
 app.register_blueprint(profile_page, url_prefix='/profile')
 app.register_blueprint(unit_page, url_prefix='/units')
 app.register_blueprint(customers_page, url_prefix='/customers')
+app.register_blueprint(login_page)
 db.init_app(app)
 
 
@@ -110,37 +111,37 @@ def index():
     )
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        try:
-            ph = PasswordHasher()
-            ph.verify(app.config['PASSWORD_HASH'], request.form['password'])
-        except Exception:
-            error = 'Invalid username/password'
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     error = None
+#     if request.method == 'POST':
+#         try:
+#             ph = PasswordHasher()
+#             ph.verify(app.config['PASSWORD_HASH'], request.form['password'])
+#         except Exception:
+#             error = 'Invalid username/password'
 
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username/password'
+#         if request.form['username'] != app.config['USERNAME']:
+#             error = 'Invalid username/password'
 
-        if not error:
-            session['logged_in'] = True
-            flash('You were logged in', 'success')
+#         if not error:
+#             session['logged_in'] = True
+#             flash('You were logged in', 'success')
 
-            if 'next' in request.form:
-                return redirect(request.form['next'])
+#             if 'next' in request.form:
+#                 return redirect(request.form['next'])
 
-            return redirect(url_for('index'))
+#             return redirect(url_for('index'))
 
-    return render_template('login.html', error=error)
+#     return render_template('login.html', error=error)
 
 
-@app.route('/logout')
-@login_required
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out', 'info')
-    return redirect(url_for('index'))
+# @app.route('/logout')
+# @login_required
+# def logout():
+#     session.pop('logged_in', None)
+#     flash('You were logged out', 'info')
+#     return redirect(url_for('index'))
 
 
 @app.route('/invoice/<invoice_id>/items/delete', methods=["GET", "POST"])

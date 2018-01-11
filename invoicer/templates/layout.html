@@ -16,9 +16,9 @@
     <a href="{{url_for('unit_page.units')}}" class="w3-bar-item w3-button w3-mobile">Billable Units</a>
 
     {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log In</a>
+    <a href="{{ url_for('login_page.login') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log In</a>
     {% else %}
-    <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log out</a>
+    <a href="{{ url_for('login_page.logout') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log out</a>
     {% endif %}
     <a href="{{url_for('profile_page.update')}}" class="w3-bar-item w3-button w3-mobile w3-right">Profile</a>
   </div>
