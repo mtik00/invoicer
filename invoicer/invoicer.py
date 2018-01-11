@@ -1,10 +1,7 @@
 import os
 import re
-import json
 import time
-import sqlite3
 import zipfile
-from functools import wraps
 from datetime import timedelta
 
 import click
@@ -12,18 +9,19 @@ import pdfkit
 from pdfkit.configuration import Configuration
 import arrow
 from argon2 import PasswordHasher
-from flask import (Flask, request, session, g, redirect, url_for, abort,
-     render_template, flash, send_file, Response)
+from flask import (
+    Flask, request, session, g, redirect, url_for, render_template, flash,
+    Response)
 from premailer import Premailer
 from werkzeug.routing import BaseConverter
 
 from .forms import (
-    CustomerForm, InvoiceForm, ItemForm, EmptyForm, ProfileForm, UnitForm)
+    CustomerForm, InvoiceForm, ItemForm, EmptyForm, UnitForm)
 from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
-from ._profile import profile_page
 from .common import login_required
+from ._profile import profile_page
 
 
 app = Flask(__name__)
@@ -79,6 +77,7 @@ def make_session_permanent():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=app.config.get('SESSION_TIMEOUT_MINUTES'))
 
+
 if app.config.get('SESSION_TIMEOUT_MINUTES'):
     app.before_request(make_session_permanent)
 ###############################################################################
@@ -115,7 +114,7 @@ def login():
         try:
             ph = PasswordHasher()
             ph.verify(app.config['PASSWORD_HASH'], request.form['password'])
-        except:
+        except Exception:
             error = 'Invalid username/password'
 
         if request.form['username'] != app.config['USERNAME']:
@@ -141,7 +140,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/invoice/<invoice_id>/items/delete', methods=["GET","POST"])
+@app.route('/invoice/<invoice_id>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_id):
     form = EmptyForm()
@@ -162,7 +161,7 @@ def delete_items(invoice_id):
     return render_template('delete_items_form.html', form=form, items=items, invoice_id=invoice_id)
 
 
-@app.route('/invoice/<int:invoice_id>/items/new', methods=["GET","POST"])
+@app.route('/invoice/<int:invoice_id>/items/new', methods=["GET", "POST"])
 @login_required
 def new_item(invoice_id):
     form = ItemForm(quantity=1)
@@ -202,7 +201,7 @@ def new_item(invoice_id):
     return render_template('item_form.html', form=form, invoice_id=invoice_id)
 
 
-@app.route('/invoice/<invoice_id>/update', methods=["GET","POST"])
+@app.route('/invoice/<invoice_id>/update', methods=["GET", "POST"])
 @login_required
 def update_invoice(invoice_id):
     customers = Customer.query.all()
@@ -214,7 +213,7 @@ def update_invoice(invoice_id):
         description=invoice.description,
         submitted_date=invoice.submitted_date,
         paid_date=invoice.paid_date,
-        )
+    )
     form.customer.choices = addr_choices
     form.customer.process_data(invoice.customer_id)
 
@@ -271,7 +270,8 @@ def invoice_by_number(invoice_number):
         can_submit=to_emails and invoice and can_submit(invoice.customer_id)
     )
 
-@app.route('/invoice/new', methods=["GET","POST"])
+
+@app.route('/invoice/new', methods=["GET", "POST"])
 @login_required
 def new_invoice():
     form = InvoiceForm()
@@ -317,8 +317,6 @@ def delete_invoice(invoice_id):
 @login_required
 def to_pdf(invoice_id):
     text = raw_invoice(invoice_id)
-    fname = "invoice-%03i.pdf" % int(invoice_id)
-    fpath = os.path.join(app.instance_path, fname)
     config = Configuration(app.config['WKHTMLTOPDF'])
     options = {
         'print-media-type': None,
@@ -344,6 +342,7 @@ def get_address_emails(customer_id):
         return ['%s@%s' % (x, domain) for x in name.split('|')]
 
     return [email]
+
 
 @app.route('/invoice/<invoice_id>/submit')
 @login_required
@@ -401,7 +400,8 @@ def get_next_customer_number(starting=4000, increment=10):
 def get_customer(customer_id):
     return Customer.query.get(customer_id)
 
-@app.route('/customers/<customer_id>/update', methods=["GET","POST"])
+
+@app.route('/customers/<customer_id>/update', methods=["GET", "POST"])
 @login_required
 def update_customer(customer_id):
     customer = Customer.query.get(customer_id)
@@ -429,7 +429,7 @@ def update_customer(customer_id):
     return render_template('customer_form.html', form=form, customer_id=customer_id)
 
 
-@app.route('/customers/new', methods=["GET","POST"])
+@app.route('/customers/new', methods=["GET", "POST"])
 @login_required
 def new_customer():
     form = CustomerForm(request.form, number=get_next_customer_number())
@@ -458,7 +458,7 @@ def units():
     return render_template('units.html', units=units)
 
 
-@app.route('/units/<unit_id>/update', methods=["GET","POST"])
+@app.route('/units/<unit_id>/update', methods=["GET", "POST"])
 def update_unit(unit_id):
     unit = UnitPrice.query.get(unit_id)
     form = UnitForm(request.form, obj=unit)
@@ -479,7 +479,7 @@ def update_unit(unit_id):
     return render_template('unit_form.html', form=form, unit=unit)
 
 
-@app.route('/units/new', methods=["GET","POST"])
+@app.route('/units/new', methods=["GET", "POST"])
 @login_required
 def new_unit():
     form = UnitForm(request.form)
@@ -496,7 +496,7 @@ def new_unit():
     return render_template('unit_form.html', form=form)
 
 
-# @app.route('/profile/update', methods=["GET","POST"])
+# @app.route('/profile/update', methods=["GET", "POST"])
 # @login_required
 # def update_profile():
 #     profile = Address.query.get(1)
