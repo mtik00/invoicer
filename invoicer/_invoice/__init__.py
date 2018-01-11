@@ -10,13 +10,13 @@ from flask import (
 from premailer import Premailer
 
 # from .app import create_app
-from ..forms import ItemForm, EmptyForm
+from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
 from ..models import Item, Invoice, Customer, UnitPrice, Address
 from ..common import login_required
 
-from .forms import InvoiceForm
+from .forms import InvoiceForm, ItemForm
 
 
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
