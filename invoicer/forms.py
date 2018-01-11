@@ -7,16 +7,6 @@ class EmptyForm(FlaskForm):
     pass
 
 
-class ProfileForm(FlaskForm):
-    full_name = StringField('Full Name*', validators=[DataRequired()])
-    email = StringField('Email')
-    street = StringField('Street Address')
-    city = StringField('City')
-    state = StringField('State')
-    zip = StringField('Zipcode')
-    terms = StringField('Terms')
-
-
 class InvoiceForm(FlaskForm):
     description = StringField(u'Description', validators=[DataRequired()])
     customer = SelectField(u'Bill To Address', coerce=int)
