@@ -22,7 +22,7 @@ from .forms import (
 from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
-from .profile import profile_page
+from ._profile import profile_page
 from .common import login_required
 
 
