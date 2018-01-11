@@ -48,7 +48,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
-app.register_blueprint(profile_page)
+app.register_blueprint(profile_page, url_prefix='/profile')
 db.init_app(app)
 
 

@@ -7,7 +7,7 @@ from ..forms import ProfileForm
 profile_page = Blueprint('profile_page', __name__, template_folder='templates')
 
 
-@profile_page.route('/profile/update', methods=["GET", "POST"])
+@profile_page.route('/update', methods=["GET", "POST"])
 @login_required
 def update():
     profile = Address.query.get(1)
