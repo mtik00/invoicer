@@ -11,6 +11,7 @@ from ._profile import profile_page
 from ._units import unit_page
 from ._customers import customers_page
 from ._login import login_page
+from ._invoice import invoice_page
 
 
 class RegexConverter(BaseConverter):
@@ -52,6 +53,7 @@ def create_app():
     app.register_blueprint(profile_page, url_prefix='/profile')
     app.register_blueprint(unit_page, url_prefix='/units')
     app.register_blueprint(customers_page, url_prefix='/customers')
+    app.register_blueprint(invoice_page, url_prefix='/invoice')
     app.register_blueprint(login_page)
 
     if app.config.get('SESSION_TIMEOUT_MINUTES'):

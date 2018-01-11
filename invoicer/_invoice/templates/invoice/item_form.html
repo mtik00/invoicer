@@ -20,7 +20,7 @@ $( function() {
       <li>{{ error }}</li>
 {% endfor %}
 {% endif %}
-<form class="w3-container w3-col m5" action="{{url_for('new_item', invoice_id=invoice_id)}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('invoice_page.new_item', invoice_id=invoice_id)}}" method="POST">
   <dl>
     {{ form.hidden_tag() }}
     {{ render_field(form.date) }}

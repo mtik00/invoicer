@@ -6,7 +6,7 @@
       <th>Invoice</th><th>Bill To</th><th>Description</th><th class="w3-center">Submitted</th><th class="w3-center">Paid</th>
     </tr>
     {% for invoice in invoices -%}
-    <tr onclick="window.location='{{url_for('invoice_by_number', invoice_number=invoice.number)}}';"
+    <tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';"
     {%- if invoice.submitted_date and not invoice.paid_date %} class="pointer w3-orange"
     {%- elif invoice.submitted_date and invoice.paid_date %} class="pointer w3-pale-green"
     {%- else %}class="pointer"

@@ -7,13 +7,6 @@ class EmptyForm(FlaskForm):
     pass
 
 
-class InvoiceForm(FlaskForm):
-    description = StringField(u'Description', validators=[DataRequired()])
-    customer = SelectField(u'Bill To Address', coerce=int)
-    submitted_date = StringField(u'Submitted Date', id="datepicker1")
-    paid_date = StringField(u'Paid Date', id="datepicker2")
-
-
 class ItemForm(FlaskForm):
     date = StringField(u'Date', validators=[DataRequired()], id="datepicker")
     description = StringField(u'Description', validators=[DataRequired()])
