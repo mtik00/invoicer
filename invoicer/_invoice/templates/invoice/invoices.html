@@ -2,7 +2,7 @@
 {% block body %}
 
 <form method="GET">        
-    <div class="w3-bar w3-cyan">
+    <div class="w3-bar w3-theme-d2">
         {% if previous_id %}
         <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.invoice_by_number', invoice_number=previous_id)}}">Previous</button>
         {% else %}

@@ -24,7 +24,7 @@
     {{ render_field(form.terms) }}
     {{ render_field(form.number) }}
   <p>
-      {% if customer_id %}<input class="w3-btn w3-cyan" type=submit value="Update">{% else %}<input class="w3-btn w3-cyan" type=submit value="Add">{% endif %}
+      {% if customer_id %}<input class="w3-btn w3-theme-action" type=submit value="Update">{% else %}<input class="w3-btn w3-theme-action" type=submit value="Add">{% endif %}
   </p>
 </form>
 {% endblock %}

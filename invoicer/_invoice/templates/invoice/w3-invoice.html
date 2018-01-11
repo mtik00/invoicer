@@ -5,6 +5,7 @@
     <title>Invoice {{invoice_number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-cyan.css">
     <style>
         .total{font-weight:bold;}
         .right-text{text-align: right;}
@@ -47,7 +48,7 @@
         <div class="w3-row w3-padding">
             <div class="w3-col">
             <table class="w3-table w3-striped w3-bordered">
-                <tr class="w3-cyan">
+                <tr class="w3-theme">
                     <th>Item</th>
                     <th>Unit Price</th>
                     <th style="text-align:center !important;">Quantity</th>

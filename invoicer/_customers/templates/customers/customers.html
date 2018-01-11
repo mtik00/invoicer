@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <a href="{{url_for('customers_page.create')}}" class="w3-btn w3-cyan">New customer</a>
+  <a href="{{url_for('customers_page.create')}}" class="w3-btn w3-theme-action">New customer</a>
   <ul class=entries>
   {% for customer in customers %}
     <li>{{ customer.number }}: <a href="{{ url_for('customers_page.update', customer_id=customer.id) }}">{{customer.name1}}</a>
