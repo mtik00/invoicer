@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from ..common import login_required
 from ..models import UnitPrice
 from ..database import db
-from ..forms import UnitForm
+from .forms import UnitForm
 
 unit_page = Blueprint('unit_page', __name__, template_folder='templates')
 
