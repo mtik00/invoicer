@@ -2,14 +2,15 @@
 {% block body %}
   <h2>Login</h2>
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-  <form action="{{ url_for('login') }}" method=post>
-    <dl>
-      <dt>Username:
-      <dd><input type=text name=username>
-      <dt>Password:
-      <dd><input type=password name=password>
-      <dd><input type=submit value=Login>
-      <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
-    </dl>
+    <form class="w3-container w3-col m5" action="{{ url_for('login') }}" method="POST">
+        <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
+
+        <label class="w3-text-blue" for="username">Username</label>
+        <input class="w3-input w3-border" id="username" name="username" type="text" value="">
+  
+        <label class="w3-text-blue" for="password">Password</label>
+        <input class="w3-input w3-border" id="password" name="password" type="text" value="">
+
+        <p><input type=submit value="Login" class="w3-btn w3-cyan"></p>
   </form>
 {% endblock %}
