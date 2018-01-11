@@ -410,4 +410,5 @@ def raw_invoice(invoice_id):
         submit_address=submit_address,
         terms=terms_description,
         paid=invoice.paid_date,
+        theme="deep-orange"
     )

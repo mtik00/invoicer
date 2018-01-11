@@ -39,6 +39,10 @@ def create_app():
         BACKUP_DIR=app.instance_path,
         SESSION_TIMEOUT_MINUTES=30,
 
+        # https://www.w3schools.com/w3css/w3css_color_themes.asp
+        # Replace this with the short name (e.g. w3-theme-cyan --> 'cyan')
+        W3_THEME='cyan',
+
         EMAIL_USERNAME=None,
         EMAIL_PASSWORD=None,
         EMAIL_SERVER=None
