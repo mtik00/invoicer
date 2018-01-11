@@ -34,7 +34,6 @@ app.config.update(dict(
     SECRET_KEY='development key',
     USERNAME='admin',
     PASSWORD_HASH='$argon2i$v=19$m=512,t=2,p=2$+w4dAmcJGnaqsgob82pqcQ$4uGfP7JerZJPqAq5cWZ0bw',  # 'default'
-    NAME='John Doe',
     WKHTMLTOPDF="c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe",
     BACKUP_DIR=app.instance_path,
     SESSION_TIMEOUT_MINUTES=30,
@@ -369,6 +368,14 @@ def last_invoice_id():
     return 0
 
 
+def last_invoice_number():
+    invoice = Invoice.query.order_by(Invoice.id.desc()).first()
+    if invoice:
+        return invoice.number
+
+    return 0
+
+
 def next_invoice_number(customer_id):
     """
     Returns the next available invoice number in the format:
@@ -395,7 +402,7 @@ def next_invoice_number(customer_id):
 @app.route('/invoice')
 @login_required
 def last_invoice():
-    return redirect(url_for('invoice', invoice=last_invoice_id()))
+    return redirect(url_for('invoice_by_number', invoice_number=last_invoice_number()))
 
 
 @app.route('/raw-invoice/<invoice_id>')
