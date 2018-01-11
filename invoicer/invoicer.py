@@ -22,6 +22,8 @@ from .forms import (
 from .submitter import sendmail
 from .database import db, init_db
 from .models import Item, Invoice, Customer, Address, UnitPrice
+from .profile import profile_page
+from .common import login_required
 
 
 app = Flask(__name__)
@@ -48,7 +50,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
-
+app.register_blueprint(profile_page)
 db.init_app(app)
 
 
@@ -59,15 +61,6 @@ class RegexConverter(BaseConverter):
 
 
 app.url_map.converters['regex'] = RegexConverter
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in'):
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 def get_user_info(update=False):
@@ -503,23 +496,23 @@ def new_unit():
     return render_template('unit_form.html', form=form)
 
 
-@app.route('/profile/update', methods=["GET","POST"])
-@login_required
-def update_profile():
-    profile = Address.query.get(1)
-    form = ProfileForm(request.form, obj=profile)
+# @app.route('/profile/update', methods=["GET","POST"])
+# @login_required
+# def update_profile():
+#     profile = Address.query.get(1)
+#     form = ProfileForm(request.form, obj=profile)
 
-    if form.validate_on_submit():
-        form['state'].data = form['state'].data.upper()
-        form.populate_obj(profile)
-        db.session.add(profile)
-        db.session.commit()
+#     if form.validate_on_submit():
+#         form['state'].data = form['state'].data.upper()
+#         form.populate_obj(profile)
+#         db.session.add(profile)
+#         db.session.commit()
 
-        get_user_info(update=True)
-        flash('profile updated', 'success')
-        return redirect(url_for('update_profile'))
+#         get_user_info(update=True)
+#         flash('profile updated', 'success')
+#         return redirect(url_for('update_profile'))
 
-    return render_template('profile_form.html', form=form)
+#     return render_template('profile_form.html', form=form)
 
 
 def get_invoice_ids():
