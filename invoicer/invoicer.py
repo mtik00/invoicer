@@ -2,16 +2,13 @@ import os
 import re
 import time
 import zipfile
-from datetime import timedelta
 
 import click
 import pdfkit
 from pdfkit.configuration import Configuration
 import arrow
-from flask import (
-    request, session, g, redirect, url_for, render_template, flash, Response)
+from flask import (request, g, redirect, url_for, render_template, flash, Response)
 from premailer import Premailer
-from werkzeug.routing import BaseConverter
 
 from .app import create_app
 from .forms import InvoiceForm, ItemForm, EmptyForm
@@ -23,15 +20,6 @@ from .common import login_required
 app = create_app()
 
 
-class RegexConverter(BaseConverter):
-    def __init__(self, url_map, *items):
-        super(RegexConverter, self).__init__(url_map)
-        self.regex = items[0]
-
-
-app.url_map.converters['regex'] = RegexConverter
-
-
 def get_user_info(update=False):
     if update or (not hasattr(g, '_userinfo')):
         info = Address.query.get(1)
@@ -41,17 +29,6 @@ def get_user_info(update=False):
             g._userinfo = Address()
 
     return g._userinfo
-
-
-# Expire the session if the user sets `SESSION_TIMEOUT_MINUTES` ###############
-def make_session_permanent():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=app.config.get('SESSION_TIMEOUT_MINUTES'))
-
-
-if app.config.get('SESSION_TIMEOUT_MINUTES'):
-    app.before_request(make_session_permanent)
-###############################################################################
 
 
 @app.route('/')

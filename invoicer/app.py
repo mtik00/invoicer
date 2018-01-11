@@ -1,5 +1,9 @@
 import os
-from flask import Flask
+from datetime import timedelta
+
+from flask import Flask, current_app, session
+from werkzeug.routing import BaseConverter
+
 from .database import db
 
 
@@ -7,6 +11,17 @@ from ._profile import profile_page
 from ._units import unit_page
 from ._customers import customers_page
 from ._login import login_page
+
+
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
+
+
+def make_session_permanent():
+    session.permanent = True
+    current_app.permanent_session_lifetime = timedelta(minutes=current_app.config.get('SESSION_TIMEOUT_MINUTES'))
 
 
 def create_app():
@@ -30,12 +45,18 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
     app.config.from_envvar('INVOICER_SETTINGS', silent=True)
     app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
+    app.url_map.converters['regex'] = RegexConverter
+
     app.register_blueprint(profile_page, url_prefix='/profile')
     app.register_blueprint(unit_page, url_prefix='/units')
     app.register_blueprint(customers_page, url_prefix='/customers')
     app.register_blueprint(login_page)
+
+    if app.config.get('SESSION_TIMEOUT_MINUTES'):
+        app.before_request(make_session_permanent)
+
     db.init_app(app)
+
     return app
