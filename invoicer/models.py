@@ -14,6 +14,7 @@ class Address(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.String(120))
+    w3_theme = db.Column(db.String(120))
 
     def __repr__(self):
         return '<Address %r>' % (self.full_name)

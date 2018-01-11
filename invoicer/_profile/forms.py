@@ -1,6 +1,6 @@
 import re
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, SelectField
 from wtforms.validators import DataRequired, ValidationError
 
 
@@ -12,6 +12,7 @@ class ProfileForm(FlaskForm):
     state = StringField('State')
     zip = StringField('Zipcode')
     terms = StringField('Terms')
+    w3_theme = SelectField('Theme')
 
     def validate_terms(form, field):
         if field.data and (not re.search('\d+\s*?days', field.data, re.IGNORECASE)):
