@@ -35,5 +35,5 @@ def login():
 @login_required
 def logout():
     session.pop('logged_in', None)
-    flash('You were logged out', 'info')
+    flash('You were logged out', 'warning')
     return redirect(url_for('index'))
