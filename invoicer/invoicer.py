@@ -111,39 +111,6 @@ def index():
     )
 
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     error = None
-#     if request.method == 'POST':
-#         try:
-#             ph = PasswordHasher()
-#             ph.verify(app.config['PASSWORD_HASH'], request.form['password'])
-#         except Exception:
-#             error = 'Invalid username/password'
-
-#         if request.form['username'] != app.config['USERNAME']:
-#             error = 'Invalid username/password'
-
-#         if not error:
-#             session['logged_in'] = True
-#             flash('You were logged in', 'success')
-
-#             if 'next' in request.form:
-#                 return redirect(request.form['next'])
-
-#             return redirect(url_for('index'))
-
-#     return render_template('login.html', error=error)
-
-
-# @app.route('/logout')
-# @login_required
-# def logout():
-#     session.pop('logged_in', None)
-#     flash('You were logged out', 'info')
-#     return redirect(url_for('index'))
-
-
 @app.route('/invoice/<invoice_id>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_id):
@@ -388,72 +355,6 @@ def submit_invoice(invoice_id):
 
     flash('invoice was submitted to ' + ', '.join(email_to), 'success')
     return redirect(url_for('invoice', invoice=invoice_id))
-
-
-# def get_next_customer_number(starting=4000, increment=10):
-#     numbers = [round(float(x.number), -1) for x in Customer.query.all()]
-
-#     customer_number = starting
-#     for number in numbers:
-#         if number > customer_number:
-#             customer_number = number
-
-#     return int(customer_number + increment)
-
-
-# def get_customer(customer_id):
-#     return Customer.query.get(customer_id)
-
-
-# @app.route('/customers/<customer_id>/update', methods=["GET", "POST"])
-# @login_required
-# def update_customer(customer_id):
-#     customer = Customer.query.get(customer_id)
-#     form = CustomerForm(request.form, obj=customer)
-
-#     if form.validate_on_submit():
-#         form['state'].data = form['state'].data.upper()
-
-#         # Only change the customer number there are no invoices and the new
-#         # number isn't already taken.
-#         number = form['number'].data
-#         if (number != customer.number) and customer_has_invoices(customer_id):
-#             flash('cannot change customer numbers if they have invoices', 'warning')
-#             form['number'].data = customer.number
-#         elif (number != customer.number) and Customer.query.filter(Customer.number == number):
-#             flash('that customer number is already in use', 'warning')
-#             form['number'].data = customer.number
-
-#         form.populate_obj(customer)
-#         db.session.add(customer)
-#         db.session.commit()
-#         flash('address updated', 'success')
-#         return redirect(url_for('customers'))
-
-#     return render_template('customer_form.html', form=form, customer_id=customer_id)
-
-
-# @app.route('/customers/new', methods=["GET", "POST"])
-# @login_required
-# def new_customer():
-#     form = CustomerForm(request.form, number=get_next_customer_number())
-#     if form.validate_on_submit():
-#         customer = Customer()
-#         form.populate_obj(customer)
-#         db.session.add(customer)
-#         db.session.commit()
-
-#         flash('address added', 'success')
-#         return redirect(url_for('customers'))
-
-#     return render_template('customer_form.html', form=form)
-
-
-# @app.route('/customers')
-# @login_required
-# def customers():
-#     customers = Customer.query.all()
-#     return render_template('customers.html', customers=customers)
 
 
 def get_invoice_ids():
