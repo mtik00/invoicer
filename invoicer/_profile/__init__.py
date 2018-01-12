@@ -22,10 +22,12 @@ def edit():
 
     theme_choices = [(x, x) for x in color_themes]
     form.w3_theme.choices = theme_choices
+    form.w3_theme_invoice.choices = theme_choices
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
         form.w3_theme.process_data(profile.w3_theme)
+        form.w3_theme_invoice.process_data(profile.w3_theme_invoice)
 
     if form.validate_on_submit():
         form['state'].data = form['state'].data.upper()

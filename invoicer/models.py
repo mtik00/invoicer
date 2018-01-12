@@ -1,7 +1,5 @@
-import re
-
 import arrow
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship
 from .database import db
 
 
@@ -16,6 +14,7 @@ class Address(db.Model):
     email = db.Column(db.String(120))
     terms = db.Column(db.Integer(), default=30)
     w3_theme = db.Column(db.String(120), default='cyan')
+    w3_theme_invoice = db.Column(db.String(120), default='cyan')
 
     def __repr__(self):
         return '<Address %r>' % (self.full_name)
@@ -109,6 +108,26 @@ class Invoice(db.Model):
             due_date = due_date.format('DD-MMM-YYYY')
 
         return due_date
+
+    def get_theme(self):
+        """
+        Returns the appropriate theme for presenting the invoice.
+        """
+        if self.w3_theme:
+            return self.w3_theme
+
+        customer = Customer.query.get(self.customer_id)
+        if customer.w3_theme:
+            return customer.w3_theme
+
+        user = Address.query.get(1)
+        if user.w3_theme_invoice:
+            return user.w3_theme_invoice
+
+        if user.w3_theme:
+            return user.w3_theme
+
+        return None
 
 
 class UnitPrice(db.Model):

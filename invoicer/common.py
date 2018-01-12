@@ -3,6 +3,7 @@ from flask import request, redirect, session, url_for
 
 
 color_themes = [
+    '',
     'red', 'pink', 'purple', 'deep-purple', 'blue', 'light-blue', 'cyan', 'teal',
     'green', 'light-green', 'lime', 'khaki', 'yellow', 'amber', 'orange',
     'deep-orange', 'blue-grey', 'brown', 'grey', 'dark-grey', 'black'

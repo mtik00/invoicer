@@ -8,7 +8,8 @@
     <dd>&nbsp;</dd>
     <dd>Terms: NET {{profile.terms}} days</dd>
     <dd>&nbsp;</dd>
-    <dd>Theme: {{profile.w3_theme}}</dd>
+    <dd>Site Theme: {{profile.w3_theme}}</dd>
+    <dd>Default Invoice Theme: {{profile.w3_theme_invoice or 'None'}}</dd>
 </dl>
 
 <a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-theme-action">Edit</a>

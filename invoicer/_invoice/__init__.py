@@ -152,7 +152,7 @@ def update(invoice_number):
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
-        form.w3_theme.process_data(invoice.w3_theme or customer.w3_theme or me.w3_theme)
+        form.w3_theme.process_data(invoice.w3_theme)
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
@@ -407,5 +407,5 @@ def raw_invoice(invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        w3_theme=invoice.w3_theme or customer.w3_theme or current_app.config['W3_THEME']
+        w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
     )

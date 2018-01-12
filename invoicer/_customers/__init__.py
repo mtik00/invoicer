@@ -37,9 +37,9 @@ def update(customer_id):
     theme_choices = [(x, x) for x in color_themes]
     form.w3_theme.choices = theme_choices
 
-    if request.method == 'GET':
-        # Set the default them only for `GET` or the value will never change.
-        form.w3_theme.process_data(customer.w3_theme or me.w3_theme)
+    # if request.method == 'GET':
+    #     # Set the default them only for `GET` or the value will never change.
+    #     form.w3_theme.process_data(customer.w3_theme or me.w3_theme)
 
     if form.validate_on_submit():
         form['state'].data = form['state'].data.upper()
