@@ -33,9 +33,10 @@
                     <strong>Invoice Number:</strong><br><h1>{{invoice.number}}</h1>
             </div>
 
+            
             <div class="w3-cell w3-cell-top w3-right-align">
-                Submitted Date: {{invoice.submitted_date|upper}}<br>
-                Due Date: {{due|upper}}<br>
+                Submitted Date: {% if invoice.submitted_date %}{{invoice.submitted_date|upper}}{% else %}&nbsp;{% endif %}<br>
+                Due Date: {% if due %}{{due|upper}}{% else %}&nbsp;{% endif %}<br>
                 {% if invoice.paid_date and overdue -%}
                 <span style="color: orange;">Paid Date: {{invoice.paid_date|upper}}</span>
                 {% elif invoice.paid_date %}
@@ -43,6 +44,10 @@
                 {% elif overdue -%}
                 <h3 style="color: red;">OVERDUE</h3>
                 {%endif%}
+
+                <div>
+                    <br>Invoice Total:<br><span class="w3-xxxlarge w3-text-green">{{invoice.total|currency}}</span>
+                </div>
             </div>
         </div>
 
