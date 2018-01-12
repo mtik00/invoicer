@@ -16,7 +16,10 @@
     <div class="w3-container w3-padding w3-margin-right">
         <div class="w3-cell-row w3-padding w3-theme-d1">
             <div class="w3-cell w3-padding-left">&nbsp;</div>
-            <div class="w3-cell w3-cell-middle"><h2 class="w3-text-white">INVOICE</h2></div>
+            <div class="w3-cell w3-cell-middle">
+                <span class="w3-xxxlarge w3-text-white">INVOICE</span>
+                {% if invoice.description %}<br><span class="w3-large">{{invoice.description}}</span>{% endif %}
+            </div>
             <div class="w3-cell w3-padding w3-right">&nbsp;</div>
             <div class="w3-cell w3-text-white w3-right w3-right-align">
                 {{submit_address|safe}}
