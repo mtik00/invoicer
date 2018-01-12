@@ -13,39 +13,40 @@
 </head>
 
 <body>
-    <div class="w3-container">
-        <div class="w3-row w3-padding">
-            <h2 class="text-left">Invoice {{invoice_number}}<br>{{invoice_description}}</h2>
+    <div class="w3-container w3-padding w3-margin-right">
+        <div class="w3-cell-row w3-padding w3-theme-d1">
+            <div class="w3-cell w3-padding-left">&nbsp;</div>
+            <div class="w3-cell w3-cell-middle"><h2 class="w3-text-white">INVOICE</h2></div>
+            <div class="w3-cell w3-padding w3-right">&nbsp;</div>
+            <div class="w3-cell w3-text-white w3-right w3-right-align">
+                {{submit_address|safe}}
+            </div>
         </div>
 
-        <div class="w3-row w3-padding-large">
-            <div class="w3-col w3-half w3-right right-text">
-                Submitted: {{submitted|upper}}<br>
-                Due: {{due|upper}}<br>
-                {% if paid -%}
-                <span style="color: green;">PAID: {{paid|upper}}</span>
-                {% else -%}
-                <span style="color: red;">NOT PAID</span>
+        <div class="w3-padding-16 w3-cell-row">
+            <div class="w3-cell w3-left">
+                    <strong>BILL TO:</strong><br>
+                    {{customer_address|safe}}
+            </div>
+            <div class="w3-cell w3-cell-top">
+                    <strong>Invoice Number:</strong><br>
+                    {{invoice_number}}
+            </div>
+
+            <div class="w3-cell w3-cell-top w3-right-align">
+                Submitted Date: {{submitted|upper}}<br>
+                Due Date: {{due|upper}}<br>
+                {% if paid and overdue -%}
+                <span style="color: orange;">Paid Date: {{paid|upper}}</span>
+                {% elif paid %}
+                <span style="color: green;">Paid Date: {{paid|upper}}</span>
+                {% elif overdue -%}
+                <h3 style="color: red;">OVERDUE</h3>
                 {%endif%}
             </div>
         </div>
 
-        <div class="w3-row w3-padding-24">
-            &nbsp;
-        </div>
-
-        <div class="w3-row w3-padding">
-            <div class="w3-col s4 w3-left">
-                    <strong>BILL TO:</strong><br>
-                    {{customer_address|safe}}
-            </div>
-            <div class="w3-col s4 w3-right right-text">
-                    <strong>SUBMIT TO:</strong><br>
-                    {{submit_address|safe}}
-            </div>
-        </div>
-
-        <div class="w3-row w3-padding">
+        <div class="w3-row w3-padding-16">
             <div class="w3-col">
             <table class="w3-table w3-striped w3-bordered">
                 <tr class="w3-theme">
@@ -69,10 +70,8 @@
                 <tr class="total">
                         <td></td>
                         <td></td>
-                        <td></td>
-                        <td>
-                           Total: {{total | currency}}
-                        </td>
+                        <td class="w3-right-align">Total:</td>
+                        <td>{{total | currency}}</td>
                     </tr>
             </table>
             </div>

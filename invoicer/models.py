@@ -1,5 +1,6 @@
 import re
 
+import arrow
 from sqlalchemy.orm import relationship, validates
 from .database import db
 
@@ -94,6 +95,37 @@ class Invoice(db.Model):
 
     def __repr__(self):
         return '<Invoice %r>' % (self.number)
+
+    def overdue(self, terms_days):
+        """
+        Returns True if this invoice is overdue:
+            submitted and not paid by the due date
+            paid after the due date
+        """
+        if not self.submitted_date:
+            return False
+
+        due = self.due(terms_days, as_string=False)
+
+        if due and (arrow.now() > due):
+            return True
+
+        if due and self.paid_date:
+            paid_date = arrow.get(self.paid_date, 'DD-MMM-YYYY')
+            return paid_date > due
+
+        return False
+
+    def due(self, terms_days, as_string=True):
+        if not self.submitted_date:
+            return None
+
+        due_date = arrow.get(self.submitted_date, 'DD-MMM-YYYY').replace(days=+terms_days)
+
+        if as_string:
+            due_date = due_date.format('DD-MMM-YYYY')
+
+        return due_date
 
 
 class UnitPrice(db.Model):

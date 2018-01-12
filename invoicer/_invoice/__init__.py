@@ -53,12 +53,16 @@ def format_address(customer_id):
 def format_my_address():
     address = Address.query.first()
 
-    return '<br>'.join([
+    result = '<br>'.join([
         address.full_name,
         address.street,
-        '%s %s, %s' % (address.city, address.state, address.zip),
-        address.email
-    ])
+        '%s %s, %s' % (address.city, address.state, address.zip)]).upper()
+
+    if address.email:
+        # Prevent gmail from making this a link
+        result = result + '<br>' + "<a rel='nofollow' style='text-decoration:none; color:#fff' href='#'>" + address.email + "</a>"
+
+    return result
 
 
 def get_terms(customer_id):
@@ -285,10 +289,16 @@ def get_address_emails(customer_id):
 @invoice_page.route('/<invoice_id>/submit')
 @login_required
 def submit_invoice(invoice_id):
+
     invoice = Invoice.query.get(invoice_id)
-    invoice.submitted_date = arrow.now().format('DD-MMM-YYYY').upper()
-    db.session.add(invoice)
-    db.session.commit()
+
+    # Only update the submitted date if the invoice didn't have one in the
+    # first place.  We want the user to be able to re-submit invoices to remind
+    # customers of overdue conditions.
+    if not invoice.submitted_date:
+        invoice.submitted_date = arrow.now().format('DD-MMM-YYYY').upper()
+        db.session.add(invoice)
+        db.session.commit()
 
     text = raw_invoice(invoice_id)
     fname = "invoice-%03d.pdf" % int(invoice_id)
@@ -390,25 +400,17 @@ def raw_invoice(invoice_id):
     submit_address = format_my_address()
     terms_description, terms_days = get_terms(invoice.customer_id)
 
-    if invoice.submitted_date:
-        submitted = arrow.get(invoice.submitted_date, 'DD-MMM-YYYY')
-        due = submitted.replace(days=+terms_days).format('DD-MMM-YYYY')
-        submitted = submitted.format('DD-MMM-YYYY')
-    else:
-        submitted = None
-        due = None
-
     return render_template(
         'invoice/w3-invoice.html',
         invoice_number=invoice.number,
         invoice_description=invoice.description,
         items=invoice.items,
         total=invoice.total,
-        submitted=submitted,
-        due=due,
+        submitted=invoice.submitted_date,
+        due=invoice.due(terms_days),
         customer_address=customer_address,
         submit_address=submit_address,
         terms=terms_description,
         paid=invoice.paid_date,
-        theme="deep-orange"
+        overdue=invoice.overdue(terms_days)
     )
