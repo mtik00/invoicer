@@ -10,7 +10,8 @@
             {% if customer.addrline2 %}<li>{{customer.addrline2}}</li>{% endif %}
             <li>{{customer.city}}, {{customer.state|upper}} {{customer.zip}}</li>
             {% if customer.email %}<li>{{customer.email}}</li>{% endif %}
-            {% if customer.terms %}<li>{{customer.terms}}</li>{% endif %}
+            {% if customer.terms %}<li>Terms: NET {{customer.terms}} days</li>{% endif %}
+            {% if customer.w3_theme %}<li>Default invoice theme: {{customer.w3_theme}}</li>{% endif %}
         </ul>
     </li>
   {% endfor %}

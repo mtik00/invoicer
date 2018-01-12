@@ -1,6 +1,6 @@
 {% macro render_field(field) %}
-  {{ field.label(class_="w3-text-blue") }}
-  {{ field(class_="w3-input w3-border", **kwargs)|safe }}
+<p>
+<div class="w3-border w3-padding">
   {% if field.errors %}
     <ul class="w3-red">
     {% for error in field.errors %}
@@ -8,4 +8,8 @@
     {% endfor %}
     </ul>
   {% endif %}
+  {{ field.label(class_="w3-text-blue") }}
+  {{ field(class_="w3-input w3-border", **kwargs)|safe }}
+</div>
+</p>
 {% endmacro %}

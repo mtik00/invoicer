@@ -30,8 +30,6 @@ def get_customer(customer_id):
 @login_required
 def update(customer_id):
     customer = Customer.query.get(customer_id)
-    me = Address.query.get(1)
-
     form = CustomerForm(request.form, obj=customer)
 
     theme_choices = [(x, x) for x in color_themes]
@@ -67,6 +65,8 @@ def update(customer_id):
 @login_required
 def create():
     form = CustomerForm(request.form, number=get_next_customer_number())
+    form.w3_theme.choices = [(x, x) for x in color_themes]
+
     if form.validate_on_submit():
         customer = Customer()
         form.populate_obj(customer)
