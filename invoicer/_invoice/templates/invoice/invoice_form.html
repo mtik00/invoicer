@@ -30,10 +30,16 @@ $( function() {
 {% endif%}
     {{ form.hidden_tag() }}
     {{ render_field(form.description, size=60) }}
+    {% if invoice and invoice.submitted_date %}
+    <label class="w3-text-blue" for="customer">Bill To Address <b>NOTE: You cannot change the customer once the invoice has been submitted</b></label>
+    <input class="w3-input w3-border" value="{{invoice.customer.name1}}" disabled>
+    <input type="hidden" value="{{invoice.customer.id}}" name="customer"/>
+    {% else %}
     {{ render_field(form.customer) }}
+    {% endif %}
     {% if invoice and invoice.submitted_date %}
     <label class="w3-text-blue" for="terms">Terms (number of days) <b>NOTE: You cannot change the terms once the invoice has been submitted</b></label>
-    <input class="w3-input w3-border" id="terms" name="terms" type="text" value="30" disabled>
+    <input class="w3-input w3-border" id="terms" name="terms" type="text" value="{{terms}}" disabled>
     {% else %}{{ render_field(form.terms) }}{% endif %}
     {{ render_field(form.submitted_date) }}
     {{ render_field(form.paid_date) }}

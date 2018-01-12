@@ -141,6 +141,7 @@ def update(invoice_id):
 
     theme_choices = [(x, x) for x in color_themes]
 
+    print terms
     form = InvoiceForm(
         description=invoice.description,
         submitted_date=invoice.submitted_date,
@@ -162,7 +163,7 @@ def update(invoice_id):
             'customer_id': customer_id,
             'submitted_date': request.form['submitted_date'].upper(),
             'paid_date': request.form['paid_date'].upper(),
-            'terms': request.form['terms'] if 'terms' in request.form else terms,
+            'terms': form.terms.data,
             'w3_theme': request.form['w3_theme'],
         })
 
@@ -171,7 +172,7 @@ def update(invoice_id):
         flash('invoice updated', 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/invoice_form.html', form=form, invoice=invoice)
+    return render_template('invoice/invoice_form.html', form=form, invoice=invoice, terms=terms)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
