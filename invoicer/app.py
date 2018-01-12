@@ -66,8 +66,11 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
-        profile = Address.query.first()
-        if profile:
-            app.config['W3_THEME'] = profile.w3_theme or app.config['W3_THEME']
+        try:
+            profile = Address.query.first()
+            if profile:
+                app.config['W3_THEME'] = profile.w3_theme or app.config['W3_THEME']
+        except Exception:
+            app.config['W3_THEME'] = 'dark-grey'
 
     return app
