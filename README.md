@@ -64,3 +64,11 @@ two categories:
 *   Invoice themes:  
     order of precedence: invoice theme, customer theme, invoice theme in profile,
     the site theme in the user profile, and finally `app.config['W3_THEME']`.
+
+# Customer Emails
+You have a case (like I do) where an invoice should be sent to multiple people.
+Invoicer handles this by allowing you to use `|` in between multiple names at
+a server.  For example, `mary|tim@example.com` would be expanded to
+the following list of email addresses:  
+    `['mary@example.com', 'tim@example.com']`
+Each of these addresses will be put on the `to` line of the email.
