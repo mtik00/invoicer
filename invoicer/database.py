@@ -118,6 +118,121 @@ def init_db(sample_data=False):
                 description='Website maintenance', unit_price=50, units='hr',
                 quantity=8, invoice=invoice3, customer=customer1
             ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
+            models.Item(
+                date='06-MAR-2018',
+                description='Website maintenance', unit_price=50, units='hr',
+                quantity=8, invoice=invoice3, customer=customer1
+            ),
         ])
 
         customer2 = models.Customer(
