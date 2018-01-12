@@ -82,6 +82,8 @@ def delete_items(invoice_number):
             db.session.delete(item)
 
         db.session.commit()
+
+        flash('Item(s) deleted from %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
     return render_template('invoice/delete_items_form.html', form=form, items=items, invoice=invoice)
