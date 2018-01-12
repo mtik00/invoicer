@@ -392,7 +392,12 @@ def next_invoice_number(customer_id):
 @invoice_page.route('/')
 @login_required
 def last_invoice():
-    return redirect(url_for('invoice_page.invoice_by_number', invoice_number=last_invoice_number()))
+    last_number = last_invoice_number()
+
+    if not last_number:
+        return redirect(url_for('invoice_page.create'))
+
+    return redirect(url_for('invoice_page.invoice_by_number', invoice_number=last_number))
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/raw')

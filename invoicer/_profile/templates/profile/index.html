@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+{% if profile %}
 <dl>
     <dd>{{profile.full_name}}</dd>
     <dd>{{profile.street}}</dd>
@@ -11,7 +12,11 @@
     <dd>Site Theme: {{profile.w3_theme}}</dd>
     <dd>Default Invoice Theme: {{profile.w3_theme_invoice or 'None'}}</dd>
 </dl>
-
 <a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-theme-action">Edit</a>
+{% else %}
+No profile yet<br>
+<a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-theme-action">Create</a>
+{% endif %}
+
 
 {% endblock %}

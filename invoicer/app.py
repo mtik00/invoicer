@@ -41,7 +41,7 @@ def create_app():
 
         # https://www.w3schools.com/w3css/w3css_color_themes.asp
         # Replace this with the short name (e.g. w3-theme-cyan --> 'cyan')
-        W3_THEME='cyan',
+        W3_THEME='blue-grey',
 
         EMAIL_USERNAME=None,
         EMAIL_PASSWORD=None,

@@ -13,8 +13,8 @@ class Address(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.Integer(), default=30)
-    w3_theme = db.Column(db.String(120), default='cyan')
-    w3_theme_invoice = db.Column(db.String(120), default='cyan')
+    w3_theme = db.Column(db.String(120), default='blue-grey')
+    w3_theme_invoice = db.Column(db.String(120), default='dark-grey')
 
     def __repr__(self):
         return '<Address %r>' % (self.full_name)

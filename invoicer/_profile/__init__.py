@@ -26,17 +26,21 @@ def edit():
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
-        form.w3_theme.process_data(profile.w3_theme)
-        form.w3_theme_invoice.process_data(profile.w3_theme_invoice)
+        form.w3_theme.process_data(profile.w3_theme if profile else 'blue-grey')
+        form.w3_theme_invoice.process_data(profile.w3_theme_invoice if profile else 'dark-grey')
 
     if form.validate_on_submit():
+        if not profile:
+            profile = Address()
+
         form['state'].data = form['state'].data.upper()
         form.populate_obj(profile)
 
         db.session.add(profile)
         db.session.commit()
 
-        current_app.config['W3_THEME'] = profile.w3_theme
+        if profile.w3_theme:
+            current_app.config['W3_THEME'] = profile.w3_theme
 
         flash('profile updated', 'success')
         return redirect(url_for('profile_page.index'))
