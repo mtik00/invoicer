@@ -304,7 +304,7 @@ def submit_invoice(invoice_number):
         db.session.commit()
 
     text = raw_invoice(invoice_number)
-    fname = "invoice-%s.pdf" % int(invoice_number)
+    fname = "invoice-%s.pdf" % invoice_number
     fpath = os.path.join(current_app.instance_path, fname)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
