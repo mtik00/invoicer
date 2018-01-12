@@ -83,6 +83,13 @@ def delete_items(invoice_number):
 
         db.session.commit()
 
+        # Recalculate the invoice total
+        items = Item.query.filter(Item.invoice_id == invoice.id).all()
+        item_total = sum([x.quantity * x.unit_price for x in items])
+        Invoice.query.filter(Invoice.id == invoice.id).update({'total': item_total})
+
+        db.session.commit()
+
         flash('Item(s) deleted from %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
