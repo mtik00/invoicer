@@ -3,8 +3,8 @@ from sqlalchemy.orm import relationship
 from .database import db
 
 
-class Address(db.Model):
-    __tablename__ = 'addresses'
+class Profile(db.Model):
+    __tablename__ = 'profiles'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(50), unique=True)
     street = db.Column(db.String(50))
@@ -17,7 +17,7 @@ class Address(db.Model):
     w3_theme_invoice = db.Column(db.String(120), default='dark-grey')
 
     def __repr__(self):
-        return '<Address %r>' % (self.full_name)
+        return '<Profile %r>' % (self.full_name)
 
 
 class Customer(db.Model):
@@ -120,7 +120,7 @@ class Invoice(db.Model):
         if customer.w3_theme:
             return customer.w3_theme
 
-        user = Address.query.get(1)
+        user = Profile.query.get(1)
         if user.w3_theme_invoice:
             return user.w3_theme_invoice
 

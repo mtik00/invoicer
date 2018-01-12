@@ -12,7 +12,7 @@ def init_db(sample_data=False):
     db.create_all()
 
     if sample_data:
-        addr = models.Address(
+        addr = models.Profile(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45

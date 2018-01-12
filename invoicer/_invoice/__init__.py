@@ -13,7 +13,7 @@ from premailer import Premailer
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
-from ..models import Item, Invoice, Customer, UnitPrice, Address
+from ..models import Item, Invoice, Customer, UnitPrice, Profile
 from ..common import login_required, color_themes
 
 from .forms import InvoiceForm, ItemForm
@@ -51,7 +51,7 @@ def format_address(customer_id):
 
 
 def format_my_address():
-    address = Address.query.first()
+    address = Profile.query.first()
 
     result = '<br>'.join([
         address.full_name,
@@ -140,7 +140,7 @@ def create_item(invoice_number):
 @login_required
 def update(invoice_number):
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
-    me = Address.query.get(1)
+    me = Profile.query.get(1)
 
     terms = invoice.terms or invoice.customer.terms or me.terms
     customers = Customer.query.all()
@@ -226,7 +226,7 @@ def create():
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
     form.w3_theme.choices = [(x, x) for x in color_themes]
-    me = Address.query.get(1)
+    me = Profile.query.get(1)
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
@@ -329,7 +329,7 @@ def submit_invoice(invoice_number):
         sender='invoicer@host.com',
         to=email_to,
         cc=[current_app.config['EMAIL_USERNAME']],
-        subject='Invoice %s from %s' % (invoice.number, Address.query.get(1).full_name),
+        subject='Invoice %s from %s' % (invoice.number, Profile.query.get(1).full_name),
         body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
         server=current_app.config['EMAIL_SERVER'],
         body_type="html",
@@ -411,7 +411,7 @@ def raw_invoice(invoice_number):
     customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
 
-    terms = invoice.terms or customer.terms or Address.query.get(1).terms
+    terms = invoice.terms or customer.terms or Profile.query.get(1).terms
 
     return render_template(
         'invoice/w3-invoice.html',

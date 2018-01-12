@@ -6,7 +6,7 @@ from werkzeug.routing import BaseConverter
 
 from .database import db
 
-from .models import Address
+from .models import Profile
 from ._profile import profile_page
 from ._units import unit_page
 from ._customers import customers_page
@@ -67,7 +67,7 @@ def create_app():
 
     with app.app_context():
         try:
-            profile = Address.query.first()
+            profile = Profile.query.first()
             if profile:
                 app.config['W3_THEME'] = profile.w3_theme or app.config['W3_THEME']
         except Exception:

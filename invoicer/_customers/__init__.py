@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from ..common import login_required, color_themes
-from ..models import Customer, Invoice, Address
+from ..models import Customer, Invoice, Profile
 from ..database import db
 from .forms import CustomerForm
 
