@@ -55,3 +55,12 @@ email addresses are ignored.
 
 Be sure to check the `Submit` modal dialog for confirmation on where the email
 will be sent!
+
+# Theme support
+HTML rendering uses [w3.css](https://www.w3schools.com/w3css/default.asp).  We
+also have built-in support for [w3.css themes](https://www.w3schools.com/w3css/w3css_color_themes.asp).  Theming is split into
+two categories:
+*   Site theme: Controlled by the user profile
+*   Invoice themes:  
+    order of precedence: invoice theme, customer theme, invoice theme in profile,
+    the site theme in the user profile, and finally `app.config['W3_THEME']`.
