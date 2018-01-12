@@ -131,7 +131,6 @@ def create_item(invoice_number):
 @login_required
 def update(invoice_number):
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
-    customer = Customer.query.get(invoice.customer_id)
     me = Address.query.get(1)
 
     terms = invoice.terms or invoice.customer.terms or me.terms
