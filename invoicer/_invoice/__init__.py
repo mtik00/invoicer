@@ -65,30 +65,32 @@ def format_my_address():
     return result
 
 
-@invoice_page.route('/<invoice_id>/items/delete', methods=["GET", "POST"])
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/delete', methods=["GET", "POST"])
 @login_required
-def delete_items(invoice_id):
+def delete_items(invoice_number):
     form = EmptyForm()
-    items = Item.query.filter(Item.invoice_id == invoice_id)
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    items = Item.query.filter(Item.invoice_id == invoice.id)
 
     if form.validate_on_submit():
         item_ids_to_delete = [y for x, y in request.form.items() if x.startswith('item_')]
         items = Item.query.filter(Item.id.in_(item_ids_to_delete)).all()
         if not items:
-            return redirect(url_for('invoice_page.invoice_by_number', invoice_number=Invoice.query.get(invoice_id).number))
+            return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
         for item in items:
             db.session.delete(item)
 
         db.session.commit()
-        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=Invoice.query.get(invoice_id).number))
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/delete_items_form.html', form=form, items=items, invoice_id=invoice_id)
+    return render_template('invoice/delete_items_form.html', form=form, items=items, invoice=invoice)
 
 
-@invoice_page.route('/<int:invoice_id>/items/new', methods=["GET", "POST"])
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/create', methods=["GET", "POST"])
 @login_required
-def new_item(invoice_id):
+def create_item(invoice_number):
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
     form = ItemForm(quantity=1)
     unit_prices = UnitPrice.query.all()
 
@@ -97,13 +99,12 @@ def new_item(invoice_id):
         for x in unit_prices
     ]
     form.unit_price.choices = unit_price_choices
-    invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
 
     if form.validate_on_submit():
         unit_price = UnitPrice.query.filter(UnitPrice.id == request.form['unit_price']).first()
 
         db.session.add(Item(
-            invoice_id=invoice_id,
+            invoice_id=invoice.id,
             date=request.form['date'].upper(),
             description=request.form['description'],
             unit_price=unit_price.unit_price,
@@ -114,22 +115,22 @@ def new_item(invoice_id):
 
         db.session.commit()
 
-        items = Item.query.filter(Item.invoice_id == invoice_id).all()
+        items = Item.query.filter(Item.invoice_id == invoice.id).all()
         item_total = sum([x.quantity * x.unit_price for x in items])
-        Invoice.query.filter(Invoice.id == invoice_id).update({'total': item_total})
+        Invoice.query.filter(Invoice.id == invoice.id).update({'total': item_total})
 
         db.session.commit()
 
-        flash('item added to invoice %d' % invoice_id, 'success')
+        flash('item added to invoice %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/item_form.html', form=form, invoice_id=invoice_id)
+    return render_template('invoice/item_form.html', form=form, invoice=invoice)
 
 
-@invoice_page.route('/<invoice_id>/update', methods=["GET", "POST"])
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/update', methods=["GET", "POST"])
 @login_required
-def update(invoice_id):
-    invoice = Invoice.query.get(invoice_id)
+def update(invoice_number):
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
     customer = Customer.query.get(invoice.customer_id)
     me = Address.query.get(1)
 
@@ -137,11 +138,8 @@ def update(invoice_id):
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
 
-    invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
-
     theme_choices = [(x, x) for x in color_themes]
 
-    print terms
     form = InvoiceForm(
         description=invoice.description,
         submitted_date=invoice.submitted_date,
@@ -158,7 +156,7 @@ def update(invoice_id):
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
-        Invoice.query.filter(Invoice.id == invoice_id).update({
+        Invoice.query.filter(Invoice.number == invoice_number).update({
             'description': request.form['description'],
             'customer_id': customer_id,
             'submitted_date': request.form['submitted_date'].upper(),
@@ -203,7 +201,7 @@ def invoice_by_number(invoice_number):
 
     return render_template(
         'invoice/invoices.html',
-        invoice_id=invoice.id,
+        invoice=invoice,
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice,
@@ -225,7 +223,7 @@ def create():
         customer_id = int(request.form['customer'])
         number = next_invoice_number(customer_id)
         customer = Customer.query.get(customer_id)
-        import pdb; pdb.set_trace()
+
         db.session.add(
             Invoice(
                 description=request.form['description'],
@@ -244,10 +242,10 @@ def create():
     return render_template('invoice/invoice_form.html', form=form)
 
 
-@invoice_page.route('/<int:invoice_id>/delete')
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete')
 @login_required
-def delete_invoice(invoice_id):
-    invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
+def delete(invoice_number):
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first()
     items = Item.query.filter(Item.invoice == invoice).all()
 
     db.session.delete(invoice)
@@ -256,14 +254,14 @@ def delete_invoice(invoice_id):
         db.session.delete(item)
 
     db.session.commit()
-    flash('Invoice %d has been deleted' % invoice_id, 'warning')
+    flash('Invoice %s has been deleted' % invoice_number, 'warning')
     return redirect(url_for('invoice_page.last_invoice'))
 
 
-@invoice_page.route('/<int:invoice_id>/pdf')
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/pdf')
 @login_required
-def to_pdf(invoice_id):
-    text = raw_invoice(invoice_id)
+def to_pdf(invoice_number):
+    text = raw_invoice(invoice_number)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
         'print-media-type': None,
@@ -291,11 +289,11 @@ def get_address_emails(customer_id):
     return [email]
 
 
-@invoice_page.route('/<invoice_id>/submit')
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/submit')
 @login_required
-def submit_invoice(invoice_id):
+def submit_invoice(invoice_number):
 
-    invoice = Invoice.query.get(invoice_id)
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
 
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
@@ -305,8 +303,8 @@ def submit_invoice(invoice_id):
         db.session.add(invoice)
         db.session.commit()
 
-    text = raw_invoice(invoice_id)
-    fname = "invoice-%03d.pdf" % int(invoice_id)
+    text = raw_invoice(invoice_number)
+    fname = "invoice-%s.pdf" % int(invoice_number)
     fpath = os.path.join(current_app.instance_path, fname)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
@@ -388,19 +386,13 @@ def last_invoice():
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=last_invoice_number()))
 
 
-@invoice_page.route('/raw/<invoice_id>')
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/raw')
 @login_required
-def raw_invoice(invoice_id):
+def raw_invoice(invoice_number):
     """
     Displays a single invoice
     """
-    if not isinstance(invoice_id, basestring):
-        invoice_id = str(invoice_id)
-
-    invoice = Invoice.query.get(invoice_id)
-    if not invoice:
-        return render_template('w3-invoice.html')
-
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
     customer = Customer.query.get(invoice.customer_id)
     customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
@@ -409,16 +401,11 @@ def raw_invoice(invoice_id):
 
     return render_template(
         'invoice/w3-invoice.html',
-        invoice_number=invoice.number,
-        invoice_description=invoice.description,
-        items=invoice.items,
-        total=invoice.total,
-        submitted=invoice.submitted_date,
+        invoice=invoice,
         due=invoice.due(),
         customer_address=customer_address,
         submit_address=submit_address,
         terms=terms,
-        paid=invoice.paid_date,
         overdue=invoice.overdue(),
         w3_theme=invoice.w3_theme or customer.w3_theme or current_app.config['W3_THEME']
     )

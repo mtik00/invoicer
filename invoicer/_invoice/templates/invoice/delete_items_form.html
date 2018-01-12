@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<form class="w3-container w3-col m5" action="{{url_for('invoice_page.delete_items', invoice_id=invoice_id)}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('invoice_page.delete_items', invoice_number=invoice.number)}}" method="POST">
   <dl>
     {{ form.hidden_tag() }}
     {% for item in items -%}
     <dd><input type="checkbox" name="item_{{item.id}}" value="{{item.id}}">{{item.date}}: {{item.description}} ({{item.quantity}} x {{item.unit_price|currency}})</dd>
     {% endfor %}
   </dl>
-  <input type="hidden" value="{{invoice_id}}" name='invoice_id'>
+  <input type="hidden" value="{{invoice_id}}" name='invoice.id'>
   <p><input type=submit value="Submit" class="w3-btn w3-theme-action"></p>
 </form>
 {% endblock %}

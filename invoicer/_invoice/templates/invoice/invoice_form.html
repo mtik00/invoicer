@@ -24,7 +24,7 @@ $( function() {
 {% endfor %}
 {% endif %}
 {% if invoice %}
-<form class="w3-container w3-col m5" action="{{url_for('invoice_page.update', invoice_id=invoice.id)}}" method="POST">
+<form class="w3-container w3-col m5" action="{{url_for('invoice_page.update', invoice_number=invoice.number)}}" method="POST">
 {% else %}
 <form class="w3-container w3-col m5" action="{{url_for('invoice_page.create')}}" method="POST">
 {% endif%}

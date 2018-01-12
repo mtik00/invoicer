@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice {{invoice_number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
+    <title>Invoice {{invoice.number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-{{w3_theme}}.css">
@@ -30,16 +30,16 @@
                     {{customer_address|safe}}
             </div>
             <div class="w3-cell w3-cell-top">
-                    <strong>Invoice Number:</strong><br><h1>{{invoice_number}}</h1>
+                    <strong>Invoice Number:</strong><br><h1>{{invoice.number}}</h1>
             </div>
 
             <div class="w3-cell w3-cell-top w3-right-align">
-                Submitted Date: {{submitted|upper}}<br>
+                Submitted Date: {{invoice.submitted_date|upper}}<br>
                 Due Date: {{due|upper}}<br>
-                {% if paid and overdue -%}
-                <span style="color: orange;">Paid Date: {{paid|upper}}</span>
-                {% elif paid %}
-                <span style="color: green;">Paid Date: {{paid|upper}}</span>
+                {% if invoice.paid_date and overdue -%}
+                <span style="color: orange;">Paid Date: {{invoice.paid_date|upper}}</span>
+                {% elif invoice.paid_date %}
+                <span style="color: green;">Paid Date: {{invoice.paid_date|upper}}</span>
                 {% elif overdue -%}
                 <h3 style="color: red;">OVERDUE</h3>
                 {%endif%}
@@ -56,7 +56,7 @@
                     <th style="text-align:center !important;">Quantity</th>
                     <th>Total</th>
                 </tr>
-                {% for item in items -%}
+                {% for item in invoice.items -%}
                 <tr>
                     {% if item.date -%}
                     <td>{{item.date}}: {{item.description}}</td>
@@ -72,7 +72,7 @@
                         <td></td>
                         <td></td>
                         <td class="w3-right-align">Total:</td>
-                        <td>{{total | currency}}</td>
+                        <td>{{invoice.total | currency}}</td>
                     </tr>
             </table>
             </div>
