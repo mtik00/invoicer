@@ -225,6 +225,7 @@ def create():
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
+    form.w3_theme.choices = [(x, x) for x in color_themes]
     me = Address.query.get(1)
 
     if form.validate_on_submit():
