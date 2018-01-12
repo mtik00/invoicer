@@ -65,23 +65,6 @@ def format_my_address():
     return result
 
 
-def get_terms(customer_id):
-    terms_description = 'NET 30 days'
-    terms_days = 30
-
-    customer_terms = Customer.query.filter(Customer.id == customer_id).first().terms
-    if customer_terms:
-        terms_description = customer_terms
-    else:
-        terms_description = Address.query.get(1).terms or terms_description
-
-    match = re.search('(\d+).*?days', terms_description, re.IGNORECASE)
-    if match:
-        terms_days = int(match.group(1))
-
-    return (terms_description, terms_days)
-
-
 @invoice_page.route('/<invoice_id>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_id):
@@ -145,7 +128,9 @@ def new_item(invoice_id):
 
 @invoice_page.route('/<invoice_id>/update', methods=["GET", "POST"])
 @login_required
-def update_invoice(invoice_id):
+def update(invoice_id):
+    invoice = Invoice.query.get(invoice_id)
+    terms = invoice.terms or invoice.customer.terms or Address.query.first().terms
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
 
@@ -155,6 +140,7 @@ def update_invoice(invoice_id):
         description=invoice.description,
         submitted_date=invoice.submitted_date,
         paid_date=invoice.paid_date,
+        terms=terms
     )
     form.customer.choices = addr_choices
     form.customer.process_data(invoice.customer_id)
@@ -165,7 +151,8 @@ def update_invoice(invoice_id):
             'description': request.form['description'],
             'customer_id': customer_id,
             'submitted_date': request.form['submitted_date'].upper(),
-            'paid_date': request.form['paid_date'].upper()
+            'paid_date': request.form['paid_date'].upper(),
+            'terms': request.form['terms'] if 'terms' in request.form else terms
         })
 
         db.session.commit()
@@ -173,7 +160,7 @@ def update_invoice(invoice_id):
         flash('invoice updated', 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/invoice_form.html', form=form, invoice_id=invoice_id)
+    return render_template('invoice/invoice_form.html', form=form, invoice=invoice)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
@@ -213,22 +200,28 @@ def invoice_by_number(invoice_number):
     )
 
 
-@invoice_page.route('/new', methods=["GET", "POST"])
+@invoice_page.route('/create', methods=["GET", "POST"])
 @login_required
-def new_invoice():
-    form = InvoiceForm()
+def create():
+    form = InvoiceForm(request.form)
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
+    me = Address.query.get(1)
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
         number = next_invoice_number(customer_id)
+        customer = Customer.query.get(customer_id)
+        import pdb; pdb.set_trace()
         db.session.add(
             Invoice(
                 description=request.form['description'],
                 customer_id=customer_id,
-                number=number
+                number=number,
+                terms=customer.terms or me.terms,
+                submitted_date=form.submitted_date.data,
+                paid_date=form.paid_date.data
             )
         )
         db.session.commit()
@@ -396,9 +389,11 @@ def raw_invoice(invoice_id):
     if not invoice:
         return render_template('w3-invoice.html')
 
+    customer = Customer.query.get(invoice.customer_id)
     customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
-    terms_description, terms_days = get_terms(invoice.customer_id)
+
+    terms = invoice.terms or customer.terms or Address.query.get(1).terms
 
     return render_template(
         'invoice/w3-invoice.html',
@@ -407,10 +402,10 @@ def raw_invoice(invoice_id):
         items=invoice.items,
         total=invoice.total,
         submitted=invoice.submitted_date,
-        due=invoice.due(terms_days),
+        due=invoice.due(),
         customer_address=customer_address,
         submit_address=submit_address,
-        terms=terms_description,
+        terms=terms,
         paid=invoice.paid_date,
-        overdue=invoice.overdue(terms_days)
+        overdue=invoice.overdue()
     )

@@ -15,14 +15,14 @@ def init_db(sample_data=False):
         addr = models.Address(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
-            state='NY', zip='11111', terms='NET 30 days'
+            state='NY', zip='11111', terms=45
         )
         db.session.add_all([addr])
 
         customer1 = models.Customer(
             name1='Some Employer', addrline1='111 9th Ave N', city='New York',
             state='NY', zip='11222', email='boss|mike|larry@example.com',
-            terms='NET 30 days', number='4010')
+            terms=30, number='4010')
 
         invoice1 = models.Invoice(
             customer=customer1,
@@ -30,7 +30,8 @@ def init_db(sample_data=False):
             description='2018 Website Redesign',
             paid_date='07-FEB-2018',
             number='4010-2018-001',
-            total=6400)
+            total=6400,
+            terms=30)
 
         db.session.add_all([
             models.Item(
@@ -61,7 +62,8 @@ def init_db(sample_data=False):
             description='2018 Website Development',
             paid_date=None,
             number='4010-2018-002',
-            total=8000)
+            total=8000,
+            terms=45)
 
         db.session.add_all([
             models.Item(
@@ -92,7 +94,8 @@ def init_db(sample_data=False):
             description='2018 Website Maintenance',
             paid_date=None,
             number='4010-2018-003',
-            total=1600)
+            total=1600,
+            terms=22)
 
         db.session.add_all([
             models.Item(
@@ -127,7 +130,8 @@ def init_db(sample_data=False):
             description='2018 Website Maintenance',
             paid_date=None,
             number='4020-2018-001',
-            total=2400)
+            total=2400,
+            terms=45)
 
         db.session.add_all([
             models.Item(

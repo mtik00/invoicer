@@ -14,21 +14,11 @@ class Address(db.Model):
     state = db.Column(db.String(2))
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
-    terms = db.Column(db.String(120))
-    w3_theme = db.Column(db.String(120))
+    terms = db.Column(db.Integer(), default=30)
+    w3_theme = db.Column(db.String(120), default='cyan')
 
     def __repr__(self):
         return '<Address %r>' % (self.full_name)
-
-    @validates('terms')
-    def validate_terms(self, key, terms):
-        """
-        If terms is defined, it must have '\d+ days' in it.
-        """
-        if terms:
-            assert re.search('\d+ days', terms, re.IGNORECASE)
-
-        return terms
 
 
 class Customer(db.Model):
@@ -42,23 +32,13 @@ class Customer(db.Model):
     state = db.Column(db.String(2))
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
-    terms = db.Column(db.String(120))
+    terms = db.Column(db.Integer)
     number = db.Column(db.Integer, unique=True, nullable=False)
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
 
     def __repr__(self):
         return '<Customer %r>' % (self.name1)
-
-    @validates('terms')
-    def validate_terms(self, key, terms):
-        """
-        If terms is defined, it must have '\d+ days' in it.
-        """
-        if terms:
-            assert re.search('\d+ days', terms, re.IGNORECASE)
-
-        return terms
 
 
 class Item(db.Model):
@@ -89,6 +69,7 @@ class Invoice(db.Model):
     number = db.Column(db.String(50), unique=True, nullable=False)
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
+    terms = db.Column(db.Integer)
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
@@ -96,7 +77,7 @@ class Invoice(db.Model):
     def __repr__(self):
         return '<Invoice %r>' % (self.number)
 
-    def overdue(self, terms_days):
+    def overdue(self):
         """
         Returns True if this invoice is overdue:
             submitted and not paid by the due date
@@ -105,7 +86,7 @@ class Invoice(db.Model):
         if not self.submitted_date:
             return False
 
-        due = self.due(terms_days, as_string=False)
+        due = self.due(as_string=False)
 
         if due and (arrow.now() > due):
             return True
@@ -116,11 +97,11 @@ class Invoice(db.Model):
 
         return False
 
-    def due(self, terms_days, as_string=True):
+    def due(self, as_string=True):
         if not self.submitted_date:
             return None
 
-        due_date = arrow.get(self.submitted_date, 'DD-MMM-YYYY').replace(days=+terms_days)
+        due_date = arrow.get(self.submitted_date, 'DD-MMM-YYYY').replace(days=+self.terms)
 
         if as_string:
             due_date = due_date.format('DD-MMM-YYYY')
