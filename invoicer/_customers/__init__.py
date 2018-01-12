@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from ..common import login_required
-from ..models import Customer, Invoice
+from ..common import login_required, color_themes
+from ..models import Customer, Invoice, Address
 from ..database import db
 from .forms import CustomerForm
 
@@ -30,7 +30,16 @@ def get_customer(customer_id):
 @login_required
 def update(customer_id):
     customer = Customer.query.get(customer_id)
+    me = Address.query.get(1)
+
     form = CustomerForm(request.form, obj=customer)
+
+    theme_choices = [(x, x) for x in color_themes]
+    form.w3_theme.choices = theme_choices
+
+    if request.method == 'GET':
+        # Set the default them only for `GET` or the value will never change.
+        form.w3_theme.process_data(customer.w3_theme or me.w3_theme)
 
     if form.validate_on_submit():
         form['state'].data = form['state'].data.upper()

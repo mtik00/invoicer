@@ -36,6 +36,7 @@ class Customer(db.Model):
     number = db.Column(db.Integer, unique=True, nullable=False)
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
+    w3_theme = db.Column(db.String(120))
 
     def __repr__(self):
         return '<Customer %r>' % (self.name1)
@@ -70,6 +71,7 @@ class Invoice(db.Model):
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
     terms = db.Column(db.Integer)
+    w3_theme = db.Column(db.String(120))
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")

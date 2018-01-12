@@ -37,6 +37,7 @@ $( function() {
     {% else %}{{ render_field(form.terms) }}{% endif %}
     {{ render_field(form.submitted_date) }}
     {{ render_field(form.paid_date) }}
+    {{ render_field(form.w3_theme) }}
   <p>
     {% if invoice -%}
     <input type=submit value="Update" class="w3-btn w3-theme-action">

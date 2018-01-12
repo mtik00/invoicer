@@ -1,17 +1,10 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
-from ..common import login_required
+from ..common import login_required, color_themes
 from ..models import Address
 from ..database import db
 from .forms import ProfileForm
 
 profile_page = Blueprint('profile_page', __name__, template_folder='templates')
-
-
-color_themes = [
-    'red', 'pink', 'purple', 'deep-purple', 'blue', 'light-blue', 'cyan', 'teal',
-    'green', 'light-green', 'lime', 'khaki', 'yellow', 'amber', 'orange',
-    'deep-orange', 'blue-grey', 'brown', 'grey', 'dark-grey', 'black'
-]
 
 
 @profile_page.route('/')

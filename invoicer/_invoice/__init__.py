@@ -14,7 +14,7 @@ from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
 from ..models import Item, Invoice, Customer, UnitPrice, Address
-from ..common import login_required
+from ..common import login_required, color_themes
 
 from .forms import InvoiceForm, ItemForm
 
@@ -130,11 +130,16 @@ def new_item(invoice_id):
 @login_required
 def update(invoice_id):
     invoice = Invoice.query.get(invoice_id)
-    terms = invoice.terms or invoice.customer.terms or Address.query.first().terms
+    customer = Customer.query.get(invoice.customer_id)
+    me = Address.query.get(1)
+
+    terms = invoice.terms or invoice.customer.terms or me.terms
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
 
     invoice = Invoice.query.filter(Invoice.id == invoice_id).first()
+
+    theme_choices = [(x, x) for x in color_themes]
 
     form = InvoiceForm(
         description=invoice.description,
@@ -143,7 +148,12 @@ def update(invoice_id):
         terms=terms
     )
     form.customer.choices = addr_choices
-    form.customer.process_data(invoice.customer_id)
+    form.w3_theme.choices = theme_choices
+
+    if request.method == 'GET':
+        # Set the default them only for `GET` or the value will never change.
+        form.customer.process_data(invoice.customer_id)
+        form.w3_theme.process_data(invoice.w3_theme or customer.w3_theme or me.w3_theme)
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
@@ -152,7 +162,8 @@ def update(invoice_id):
             'customer_id': customer_id,
             'submitted_date': request.form['submitted_date'].upper(),
             'paid_date': request.form['paid_date'].upper(),
-            'terms': request.form['terms'] if 'terms' in request.form else terms
+            'terms': request.form['terms'] if 'terms' in request.form else terms,
+            'w3_theme': request.form['w3_theme'],
         })
 
         db.session.commit()
@@ -407,5 +418,6 @@ def raw_invoice(invoice_id):
         submit_address=submit_address,
         terms=terms,
         paid=invoice.paid_date,
-        overdue=invoice.overdue()
+        overdue=invoice.overdue(),
+        w3_theme=invoice.w3_theme or customer.w3_theme or current_app.config['W3_THEME']
     )
