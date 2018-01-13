@@ -142,7 +142,6 @@ def update(invoice_number):
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
     me = Profile.query.get(1)
 
-    terms = invoice.terms or invoice.customer.terms or me.terms
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
 
@@ -152,7 +151,7 @@ def update(invoice_number):
         description=invoice.description,
         submitted_date=invoice.submitted_date,
         paid_date=invoice.paid_date,
-        terms=terms
+        terms=invoice.terms,
     )
     form.customer.choices = addr_choices
     form.w3_theme.choices = theme_choices
@@ -161,24 +160,26 @@ def update(invoice_number):
         # Set the default them only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
         form.w3_theme.process_data(invoice.w3_theme)
+    elif form.validate_on_submit():
+        if 'cancel' in request.form:
+            flash('invoice updated canceled', 'warning')
+        else:
+            Invoice.query.filter(Invoice.number == invoice_number).update({
+                'description': form.description.data,
+                'customer_id': form.customer.data,
+                'submitted_date': form.submitted_date.data.upper() if form.submitted_date.data else invoice.submitted_date,
+                'paid_date': form.paid_date.data.upper(),
+                'terms': form.terms.data,
+                'w3_theme': form.w3_theme.data,
+            })
 
-    if form.validate_on_submit():
-        customer_id = int(request.form['customer'])
-        Invoice.query.filter(Invoice.number == invoice_number).update({
-            'description': request.form['description'],
-            'customer_id': customer_id,
-            'submitted_date': request.form['submitted_date'].upper(),
-            'paid_date': request.form['paid_date'].upper(),
-            'terms': form.terms.data,
-            'w3_theme': request.form['w3_theme'],
-        })
+            db.session.commit()
 
-        db.session.commit()
+            flash('invoice updated', 'success')
 
-        flash('invoice updated', 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/invoice_form.html', form=form, invoice=invoice, terms=terms)
+    return render_template('invoice/invoice_form.html', form=form, invoice=invoice)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
@@ -300,6 +301,27 @@ def get_address_emails(customer_id):
         return ['%s@%s' % (x, domain) for x in name.split('|')]
 
     return [email]
+
+
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/mark_invoice_submitted')
+@login_required
+def mark_invoice_submitted(invoice_number):
+
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+
+    # Only update the submitted date if the invoice didn't have one in the
+    # first place.  We want the user to be able to re-submit invoices to remind
+    # customers of overdue conditions.
+    if not invoice.submitted_date:
+        invoice.submitted_date = arrow.now().format('DD-MMM-YYYY').upper()
+        db.session.add(invoice)
+        db.session.commit()
+
+        flash('Invoice has been marked as submitted; due on %s' % invoice.due(), 'success')
+    else:
+        flash('Invoice has already been marked as submitted', 'error')
+
+    return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/submit')

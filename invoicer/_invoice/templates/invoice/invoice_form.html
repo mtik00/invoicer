@@ -39,17 +39,24 @@ $( function() {
     {{ render_field(form.description, size=60) }}
     {% if invoice and invoice.submitted_date %}
     <label class="w3-text-blue" for="terms">Terms (number of days) <b>NOTE: You cannot change the terms once the invoice has been submitted</b></label>
-    <input class="w3-input w3-border" id="terms" name="terms" type="text" value="{{terms}}" disabled>
-    {% else %}{{ render_field(form.terms) }}{% endif %}
-    {{ render_field(form.submitted_date) }}
+    <input class="w3-input w3-border" id="terms" name="terms" type="text" value="{{invoice.terms}}" disabled>
+    {% elif invoice %}{{ render_field(form.terms) }}{% endif %}
+
+    {% if invoice and invoice.submitted_date %}
+    <label class="w3-text-blue" for="terms">Submitted Date <b>NOTE: You cannot change the submitted date once the invoice has been submitted</b></label>
+    <input class="w3-input w3-border" id="submitted_date" name="submitted_date" type="text" value="{{invoice.submitted_date}}" disabled>
+    {% else %}{{ render_field(form.submitted_date) }}{% endif %}
+
     {{ render_field(form.paid_date) }}
     {{ render_field(form.w3_theme) }}
   <p>
     {% if invoice -%}
     <input type=submit value="Update" class="w3-btn w3-theme-action">
+    <input type=submit value="Cancel" name="cancel" class="w3-btn w3-theme-action w3-right">
     {% else -%}
     <input type=submit value="Add" class="w3-btn w3-theme-action">
     {% endif %}
+    
   </p>
 </form>
 {% endblock %}

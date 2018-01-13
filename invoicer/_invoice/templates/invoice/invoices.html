@@ -55,15 +55,16 @@
             {% if to_emails -%}
             <p>Really submit the invoice to: {{to_emails}}?</p>
             {% else -%}
-            <p>ERROR: No emails to submit to</p>
+            <p>This customer has no email address(es) associated with it</p>
             {% endif -%}
         </div>
 
         <div class="w3-container w3-light-grey w3-padding">
             {% if to_emails -%}
-            <button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}';">Yes</button>
+            <p><button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}';">Email Invoice</button></p>
             {% endif -%}
-            <button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('submit-modal').style.display='none'">Close</button>
+            <p><button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('invoice_page.mark_invoice_submitted', invoice_number=invoice.number)}}';">Mark as submitted</button></p>
+            <p><button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('submit-modal').style.display='none'">Close</button></p>
         </div>
     </div>
 </div>
