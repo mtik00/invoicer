@@ -26,7 +26,7 @@ def paginate_index(page):
 
     return render_template(
         'index.html',
-        invoices=None
+        invoices=invoices
     )
 
 

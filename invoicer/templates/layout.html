@@ -10,6 +10,8 @@
 {% block extrahead %}{% endblock%}
 </head>
 <body>
+{% if config['DEBUG'] %}<div class="w3-bar w3-red w3-center">DEBUG MODE</div>{% endif %}
+
 <div class="w3-bar w3-theme-dark">
     <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
     <a href="{{url_for('invoice_page.last_invoice')}}" class="w3-bar-item w3-button w3-mobile">Invoices</a>
