@@ -251,9 +251,13 @@ def create():
     return render_template('invoice/invoice_form.html', form=form)
 
 
-@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete')
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete', methods=['POST'])
 @login_required
 def delete(invoice_number):
+    if request.form['validate_delete'].lower() != 'delete':
+        flash('Invalid delete request', 'error')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
+
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first()
     items = Item.query.filter(Item.invoice == invoice).all()
 

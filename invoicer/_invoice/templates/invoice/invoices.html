@@ -77,16 +77,18 @@
             <h2>Delete Invoice</h2>
         </header>
 
-        <div class="w3-container">
-            <p>WARNING: This action cannot be undone</p>
-            <p>Enter DELETE in the input box below to really delete this invoice</p>
-            <input id="validate_delete">
-        </div>
+        <form action="{{url_for('invoice_page.delete', invoice_number=invoice.number)}}" method='POST'>
+            <div class="w3-container">
+                <p>WARNING: This action cannot be undone</p>
+                <p>Enter DELETE in the input box below to really delete this invoice</p>
+                <input id="validate_delete" name='validate_delete'>
+            </div>
 
-        <div class="w3-container w3-light-grey w3-padding">
-            <button disabled class="w3-button w3-left w3-white w3-border" id="delete_invoice_button" onclick="location.href='{{url_for('invoice_page.delete', invoice_number=invoice.number)}}';">Yes</button>
-            <button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('delete-modal').style.display='none'">Close</button>
-        </div>
+            <div class="w3-container w3-light-grey w3-padding">
+                <input class="w3-button w3-left w3-white w3-border" type="submit" value="Submit" id="delete_invoice_button" disabled>
+                <span onclick="document.getElementById('delete-modal').style.display='none'" class="w3-button w3-right w3-white w3-border">Close</span>
+            </div>
+        </form>
     </div>
 </div>
 
