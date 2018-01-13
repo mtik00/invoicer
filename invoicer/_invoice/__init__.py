@@ -303,10 +303,8 @@ def get_address_emails(customer_id):
     return [email]
 
 
-@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/mark_invoice_submitted')
 @login_required
 def mark_invoice_submitted(invoice_number):
-
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
 
     # Only update the submitted date if the invoice didn't have one in the
@@ -324,9 +322,11 @@ def mark_invoice_submitted(invoice_number):
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 
 
-@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/submit')
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/submit', methods=["POST"])
 @login_required
 def submit_invoice(invoice_number):
+    if 'mark' in request.form:
+        return mark_invoice_submitted(invoice_number)
 
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
 

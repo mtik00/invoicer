@@ -53,17 +53,24 @@
 
         <div class="w3-container">
             {% if to_emails -%}
-            <p>Really submit the invoice to: {{to_emails}}?</p>
+            <p>Email submissions will be sent to: {{to_emails}}</p>
             {% else -%}
             <p>This customer has no email address(es) associated with it</p>
             {% endif -%}
         </div>
 
+        <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}" method="POST">
+            <div class="w3-container w3-form">
+                {% if to_emails -%}
+                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border" style="width:25em;" name="email" value="Email Invoice and mark as submitted" /></p>
+                {% else %}
+                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border" style="width:25em;" name="email" value="Email Invoice and mark as submitted" disabled/></p>
+                {% endif %}
+                <p><input type="submit" class="w3-button w3-white w3-border" style="width:25em;" name="mark" value="Mark invoice as submitted (no email)" /></p>
+            </div>
+        </form>
+
         <div class="w3-container w3-light-grey w3-padding">
-            {% if to_emails -%}
-            <p><button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}';">Email Invoice</button></p>
-            {% endif -%}
-            <p><button class="w3-button w3-left w3-white w3-border" onclick="location.href='{{url_for('invoice_page.mark_invoice_submitted', invoice_number=invoice.number)}}';">Mark as submitted</button></p>
             <p><button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('submit-modal').style.display='none'">Close</button></p>
         </div>
     </div>
@@ -93,6 +100,10 @@
     </div>
 </div>
 
+<div id="email-modal" class="w3-modal">
+    <div class="loader w3-display-middle"></div>
+</div>
+
 <div class="fluidMedia">
     <iframe src="{{url_for('invoice_page.raw_invoice', invoice_number=invoice.number)}}" frameborder="0"></iframe>
 </div>
@@ -110,5 +121,22 @@
             document.getElementById('delete_invoice_button').disabled = true;
         };
     }
+
+    // When the user clicks anywhere outside of the modal, close it
+    var submit_modal = document.getElementById('submit-modal');
+    window.onclick = function(event) {
+        if (event.target == submit_modal) {
+            submit_modal.style.display = "none";
+        }
+    }
+    // Get the button that opens the modal
+    var email_btn = document.getElementById("email_btn");
+    var email_modal = document.getElementById('email-modal');
+    // When the user clicks on the button, open the modal 
+    email_btn.onclick = function() {
+        submit_modal.style.display = "none";
+        email_modal.style.display = "block";
+    }
+
 </script>
 {% endblock%}
