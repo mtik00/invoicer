@@ -1,0 +1,15 @@
+{% macro render_pagination(pagination, endpoint) %}
+  <div class="w3-bar">
+  {%- for page in pagination.iter_pages() %}
+    {% if page %}
+      {% if page != pagination.page %}
+        <a href="{{ url_for(endpoint, page=page) }}" class="w3-button">{{ page }}</a>
+      {% else %}
+        <span class="w3-button w3-theme-l2">{{ page }}</span>
+      {% endif %}
+    {% else %}
+      <span class=ellipsis>…</span>
+    {% endif %}
+  {%- endfor %}
+  </div>
+{% endmacro %}

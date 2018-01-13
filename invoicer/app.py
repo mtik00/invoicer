@@ -45,7 +45,9 @@ def create_app():
 
         EMAIL_USERNAME=None,
         EMAIL_PASSWORD=None,
-        EMAIL_SERVER=None
+        EMAIL_SERVER=None,
+
+        INDEX_ITEMS_PER_PAGE=10,
     ))
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']

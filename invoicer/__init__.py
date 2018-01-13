@@ -5,7 +5,7 @@ import zipfile
 
 import click
 import arrow
-from flask import render_template
+from flask import render_template, url_for, redirect
 
 from .app import create_app
 from .submitter import sendmail
@@ -16,12 +16,27 @@ from .common import login_required
 app = create_app()
 
 
+@app.route('/p<int:page>')
+@login_required
+def paginate_index(page):
+    try:
+        invoices = Invoice.query.order_by(Invoice.id.desc()).paginate(page=page, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
+    except Exception:
+        return redirect(url_for('index'))
+
+    return render_template(
+        'index.html',
+        invoices=None
+    )
+
+
 @app.route('/')
 @login_required
 def index():
+    invoices = Invoice.query.order_by(Invoice.id.desc()).paginate(page=1, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
     return render_template(
         'index.html',
-        invoices=Invoice.query.order_by(Invoice.id.desc()).all()
+        invoices=invoices
     )
 
 
