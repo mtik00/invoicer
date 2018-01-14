@@ -352,7 +352,7 @@ def submit_invoice(invoice_number):
 
     email_to = get_address_emails(invoice.customer_id)
     sendmail(
-        sender='invoicer@host.com',
+        sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
         to=email_to,
         cc=[current_app.config['EMAIL_USERNAME']],
         subject='Invoice %s from %s' % (invoice.number, Profile.query.get(1).full_name),
@@ -362,7 +362,7 @@ def submit_invoice(invoice_number):
         attachments=[fpath],
         username=current_app.config['EMAIL_USERNAME'],
         password=current_app.config['EMAIL_PASSWORD'],
-        starttls=True,
+        starttls=current_app.config['EMAIL_STARTTLS'],
         encode_body=True
     )
 

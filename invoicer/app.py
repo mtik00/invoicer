@@ -43,9 +43,11 @@ def create_app():
         # Replace this with the short name (e.g. w3-theme-cyan --> 'cyan')
         W3_THEME='blue-grey',
 
+        EMAIL_FROM=None,
         EMAIL_USERNAME=None,
         EMAIL_PASSWORD=None,
         EMAIL_SERVER=None,
+        EMAIL_STARTTLS=True,
 
         INDEX_ITEMS_PER_PAGE=10,
     ))
