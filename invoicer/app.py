@@ -50,6 +50,9 @@ def create_app():
         EMAIL_STARTTLS=True,
 
         INDEX_ITEMS_PER_PAGE=10,
+
+        STARTING_CUSTOMER_NUMBER=1000,
+        CUSTOMER_INCREMENT=10,
     ))
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']

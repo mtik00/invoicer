@@ -26,14 +26,14 @@ def init_db(sample_data=False):
         customer1 = models.Customer(
             name1='Some Employer', addrline1='111 9th Ave N', city='New York',
             state='NY', zip='11222', email='boss|mike|larry@example.com',
-            terms=30, number='4010')
+            terms=30, number=1010)
 
         invoice1 = models.Invoice(
             customer=customer1,
             submitted_date='20-JAN-2018',
             description='2018 Website Redesign',
             paid_date='07-FEB-2018',
-            number='4010-2018-001',
+            number='1010-2018-001',
             total=6400,
             terms=30)
 
@@ -65,7 +65,7 @@ def init_db(sample_data=False):
             submitted_date='20-FEB-2018',
             description='2018 Website Development',
             paid_date=None,
-            number='4010-2018-002',
+            number='1010-2018-002',
             total=8000,
             terms=45)
 
@@ -97,7 +97,7 @@ def init_db(sample_data=False):
             submitted_date=None,
             description='2018 Website Maintenance',
             paid_date=None,
-            number='4010-2018-003',
+            number='1010-2018-003',
             total=1600,
             terms=22)
 
@@ -241,14 +241,14 @@ def init_db(sample_data=False):
 
         customer2 = models.Customer(
             name1='Employer #2', addrline1='1234 45th St', city='New York',
-            state='NY', zip='11133', email='billing@example.com', number='4020')
+            state='NY', zip='11133', email='billing@example.com', number=1020)
 
         invoice4 = models.Invoice(
             customer=customer2,
             submitted_date=None,
             description='2018 Website Maintenance',
             paid_date=None,
-            number='4020-2018-001',
+            number='1020-2018-001',
             total=2400,
             terms=45)
 

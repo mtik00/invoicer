@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import (
+    Blueprint, render_template, request, flash, redirect, url_for,
+    current_app)
 from ..common import login_required, color_themes
 from ..models import Customer, Invoice, Profile
 from ..database import db
@@ -11,7 +13,10 @@ def customer_has_invoices(customer_id):
     return Invoice.query.filter(Customer.id == 1).count() > 0
 
 
-def get_next_customer_number(starting=4000, increment=10):
+def get_next_customer_number():
+    starting = current_app.config['STARTING_CUSTOMER_NUMBER']
+    increment = current_app.config['CUSTOMER_INCREMENT']
+
     numbers = [round(float(x.number), -1) for x in Customer.query.all()]
 
     customer_number = starting
