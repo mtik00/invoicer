@@ -71,7 +71,7 @@
                     {% else %}
                     <td>{{item.description}}</td>
                     {% endif %}
-                    <td>{{item.unit_price|currency}}/{{item.units}}</td>
+                    <td>{{item.unit_price|currency}}{% if item.units %}/{{item.units}}{% endif %}</td>
                     <td style="text-align:center !important;">{{item.quantity}}</td>
                     <td>{{ (item.unit_price * item.quantity) | currency}}</td>
                 </tr>{% endfor %}
