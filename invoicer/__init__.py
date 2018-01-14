@@ -9,7 +9,7 @@ from flask import render_template, url_for, redirect
 
 from .app import create_app
 from .submitter import sendmail
-from .database import init_db
+from .database import init_db, export as export_db, import_clean_json
 from .models import Invoice, Customer
 from .common import login_required
 
@@ -106,7 +106,7 @@ def initdb_command():
     """Initializes the database."""
     click.echo("WARNING: Continue will delete all data in the databse")
     if not click.confirm('Do you want to continue?'):
-        return
+        raise click.Abort()
 
     if click.confirm('Populate with sample data?'):
         init_db(True)
@@ -143,3 +143,27 @@ def test_email():
         password=app.config['EMAIL_PASSWORD'],
         starttls=True
     )
+
+
+@app.cli.command('export-json')
+@click.argument('path')
+def export_json(path):
+    """
+    Export the database into JSON format.
+    """
+    export_db(path)
+
+
+@app.cli.command('import-json')
+@click.argument('path', type=click.Path(exists=True))
+def import_json(path):
+    """
+    Import the JSON data into the database.
+    """
+    click.echo("WARNING: Continue will delete all data in the databse")
+    if not click.confirm('Do you want to continue?'):
+        raise click.Abort()
+
+    init_db(False)
+    import_clean_json(path)
+    click.echo('JSON data has been imported')

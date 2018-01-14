@@ -68,6 +68,7 @@ def create_app():
         app.before_request(make_session_permanent)
 
     db.init_app(app)
+    app.db = db
 
     with app.app_context():
         try:

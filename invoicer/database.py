@@ -1,3 +1,7 @@
+import json
+import string
+
+from sqlalchemy import select
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -281,3 +285,64 @@ def init_db(sample_data=False):
         ])
 
         db.session.commit()
+
+
+def export(path):
+    """
+    Exports all of the data (no metadata) to a json file.
+    """
+    import models
+    result = {}
+
+    # May need to change this if it starts being wierd.  This is also dependent
+    # on all of the models located in `models`.
+    model_names = [x for x in dir(models) if x[0] in string.uppercase]
+    if not model_names:
+        raise Exception('No model names found in `models`')
+
+    for model in [getattr(models, model_name) for model_name in model_names]:
+        items = model.query.all()
+        result[model.__tablename__] = [{key: getattr(item, key) for key in model.__table__.columns.keys()} for item in items]
+
+    formatted_json = json.dumps(result, sort_keys=True, indent=4, separators=(',', ': '))
+
+    with open(path, 'wb') as fh:
+        fh.write(formatted_json)
+
+
+def import_clean_json(path):
+    """
+    Imports the data in the JSON file.
+
+    NOTE: This is meant to be called with no data in the databse!
+    """
+    import models
+    with open(path) as fh:
+        json_data = json.load(fh)
+
+    profile = json_data['profiles'][0]
+    db.session.add(models.Profile(
+        **profile
+    ))
+
+    customers = json_data['customers']
+    db.session.add_all([
+        models.Customer(**data) for data in customers
+    ])
+
+    invoices = json_data['invoices']
+    db.session.add_all([
+        models.Invoice(**data) for data in invoices
+    ])
+
+    items = json_data['items']
+    db.session.add_all([
+        models.Item(**data) for data in items
+    ])
+
+    unit_prices = json_data['unit_prices']
+    db.session.add_all([
+        models.UnitPrice(**data) for data in unit_prices
+    ])
+
+    db.session.commit()
