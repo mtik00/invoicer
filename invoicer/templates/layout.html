@@ -31,7 +31,7 @@
     <div class="w3-panel w3-display-container pointer {{category}}" onclick="this.style.display='none'">
         <span onclick="this.parentElement.style.display='none'"
         class="w3-button {{category}} w3-large w3-display-topright">&times;</span>
-        <p>{{ message }}</p>
+        <p>{{ message|safe }}</p>
     </div>
   {% endfor %}
   {% block body %}{% endblock %}

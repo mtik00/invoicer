@@ -317,7 +317,7 @@ def mark_invoice_submitted(invoice_number):
 
         flash('Invoice has been marked as submitted; due on %s' % invoice.due(), 'success')
     else:
-        flash('Invoice has already been marked as submitted', 'error')
+        flash('Invoice has already been marked as submitted<br>Download the PDF and email manually if needed', 'error')
 
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 

@@ -32,10 +32,8 @@
 
         <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.to_pdf', invoice_number=invoice.number)}}" formtarget="_blank">Download PDF</button>
 
-        {% if can_submit and ((config['DEBUG'] and invoice_obj.submitted_date) or (not invoice_obj.submitted_date)) -%}
+        {% if can_submit and (invoice_obj.submitted_date or config['DEBUG']) %}
         <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button">Submit Invoice</span>
-        {% else %}
-        <button class="w3-bar-item w3-button" formaction="#" disabled>Submit Invoice</button>
         {% endif -%}
         
         <button class="w3-bar-item w3-button w3-right" formaction="{{url_for('invoice_page.create')}}">Add New Invoice</button>
