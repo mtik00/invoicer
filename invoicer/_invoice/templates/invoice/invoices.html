@@ -133,14 +133,13 @@
             submit_modal.style.display = "none";
         }
     }
-    // Get the button that opens the modal
+
+    // Handle the email submission / loading modal
     var email_btn = document.getElementById("email_btn");
     var email_modal = document.getElementById('email-modal');
-    // When the user clicks on the button, open the modal 
     email_btn.onclick = function() {
         submit_modal.style.display = "none";
         email_modal.style.display = "block";
     }
-
 </script>
 {% endblock%}
