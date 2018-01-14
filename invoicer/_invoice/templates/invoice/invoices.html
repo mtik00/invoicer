@@ -19,9 +19,12 @@
             <button class="w3-button">Modify</button>
             <div class="w3-dropdown-content w3-bar-block w3-card-4">
                 <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.update', invoice_number=invoice.number) }}">Edit</button>
-                {% if (not invoice_obj.submitted_date) or config['DEBUG'] -%}
+                {% if (not invoice_obj.submitted_date) -%}
                 <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}">Add Item</button>
                 <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}">Delete Items</button>
+                {% elif config['DEBUG'] %}
+                <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}">Add Item (only allowed in debug mode)</button>
+                <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}">Delete Items (only allowed in debug mode)</button>
                 {% else -%}
                 <button class="w3-bar-item w3-button" formaction="#" disabled>Add Item</button>
                 <button class="w3-bar-item w3-button" formaction="#" disabled>Delete Items</button>
