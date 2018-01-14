@@ -350,28 +350,32 @@ def submit_invoice(invoice_number):
     }
     pdf_text = pdfkit.from_string(text, None, options=options, configuration=config)
     pdf_fh = StringIO()
+
     pdf_fh.write(pdf_text)
     pdf_fh.seek(0)  # Ensure `sendmail` gets the whole thing
 
-    email_to = get_address_emails(invoice.customer_id)
-    sendmail(
-        sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
-        to=email_to,
-        cc=[current_app.config['EMAIL_USERNAME']],
-        subject='Invoice %s from %s' % (invoice.number, Profile.query.get(1).full_name),
-        body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
-        server=current_app.config['EMAIL_SERVER'],
-        body_type="html",
-        username=current_app.config['EMAIL_USERNAME'],
-        password=current_app.config['EMAIL_PASSWORD'],
-        starttls=current_app.config['EMAIL_STARTTLS'],
-        encode_body=True,
-        stream_attachments=[(fname, pdf_fh)],
-    )
+    try:
+        email_to = get_address_emails(invoice.customer_id)
+        sendmail(
+            sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
+            to=['test@___'], #email_to,
+            cc=[current_app.config['EMAIL_USERNAME']],
+            subject='Invoice %s from %s' % (invoice.number, Profile.query.get(1).full_name),
+            body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
+            server=current_app.config['EMAIL_SERVER'],
+            body_type="html",
+            username=current_app.config['EMAIL_USERNAME'],
+            password=current_app.config['EMAIL_PASSWORD'],
+            starttls=current_app.config['EMAIL_STARTTLS'],
+            encode_body=True,
+            stream_attachments=[(fname, pdf_fh)],
+        )
+        flash('invoice was submitted to ' + ', '.join(email_to), 'success')
+    except Exception as e:
+        flash('Error while trying to email the invoice: %s' % e, 'error')
+    finally:
+        pdf_fh.close()
 
-    pdf_fh.close()
-
-    flash('invoice was submitted to ' + ', '.join(email_to), 'success')
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
 
