@@ -59,12 +59,15 @@
 
         <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}" method="POST">
             <div class="w3-container w3-form">
-                {% if to_emails -%}
-                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border" style="width:25em;" name="email" value="Email Invoice and mark as submitted" /></p>
-                {% else %}
-                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border" style="width:25em;" name="email" value="Email Invoice and mark as submitted" disabled/></p>
+                {% if to_emails and invoice_obj.submitted_date -%}
+                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border" style="width: 75%"  name="email" value="Email only (invoice already marked as submitted)" /></p>
+                {% elif to_emails %}
+                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border" style="width: 75%"  name="email" value="Email and mark invoice as submitted" /></p>
                 {% endif %}
-                <p><input type="submit" class="w3-button w3-white w3-border" style="width:25em;" name="mark" value="Mark invoice as submitted (no email)" /></p>
+
+                {% if not invoice_obj.submitted_date %}
+                <p><input type="submit" class="w3-button w3-white w3-border" style="width: 75%"  name="mark" value="Mark invoice as submitted (do not send email)" /></p>
+                {% endif %}
             </div>
         </form>
 
