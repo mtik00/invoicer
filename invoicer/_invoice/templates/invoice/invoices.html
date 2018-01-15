@@ -116,39 +116,45 @@
 
 {% block extrascripts %}
 <script>
-    document.getElementById("validate_delete").onkeyup = function() {myFunction()};
+    $( document ).ready(function() {
 
-    function myFunction() {
-        if (document.getElementById('validate_delete').value.toLowerCase() == 'delete') {
-            document.getElementById('delete_invoice_button').disabled = false;
-        } else {
-            document.getElementById('delete_invoice_button').disabled = true;
-        };
-    }
+        // Make sure the user *really* wants to delete the invoice
+        $( "#validate_delete" ).keyup(function() {
+            if ($(this).val().toLowerCase() == 'delete') {
+                $('#delete_invoice_button').prop('disabled', false);
+            } else {
+                $('#delete_invoice_button').prop('disabled', true);
 
-    // When the user clicks anywhere outside of the modal, close it
-    var submit_modal = document.getElementById('submit-modal');
-    window.onclick = function(event) {
-        if (event.target == submit_modal) {
-            submit_modal.style.display = "none";
-        }
-    }
+            }
+        });
 
-    // Handle the email submission / loading modal
-    var email_btn = document.getElementById("email_btn");
-    var email_modal = document.getElementById('email-modal');
-    email_btn.onclick = function() {
-        submit_modal.style.display = "none";
-        email_modal.style.display = "block";
-    }
+        // Handle the email submit button
+        $('#email_btn').on('click', function(event) {
+            // Close the submit modal
+            $('#submit-modal').css({ 'display': "none" });
 
-    $( "#submit-close-button" ).click(function() {
-        submit_modal.style.display = "none";
+            // Show the loading modal
+            $('#email-modal').css({ 'display': "block" });
+        });
+        
+        // Close the submit modal if the button is clicked
+        $( "#submit-close-button" ).click(function() {
+            $('#submit-modal').css({ 'display': "none" });
+        });
+
+        // Close the submit modal when the escape key is pressed
+        $(document).on('keydown',function(event) {
+            if (event.keyCode == 27) {
+                $('#submit-modal').css({ 'display': "none" });
+             }
+         });
+
+        // Close the submit modal when clicking outside of the window
+        $(window).on('click', function(event){
+            if (event.target == $('#submit-modal').get()[0]) {
+                $('#submit-modal').css({ 'display': "none" });
+            }
+        });
     });
-    $(document).on('keydown',function(event) {
-        if (event.keyCode == 27) {
-            submit_modal.style.display = "none";
-         }
-     });
 </script>
 {% endblock%}
