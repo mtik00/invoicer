@@ -75,7 +75,7 @@
         </form>
 
         <div class="w3-container w3-light-grey w3-padding">
-            <p><button class="w3-button w3-right w3-white w3-border" onclick="document.getElementById('submit-modal').style.display='none'">Close</button></p>
+            <p><button id='submit-close-button' class="w3-button w3-right w3-white w3-border">Cancel</button></p>
         </div>
     </div>
 </div>
@@ -141,5 +141,14 @@
         submit_modal.style.display = "none";
         email_modal.style.display = "block";
     }
+
+    $( "#submit-close-button" ).click(function() {
+        submit_modal.style.display = "none";
+    });
+    $(document).on('keydown',function(event) {
+        if (event.keyCode == 27) {
+            submit_modal.style.display = "none";
+         }
+     });
 </script>
 {% endblock%}
