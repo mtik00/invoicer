@@ -146,13 +146,15 @@
         $(document).on('keydown',function(event) {
             if (event.keyCode == 27) {
                 $('#submit-modal').css({ 'display': "none" });
+                $('#delete-modal').css({ 'display': "none" });
              }
          });
 
         // Close the submit modal when clicking outside of the window
         $(window).on('click', function(event){
-            if (event.target == $('#submit-modal').get()[0]) {
+            if ((event.target == $('#submit-modal').get()[0]) || (event.target == $('#delete-modal').get()[0])) {
                 $('#submit-modal').css({ 'display': "none" });
+                $('#delete-modal').css({ 'display': "none" });
             }
         });
     });
