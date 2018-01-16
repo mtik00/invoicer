@@ -1,0 +1,25 @@
+INVOICE
+{% if invoice.description %}{{invoice.description}}{% endif %}
+Invoice Number: {{invoice.number}}
+
+SUBMIT TO:
+{{submit_address|safe}}
+
+BILL TO:
+{{customer_address|safe}}
+
+Submitted Date: {% if invoice.submitted_date %}{{invoice.submitted_date|upper}}{% endif %}
+Due Date: {% if due %}{{due|upper}}{% endif %}
+Paid Date: {{invoice.paid_date|upper}} {% if overdue %}OVERDUE{%endif%}
+
+Invoice Total: {{invoice.total|currency}}
+
+{% for item in invoice.items -%}
+{{loop.index}}) {% if item.date -%}{{item.date}}: {% endif %}{{item.description}}
+    {{item.unit_price|currency}}{% if item.units %}/{{item.units}}{% endif %} * {{item.quantity}} = {{ (item.unit_price * item.quantity) | currency}}
+{% endfor %}
+
+Invoice Total: {{invoice.total | currency}}
+
+{% if terms %}Terms: NET {{terms}} days{% endif %}
+Please include invoice number on submission

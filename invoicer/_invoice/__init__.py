@@ -42,26 +42,30 @@ def can_submit(customer_id):
     return True
 
 
-def format_address(customer_id):
+def format_address(customer_id, html=True):
+    join_with = '<br>' if html else '\n'
     customer = Customer.query.filter(Customer.id == customer_id).first()
-    name = '<br>'.join([x for x in [customer.name1, customer.name2] if x])
-    street = '<br>'.join([x for x in [customer.addrline1, customer.addrline2] if x])
+    name = join_with.join([x for x in [customer.name1, customer.name2] if x])
+    street = join_with.join([x for x in [customer.addrline1, customer.addrline2] if x])
     city = '%s, %s %s' % (customer.city, customer.state.upper(), customer.zip)
 
-    return '<br>'.join([name, street, city, customer.email])
+    return join_with.join([name, street, city, customer.email])
 
 
-def format_my_address():
+def format_my_address(html=True):
     address = Profile.query.first()
+    join_with = '<br>' if html else '\n'
 
-    result = '<br>'.join([
+    result = join_with.join([
         address.full_name,
         address.street,
         '%s %s, %s' % (address.city, address.state, address.zip)]).upper()
 
-    if address.email:
+    if address.email and html:
         # Prevent gmail from making this a link
-        result = result + '<br>' + "<a rel='nofollow' style='text-decoration:none; color:#fff' href='#'>" + address.email + "</a>"
+        result += join_with + "<a rel='nofollow' style='text-decoration:none; color:#fff' href='#'>" + address.email + "</a>"
+    elif  address.email:
+        result += join_with + address.email
 
     return result
 
@@ -448,6 +452,32 @@ def raw_invoice(invoice_number):
 
     return render_template(
         'invoice/w3-invoice.html',
+        invoice=invoice,
+        due=invoice.due(),
+        customer_address=customer_address,
+        submit_address=submit_address,
+        terms=terms,
+        overdue=invoice.overdue(),
+        w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+    )
+
+
+
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/text')
+@login_required
+def text_invoice(invoice_number):
+    """
+    Displays a single invoice
+    """
+    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    customer = Customer.query.get(invoice.customer_id)
+    customer_address = format_address(invoice.customer_id, html=False)
+    submit_address = format_my_address(html=False)
+
+    terms = invoice.terms or customer.terms or Profile.query.get(1).terms
+
+    return render_template(
+        'invoice/text-invoice.txt',
         invoice=invoice,
         due=invoice.due(),
         customer_address=customer_address,
