@@ -101,11 +101,8 @@ def sendmail(
         cc = []
 
     if text_body and html_body:
-        # outer_alternative = MIMEMultipart('alternative')
         text_msg = get_message(text_body, 'plain', encode=encode_body)
         html_msg = get_message(html_body, 'html', encode=encode_body)
-        # outer_alternative.attach(text_msg)
-        # outer_alternative.attach(html_body)
         outer.attach(text_msg)
         outer.attach(html_msg)
     elif html_body:
