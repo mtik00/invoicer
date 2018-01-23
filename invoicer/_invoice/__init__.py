@@ -343,7 +343,8 @@ def submit_invoice(invoice_number):
         db.session.add(invoice)
         db.session.commit()
 
-    text = raw_invoice(invoice_number)
+    html_text = raw_invoice(invoice_number)
+    raw_text = text_invoice(invoice_number)
     fname = "invoice-%s.pdf" % invoice_number
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
@@ -352,7 +353,7 @@ def submit_invoice(invoice_number):
         'no-outline': None,
         'quiet': None
     }
-    pdf_text = pdfkit.from_string(text, None, options=options, configuration=config)
+    pdf_text = pdfkit.from_string(html_text, None, options=options, configuration=config)
     pdf_fh = StringIO()
 
     pdf_fh.write(pdf_text)
@@ -362,12 +363,12 @@ def submit_invoice(invoice_number):
         email_to = get_address_emails(invoice.customer_id)
         sendmail(
             sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
-            to=['test@___'], #email_to,
+            to=email_to,
             cc=[current_app.config['EMAIL_USERNAME']],
             subject='Invoice %s from %s' % (invoice.number, Profile.query.get(1).full_name),
-            body=Premailer(text, cssutils_logging_level='CRITICAL').transform(),
             server=current_app.config['EMAIL_SERVER'],
-            body_type="html",
+            html_body=Premailer(html_text, cssutils_logging_level='CRITICAL').transform(),
+            text_body=raw_text,
             username=current_app.config['EMAIL_USERNAME'],
             password=current_app.config['EMAIL_PASSWORD'],
             starttls=current_app.config['EMAIL_STARTTLS'],

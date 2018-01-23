@@ -13,6 +13,7 @@ from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 # Metadata ####################################################################
 __author__ = 'Timothy McFadden'
@@ -21,7 +22,7 @@ __creationDate__ = '08-JAN-2018'
 
 # Globals #####################################################################
 def sendmail(
-    sender, to, subject, body, server, body_type="html",
+    sender, to, subject, server, text_body=None, html_body=None,
     attachments=None, username=None, password=None, cc=None, starttls=False,
     encode_body=True,
     stream_attachments=None
@@ -64,7 +65,17 @@ def sendmail(
         >>> x.seek(0)
         >>> sendmail(stream_attachments=[('readme.txt', x)])
     '''
+    def get_message(content, body_type, encode=True):
+        if encode_body:
+            msg = MIMEBase('text', body_type, _charset='utf-8')
+            msg.set_payload(content.encode('utf-8'))
+            encoders.encode_base64(msg)
+            return msg
+        else:
+            return MIMEText(content.encode('utf-8'), body_type, 'utf-8')
+
     attachments = [] if attachments is None else attachments
+    stream_attachments = [] if stream_attachments is None else stream_attachments
 
     s = smtplib.SMTP(server)
 
@@ -74,7 +85,12 @@ def sendmail(
     if username and password:
         s.login(username, password)
 
-    outer = MIMEMultipart()
+
+    if text_body and html_body:
+        outer = MIMEMultipart('alternative')
+    else:
+        outer = MIMEMultipart()
+
     outer['Subject'] = subject
     outer['From'] = sender
     outer['To'] = ', '.join(to)
@@ -84,15 +100,23 @@ def sendmail(
     else:
         cc = []
 
-    if encode_body:
-        msg = MIMEBase('text', body_type, _charset='utf-8')
-        msg.set_payload(body.encode('utf-8'))
-        encoders.encode_base64(msg)
-    else:
-        msg = MIMEText(body.encode('utf-8'), body_type, 'utf-8')
+    if text_body and html_body:
+        # outer_alternative = MIMEMultipart('alternative')
+        text_msg = get_message(text_body, 'plain', encode=encode_body)
+        html_msg = get_message(html_body, 'html', encode=encode_body)
+        # outer_alternative.attach(text_msg)
+        # outer_alternative.attach(html_body)
+        outer.attach(text_msg)
+        outer.attach(html_msg)
+    elif html_body:
+        html_msg = get_message(html_body, 'html', encode=encode_body)
+        outer.attach(html_msg)
+    elif text_body:
+        text_msg = get_message(text_body, 'plain', encode=False)
+        outer.attach(text_msg)
 
-    outer.attach(msg)
-
+    # Take care of the stream attachments.  In this case, stream_attachments
+    # must be a list of tuples in the form of [(filename, stream)].
     for filename, stream in stream_attachments:
         ctype, encoding = mimetypes.guess_type(filename)
 
@@ -102,6 +126,8 @@ def sendmail(
             msg = MIMEText(stream.read(), _subtype=subtype)
         elif maintype == 'image':
             msg = MIMEImage(stream.read(), _subtype=subtype)
+        elif maintype == 'application':
+            msg = MIMEApplication(stream.read(), _subtype=subtype)
         else:
             msg = MIMEBase(maintype, subtype)
             msg.set_payload(stream.read())
@@ -111,6 +137,7 @@ def sendmail(
         msg.add_header('Content-Disposition', 'attachment', filename=filename)
         outer.attach(msg)
 
+    # Normal attachments are files already on the file system.
     for path in attachments:
         if not os.path.isfile(path):
             continue
@@ -124,14 +151,17 @@ def sendmail(
 
         maintype, subtype = ctype.split('/', 1)
 
-        if maintype == 'text':
-            msg = MIMEText(stream.read(), _subtype=subtype)
-        elif maintype == 'image':
-            msg = MIMEImage(stream.read(), _subtype=subtype)
-        else:
-            msg = MIMEBase(maintype, subtype)
-            msg.set_payload(stream.read())
-            encoders.encode_base64(msg)
+        with open(path, 'rb') as stream:
+            if maintype == 'text':
+                msg = MIMEText(stream.read(), _subtype=subtype)
+            elif maintype == 'image':
+                msg = MIMEImage(stream.read(), _subtype=subtype)
+            elif maintype == 'application':
+                msg = MIMEApplication(stream.read(), _subtype=subtype)
+            else:
+                msg = MIMEBase(maintype, subtype)
+                msg.set_payload(stream.read())
+                encoders.encode_base64(msg)
 
         # Set the filename parameter
         msg.add_header('Content-Disposition', 'attachment', filename=os.path.basename(path))
