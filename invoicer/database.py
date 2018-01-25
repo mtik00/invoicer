@@ -288,6 +288,11 @@ def init_db(sample_data=False):
         db.session.commit()
 
 
+def myconverter(o):
+    if isinstance(o, arrow.Arrow):
+        return o.for_json()
+
+
 def export(path):
     """
     Exports all of the data (no metadata) to a json file.
@@ -297,7 +302,7 @@ def export(path):
 
     # May need to change this if it starts being wierd.  This is also dependent
     # on all of the models located in `models`.
-    model_names = [x for x in dir(models) if x[0] in string.uppercase]
+    model_names = [x for x in dir(models) if (x[0] in string.uppercase) and ('Type' not in x)]
     if not model_names:
         raise Exception('No model names found in `models`')
 
@@ -305,7 +310,7 @@ def export(path):
         items = model.query.all()
         result[model.__tablename__] = [{key: getattr(item, key) for key in model.__table__.columns.keys()} for item in items]
 
-    formatted_json = json.dumps(result, sort_keys=True, indent=4, separators=(',', ': '))
+    formatted_json = json.dumps(result, sort_keys=True, indent=4, separators=(',', ': '), default=myconverter)
 
     with open(path, 'wb') as fh:
         fh.write(formatted_json)
