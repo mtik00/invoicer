@@ -12,5 +12,6 @@ setup(
         'pdfkit==0.6.1',
         'premailer==3.1.1',
         'Flask-SQLAlchemy==2.3.2',
+        'SQLAlchemy-Utils==0.32.21'
     ],
 )

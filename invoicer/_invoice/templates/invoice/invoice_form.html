@@ -31,7 +31,7 @@
 
     {% if invoice and invoice.submitted_date %}
     <label class="w3-text-blue" for="terms">Submitted Date <b>NOTE: You cannot change the submitted date once the invoice has been submitted</b></label>
-    <input class="w3-input w3-border" id="submitted_date" name="submitted_date" type="text" value="{{invoice.submitted_date}}" disabled>
+    <input class="w3-input w3-border" id="submitted_date" name="submitted_date" type="text" value="{{invoice.submitted_date.format('DD-MMM-YYYY').upper()}}" disabled>
     {% else %}{{ render_field(form.submitted_date) }}{% endif %}
 
     {{ render_field(form.paid_date) }}

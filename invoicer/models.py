@@ -1,4 +1,5 @@
 import arrow
+from sqlalchemy import event
 from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
 from .database import db
@@ -67,6 +68,7 @@ class Invoice(db.Model):
     submitted_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
     paid_date = db.Column(ArrowType)
+    due_date = db.Column(ArrowType)
     number = db.Column(db.String(50), unique=True, nullable=False)
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
@@ -88,26 +90,12 @@ class Invoice(db.Model):
         if not self.submitted_date:
             return False
 
-        due = self.due(as_string=False)
-
-        if due and (arrow.now() > due):
+        if (arrow.now() > self.due_date):
+            return True
+        elif self.paid_date and (self.paid_date > self.due_date):
             return True
 
-        if due and self.paid_date:
-            return self.paid_date > due
-
         return False
-
-    def due(self, as_string=True):
-        if not self.submitted_date:
-            return None
-
-        due_date = self.submitted_date.replace(days=+self.terms)
-
-        if as_string:
-            due_date = due_date.format('DD-MMM-YYYY')
-
-        return due_date
 
     def get_theme(self):
         """
@@ -128,6 +116,20 @@ class Invoice(db.Model):
             return user.w3_theme
 
         return None
+
+
+# NOTE: I can't get these to work in the application, but they work during
+# initdb.
+@event.listens_for(Invoice, 'before_insert')
+def receive_before_insert(mapper, connection, invoice):
+    if (invoice.submitted_date and invoice.terms):
+        invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
+
+
+@event.listens_for(Invoice, 'before_update')
+def receive_before_update(mapper, connection, invoice):
+    if (invoice.submitted_date and invoice.terms):
+        invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
 
 
 class UnitPrice(db.Model):

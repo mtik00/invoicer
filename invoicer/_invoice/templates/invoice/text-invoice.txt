@@ -9,7 +9,7 @@ BILL TO:
 {{customer_address|safe}}
 
 Submitted Date: {% if invoice.submitted_date %}{{invoice.submitted_date.format('DD-MMM-YYYY')|upper}}{% endif %}
-Due Date: {% if due %}{{due|upper}}{% endif %}
+Due Date: {% if invoice.due_date %}{{invoice.due_date.format('DD-MMM-YYYY')|upper}}{% endif %}
 Paid Date: {{invoice.paid_date.format('DD-MMM-YYYY')|upper}} {% if overdue %}OVERDUE{%endif%}
 
 Invoice Total: {{invoice.total|currency}}

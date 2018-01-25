@@ -180,12 +180,21 @@ def update(invoice_number):
             if form.paid_date.data:
                 paid_date = arrow.get(form.paid_date.data, 'DD-MMM-YYYY')
 
+            terms = invoice.terms
+            if form.terms.data:
+                terms = form.terms.data
+
+            due_date = None
+            if submitted_date and terms:
+                due_date = submitted_date.replace(days=+terms)
+
             Invoice.query.filter(Invoice.number == invoice_number).update({
                 'description': form.description.data,
                 'customer_id': form.customer.data,
                 'submitted_date': submitted_date,
                 'paid_date': paid_date,
-                'terms': form.terms.data,
+                'terms': terms,
+                'due_date': due_date,
                 'w3_theme': form.w3_theme.data,
             })
 
@@ -254,14 +263,25 @@ def create():
         if form.submitted_date.data:
             submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
 
+        terms = customer.terms or me.terms
+
+        due_date = None
+        if submitted_date and terms:
+            due_date = submitted_date.replace(days=+terms)
+
+        paid_date = None
+        if form.paid_date.data:
+            paid_date = arrow.get(form.paid_date.data, 'DD-MMM-YYYY')
+
         db.session.add(
             Invoice(
-                description=request.form['description'],
+                description=form.description.data,
                 customer_id=customer_id,
                 number=number,
                 terms=customer.terms or me.terms,
                 submitted_date=submitted_date,
-                paid_date=form.paid_date.data
+                paid_date=paid_date,
+                due_date=due_date
             )
         )
         db.session.commit()
@@ -335,7 +355,7 @@ def mark_invoice_submitted(invoice_number):
         db.session.add(invoice)
         db.session.commit()
 
-        flash('Invoice has been marked as submitted; due on %s' % invoice.due(), 'success')
+        flash('Invoice has been marked as submitted; due on %s' % invoice.due_date.format('DD-MMM-YYYY'), 'success')
     else:
         flash('Invoice has already been marked as submitted<br>Download the PDF and email manually if needed', 'error')
 
@@ -469,7 +489,6 @@ def raw_invoice(invoice_number):
     return render_template(
         'invoice/w3-invoice.html',
         invoice=invoice,
-        due=invoice.due(),
         customer_address=customer_address,
         submit_address=submit_address,
         terms=terms,
@@ -494,7 +513,7 @@ def text_invoice(invoice_number):
     return render_template(
         'invoice/text-invoice.txt',
         invoice=invoice,
-        due=invoice.due(),
+        due=invoice.due_date,
         customer_address=customer_address,
         submit_address=submit_address,
         terms=terms,
