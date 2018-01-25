@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 
 {% block body %}
 <form class="w3-container w3-col m5" action="{{url_for('invoice_page.delete_items', invoice_number=invoice.number)}}" method="POST">
