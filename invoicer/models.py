@@ -1,4 +1,5 @@
 import arrow
+from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
 from .database import db
 
@@ -63,7 +64,7 @@ class Item(db.Model):
 class Invoice(db.Model):
     __tablename__ = 'invoices'
     id = db.Column(db.Integer, primary_key=True)
-    submitted_date = db.Column(db.String(50))
+    submitted_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
     paid_date = db.Column(db.String(50))
     number = db.Column(db.String(50), unique=True, nullable=False)
@@ -102,7 +103,7 @@ class Invoice(db.Model):
         if not self.submitted_date:
             return None
 
-        due_date = arrow.get(self.submitted_date, 'DD-MMM-YYYY').replace(days=+self.terms)
+        due_date = self.submitted_date.replace(days=+self.terms)
 
         if as_string:
             due_date = due_date.format('DD-MMM-YYYY')

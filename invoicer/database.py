@@ -1,6 +1,7 @@
 import json
 import string
 
+import arrow
 from sqlalchemy import select
 from flask_sqlalchemy import SQLAlchemy
 
@@ -30,7 +31,7 @@ def init_db(sample_data=False):
 
         invoice1 = models.Invoice(
             customer=customer1,
-            submitted_date='20-JAN-2018',
+            submitted_date=arrow.get('20-JAN-2018', 'DD-MMM-YYYY'),
             description='2018 Website Redesign',
             paid_date='07-FEB-2018',
             number='1010-2018-001',
@@ -62,7 +63,7 @@ def init_db(sample_data=False):
 
         invoice2 = models.Invoice(
             customer=customer1,
-            submitted_date='20-FEB-2018',
+            submitted_date=arrow.get('20-FEB-2018-2018', 'DD-MMM-YYYY'),
             description='2018 Website Development',
             paid_date=None,
             number='1010-2018-002',
