@@ -30,19 +30,22 @@ def edit():
         form.w3_theme_invoice.process_data(profile.w3_theme_invoice if profile else 'dark-grey')
 
     if form.validate_on_submit():
-        if not profile:
-            profile = Profile()
+        if 'cancel' in request.form:
+            flash('invoice updated canceled', 'warning')
+        else:
+            if not profile:
+                profile = Profile()
 
-        form['state'].data = form['state'].data.upper()
-        form.populate_obj(profile)
+            form['state'].data = form['state'].data.upper()
+            form.populate_obj(profile)
 
-        db.session.add(profile)
-        db.session.commit()
+            db.session.add(profile)
+            db.session.commit()
 
-        if profile.w3_theme:
-            current_app.config['W3_THEME'] = profile.w3_theme
+            if profile.w3_theme:
+                current_app.config['W3_THEME'] = profile.w3_theme
 
-        flash('profile updated', 'success')
+            flash('profile updated', 'success')
         return redirect(url_for('profile_page.index'))
 
     return render_template('profile/profile_form.html', form=form, profile=profile)
