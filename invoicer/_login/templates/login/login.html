@@ -1,18 +1,20 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>Login</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-    <form class="w3-container w3-col m5" action="{{ url_for('login_page.login') }}" method="POST">
-        <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<form class="w3-container w3-col m5" action="{{ url_for('login_page.login') }}" method="POST">
+    <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
 
-        <label class="w3-text-blue" for="username">Username</label>
-        <input class="w3-input w3-border" id="username" name="username" type="text" value="">
-  
-        <label class="w3-text-blue" for="password">Password</label>
-        <input class="w3-input w3-border" id="password" name="password"
+    <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
+        <input class="form-control" type="text" name="username" placeholder="Login">
+    </div>
+    <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+        <input class="form-control" name="password" placeholder="Password"
         {%- if config['DEBUG'] %}type="text" {% else %}type="password" {% endif -%}
         value="">
+    </div>
 
-        <p><input type=submit value="Login" class="w3-btn w3-theme-action"></p>
-  </form>
+    <p><input type=submit value="Login" class="w3-btn w3-theme-action"></p>
+</form>
 {% endblock %}
