@@ -117,12 +117,16 @@ def create_item(invoice_number):
     if form.validate_on_submit():
         unit_price = UnitPrice.query.filter(UnitPrice.id == request.form['unit_price']).first()
 
+        date = arrow.now()
+        if form.date.data:
+            date = arrow.get(form.date.data, 'DD-MMM-YYYY')
+
         db.session.add(Item(
             invoice_id=invoice.id,
-            date=request.form['date'].upper(),
-            description=request.form['description'],
+            date=date,
+            description=form.description.data,
             unit_price=unit_price.unit_price,
-            quantity=request.form['quantity'],
+            quantity=form.quantity.data,
             units=unit_price.units,
             customer=invoice.customer
         ))
@@ -145,7 +149,6 @@ def create_item(invoice_number):
 @login_required
 def update(invoice_number):
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
-    me = Profile.query.get(1)
 
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
@@ -154,8 +157,8 @@ def update(invoice_number):
 
     form = InvoiceForm(
         description=invoice.description,
-        submitted_date=invoice.submitted_date,
-        paid_date=invoice.paid_date,
+        submitted_date=invoice.submitted_date.format('DD-MMM-YYYY').upper() if invoice.submitted_date else None,
+        paid_date=invoice.paid_date.format('DD-MMM-YYYY').upper() if invoice.paid_date else None,
         terms=invoice.terms,
     )
     form.customer.choices = addr_choices
@@ -169,11 +172,19 @@ def update(invoice_number):
         if 'cancel' in request.form:
             flash('invoice updated canceled', 'warning')
         else:
+            submitted_date = invoice.submitted_date
+            if form.submitted_date.data:
+                submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
+
+            paid_date = None
+            if form.paid_date.data:
+                paid_date = arrow.get(form.paid_date.data, 'DD-MMM-YYYY')
+
             Invoice.query.filter(Invoice.number == invoice_number).update({
                 'description': form.description.data,
                 'customer_id': form.customer.data,
-                'submitted_date': form.submitted_date.data.upper() if form.submitted_date.data else invoice.submitted_date,
-                'paid_date': form.paid_date.data.upper(),
+                'submitted_date': submitted_date,
+                'paid_date': paid_date,
                 'terms': form.terms.data,
                 'w3_theme': form.w3_theme.data,
             })
@@ -239,13 +250,17 @@ def create():
         number = next_invoice_number(customer_id)
         customer = Customer.query.get(customer_id)
 
+        submitted_date = None
+        if form.submitted_date.data:
+            submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
+
         db.session.add(
             Invoice(
                 description=request.form['description'],
                 customer_id=customer_id,
                 number=number,
                 terms=customer.terms or me.terms,
-                submitted_date=form.submitted_date.data,
+                submitted_date=submitted_date,
                 paid_date=form.paid_date.data
             )
         )
@@ -316,7 +331,7 @@ def mark_invoice_submitted(invoice_number):
     # first place.  We want the user to be able to re-submit invoices to remind
     # customers of overdue conditions.
     if not invoice.submitted_date:
-        invoice.submitted_date = arrow.now().format('DD-MMM-YYYY').upper()
+        invoice.submitted_date = arrow.now()
         db.session.add(invoice)
         db.session.commit()
 
@@ -339,7 +354,7 @@ def submit_invoice(invoice_number):
     # first place.  We want the user to be able to re-submit invoices to remind
     # customers of overdue conditions.
     if not invoice.submitted_date:
-        invoice.submitted_date = arrow.now().format('DD-MMM-YYYY').upper()
+        invoice.submitted_date = arrow.now()
         db.session.add(invoice)
         db.session.commit()
 
@@ -461,7 +476,6 @@ def raw_invoice(invoice_number):
         overdue=invoice.overdue(),
         w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
     )
-
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/text')

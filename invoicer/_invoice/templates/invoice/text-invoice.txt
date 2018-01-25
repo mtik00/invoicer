@@ -10,12 +10,12 @@ BILL TO:
 
 Submitted Date: {% if invoice.submitted_date %}{{invoice.submitted_date.format('DD-MMM-YYYY')|upper}}{% endif %}
 Due Date: {% if due %}{{due|upper}}{% endif %}
-Paid Date: {{invoice.paid_date|upper}} {% if overdue %}OVERDUE{%endif%}
+Paid Date: {{invoice.paid_date.format('DD-MMM-YYYY')|upper}} {% if overdue %}OVERDUE{%endif%}
 
 Invoice Total: {{invoice.total|currency}}
 
 {% for item in invoice.items -%}
-{{loop.index}}) {% if item.date -%}{{item.date}}: {% endif %}{{item.description}}
+{{loop.index}}) {% if item.date -%}{{item.date.format('DD-MMM-YYYY')}}: {% endif %}{{item.description}}
     {{item.unit_price|currency}}{% if item.units %}/{{item.units}}{% endif %} * {{item.quantity}} = {{ (item.unit_price * item.quantity) | currency}}
 {% endfor %}
 

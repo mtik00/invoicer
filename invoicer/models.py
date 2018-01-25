@@ -48,7 +48,7 @@ class Item(db.Model):
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'))
     invoice = relationship("Invoice", back_populates="items")
 
-    date = db.Column(db.String(50))
+    date = db.Column(ArrowType)
     description = db.Column(db.String(150))
     unit_price = db.Column(db.Float)
     quantity = db.Column(db.Integer)
@@ -66,7 +66,7 @@ class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submitted_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
-    paid_date = db.Column(db.String(50))
+    paid_date = db.Column(ArrowType)
     number = db.Column(db.String(50), unique=True, nullable=False)
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
@@ -94,8 +94,7 @@ class Invoice(db.Model):
             return True
 
         if due and self.paid_date:
-            paid_date = arrow.get(self.paid_date, 'DD-MMM-YYYY')
-            return paid_date > due
+            return self.paid_date > due
 
         return False
 

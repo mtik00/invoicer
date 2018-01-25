@@ -36,14 +36,13 @@
                     <strong>Invoice Number:</strong><br><h1>{{invoice.number}}</h1>
             </div>
 
-            
             <div class="w3-cell w3-cell-top w3-right-align">
                 Submitted Date: {% if invoice.submitted_date %}{{invoice.submitted_date.format('DD-MMM-YYYY')|upper}}{% else %}&nbsp;{% endif %}<br>
                 Due Date: {% if due %}{{due|upper}}{% else %}&nbsp;{% endif %}<br>
                 {% if invoice.paid_date and overdue -%}
-                <span style="color: orange;">Paid Date: {{invoice.paid_date|upper}}</span>
+                <span style="color: orange;">Paid Date: {{invoice.paid_date.format('DD-MMM-YYYY')|upper}}</span>
                 {% elif invoice.paid_date %}
-                <span style="color: green;">Paid Date: {{invoice.paid_date|upper}}</span>
+                <span style="color: green;">Paid Date: {{invoice.paid_date.format('DD-MMM-YYYY')|upper}}</span>
                 {% elif overdue -%}
                 <h3 style="color: red;">OVERDUE</h3>
                 {%endif%}
@@ -67,7 +66,7 @@
                 {% for item in invoice.items -%}
                 <tr>
                     {% if item.date -%}
-                    <td>{{item.date}}: {{item.description}}</td>
+                    <td>{{item.date.format('DD-MMM-YYYY')}}: {{item.description}}</td>
                     {% else %}
                     <td>{{item.description}}</td>
                     {% endif %}
