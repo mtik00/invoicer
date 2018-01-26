@@ -10,7 +10,7 @@ from flask import render_template, url_for, redirect
 from .app import create_app
 from .submitter import sendmail
 from .database import init_db, export as export_db, import_clean_json, add_user
-from .models import Invoice, Customer, User
+from .models import Invoice, Customer
 from .common import login_required
 
 app = create_app()

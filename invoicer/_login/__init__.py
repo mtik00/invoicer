@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from .forms import LoginForm
 from ..common import login_required
 from ..password import verify_password
+from ..models import User
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
 
@@ -11,15 +12,20 @@ login_page = Blueprint('login_page', __name__, template_folder='templates')
 def login():
     form = LoginForm(request.form)
     error = False
+    hashed_password = ''
 
     if form.validate_on_submit():
+        user = User.query.filter(User.username == form.username.data).first()
+        if not user:
+            error = True
+        else:
+            hashed_password = user.hashed_password
+
         try:
-            verify_password(current_app.config['PASSWORD_HASH'], form.password.data)
+            verify_password(hashed_password, form.password.data)
         except Exception:
             error = True
-
-        if form.username.data != current_app.config['USERNAME']:
-            error = True
+            raise
 
         if error:
             flash('Invalid username and/or password', 'error')

@@ -33,8 +33,6 @@ def create_app():
     app.config.update(dict(
         DATABASE=os.path.join(app.instance_path, 'invoicer.db'),
         SECRET_KEY='development key',
-        USERNAME='admin',
-        PASSWORD_HASH='$argon2i$v=19$m=512,t=2,p=2$+w4dAmcJGnaqsgob82pqcQ$4uGfP7JerZJPqAq5cWZ0bw',  # 'default'
         WKHTMLTOPDF="c:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe",
         BACKUP_DIR=app.instance_path,
         SESSION_TIMEOUT_MINUTES=30,
