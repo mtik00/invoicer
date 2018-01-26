@@ -8,12 +8,14 @@ unit_page = Blueprint('unit_page', __name__, template_folder='templates')
 
 
 @unit_page.route('/')
+@login_required
 def units():
     units = UnitPrice.query.all()
     return render_template('units/units.html', units=units)
 
 
 @unit_page.route('/<unit_id>/update', methods=["GET", "POST"])
+@login_required
 def update(unit_id):
     unit = UnitPrice.query.get(unit_id)
     form = UnitForm(request.form, obj=unit)
