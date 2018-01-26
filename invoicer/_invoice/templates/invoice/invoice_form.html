@@ -37,9 +37,9 @@
     <p>
     <div class="w3-border w3-padding">
         <label class="w3-text-blue" for="datepicker2">Paid Date</label>
-        <input class="w3-input w3-border" id="datepicker2" name="paid_date" type="text" value="{{form.paid_date.data}}">
+        <input class="w3-input w3-border" id="datepicker2" name="paid_date" type="text" value="{{form.paid_date.data if form.paid_date.data else ''}}">
         <label class="w3-text-blue" for="paid_date_notes">Payment Notes</label>
-        <input class="w3-input w3-border" id="paid_date_notes" name="paid_date_notes" type="text" value="{{form.paid_date_notes.data}}" placeholder="e.g. Check 123">
+        <input class="w3-input w3-border" id="paid_date_notes" name="paid_date_notes" type="text" value="{{form.paid_date_notes.data if form.paid_date_notes.data else ''}}" placeholder="e.g. Check 123">
     </div>
     </p>
 

@@ -189,16 +189,11 @@ def update(invoice_number):
             if form.terms.data:
                 terms = form.terms.data
 
-            due_date = None
-            if submitted_date and terms:
-                due_date = submitted_date.replace(days=+terms)
-
             invoice.description = form.description.data
             invoice.customer_id = form.customer.data
             invoice.submitted_date = submitted_date
             invoice.paid_date = paid_date
             invoice.terms = terms
-            invoice.due_date = due_date
             invoice.w3_theme = form.w3_theme.data
 
             db.session.commit()
@@ -268,10 +263,6 @@ def create():
 
         terms = customer.terms or me.terms
 
-        due_date = None
-        if submitted_date and terms:
-            due_date = submitted_date.replace(days=+terms)
-
         paid_date = None
         if form.paid_date.data:
             paid_date = InvoicePaidDate(
@@ -284,10 +275,9 @@ def create():
                 description=form.description.data,
                 customer_id=customer_id,
                 number=number,
-                terms=customer.terms or me.terms,
+                terms=terms,
                 submitted_date=submitted_date,
                 paid_date=paid_date,
-                due_date=due_date
             )
         )
         db.session.commit()
@@ -523,7 +513,6 @@ def text_invoice(invoice_number):
     return render_template(
         'invoice/text-invoice.txt',
         invoice=invoice,
-        due=invoice.due_date,
         customer_address=customer_address,
         submit_address=submit_address,
         terms=terms,

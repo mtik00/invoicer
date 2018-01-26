@@ -45,12 +45,11 @@
                     {% else %}
                         <span style="color: green;">
                     {% endif %}
-                    Paid Date: {{invoice.paid_date.paid_date.format('DD-MMM-YYYY')|upper}}
-                    {% if invoice.paid_date.description %}<br>{{invoice.paid_date.description}}{% endif %}
-                    </span>
-                {% elif overdue -%}
+                    Paid Date: {{invoice.paid_date.paid_date.format('DD-MMM-YYYY')|upper}}</span>
+                    {%- if invoice.paid_date.description %}<br>{{invoice.paid_date.description}}{% endif %}
+                {% elif overdue %}
                 <h3 style="color: red;">OVERDUE</h3>
-                {%endif%}
+                {% endif %}
                 
                 <div>
                     <br>Invoice Total:<br><span class="w3-xxxlarge w3-text-green">{{invoice.total|currency}}</span>
