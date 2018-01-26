@@ -337,14 +337,24 @@ def import_clean_json(path):
     with open(path) as fh:
         json_data = json.load(fh)
 
-    profile = json_data['profiles'][0]
-    db.session.add(models.Profile(
-        **profile
-    ))
+    profiles = json_data['profiles']
+    db.session.add_all([
+        models.Profile(**data) for data in profiles
+    ])
+
+    users = json_data['users']
+    db.session.add_all([
+        models.User(**data) for data in users
+    ])
 
     customers = json_data['customers']
     db.session.add_all([
         models.Customer(**data) for data in customers
+    ])
+
+    paid_dates = json_data['invoice_paid_dates']
+    db.session.add_all([
+        models.InvoicePaidDate(**data) for data in paid_dates
     ])
 
     invoices = json_data['invoices']
