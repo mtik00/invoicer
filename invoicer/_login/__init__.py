@@ -25,7 +25,6 @@ def login():
             verify_password(hashed_password, form.password.data)
         except Exception:
             error = True
-            raise
 
         if error:
             flash('Invalid username and/or password', 'error')

@@ -7,11 +7,6 @@ Python file).
 
 Set the following parameters:
 *   `SECRET_KEY`: You should always create your own secret key
-*   `USERNAME`: The one and only username used for login
-*   `PASSWORD_HASH`: The one and only password used for login.  This is an
-    *argon2* hash of the password.  Once you install the project requirements,
-    you can generate this with the following code:  
-    `python -c "from argon2 import PasswordHasher; ph = PasswordHasher(); print ph.hash('mysecretpassword')"`
 *   `SESSION_TIMEOUT_MINUTES`: The number of minutes before you are
     automatically logged out.  Set this to `None` or `0` to stay logged in.
 *   `WKHTMLTOPDF`: The path to the `wkhtmltopdf` binary used for converting the
@@ -31,6 +26,7 @@ To initialize the application, follow these steps:
 *   Create a virtual env and run `pip install -r requirements.txt`
 *   Create the instance folder and `instance/application.cfg`
 *   Run `flask initdb` (you may want to skip adding sample data)
+*   Run `flask add-user` to create the first user
 *   Run the application: `flask run`
 *   Open the browser
 *   Edit your profile: `http://127.0.0.1:5000/profile/update`
