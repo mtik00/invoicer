@@ -2,10 +2,10 @@ import json
 import string
 
 import arrow
-from sqlalchemy import select
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+
 
 def init_db(sample_data=False):
     # import all modules here that might define models so that
@@ -33,10 +33,13 @@ def init_db(sample_data=False):
             customer=customer1,
             submitted_date=arrow.get('20-JAN-2018', 'DD-MMM-YYYY'),
             description='2018 Website Redesign',
-            paid_date=arrow.get('07-FEB-2018', 'DD-MMM-YYYY'),
             number='1010-2018-001',
             total=6400,
-            terms=30)
+            terms=30,
+            paid_date=models.InvoicePaidDate(
+                paid_date=arrow.get('07-FEB-2018', 'DD-MMM-YYYY'),
+                description='Check 1234')
+        )
 
         db.session.add_all([
             models.Item(

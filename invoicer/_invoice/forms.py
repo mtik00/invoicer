@@ -15,5 +15,6 @@ class InvoiceForm(FlaskForm):
     customer = SelectField(u'Bill To Address', coerce=int)
     submitted_date = StringField(u'Submitted Date', id="datepicker1")
     paid_date = StringField(u'Paid Date', id="datepicker2")
+    paid_date_notes = StringField(u'Notes', validators=[Optional()])
     terms = IntegerField(u'Terms (number of days)')
     w3_theme = SelectField('Theme')

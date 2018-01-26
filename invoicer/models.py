@@ -1,7 +1,8 @@
 import arrow
 from sqlalchemy import event
 from sqlalchemy_utils.types import ArrowType
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
+
 from .database import db
 
 
@@ -67,7 +68,6 @@ class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submitted_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
-    paid_date = db.Column(ArrowType)
     due_date = db.Column(ArrowType)
     number = db.Column(db.String(50), unique=True, nullable=False)
     total = db.Column(db.Float)
@@ -77,6 +77,9 @@ class Invoice(db.Model):
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
+
+    paid_date_id = db.Column(db.Integer, db.ForeignKey('invoice_paid_dates.id', use_alter=True, name='fk_invoice_paid_dates_id'))
+    paid_date = db.relationship('InvoicePaidDate', foreign_keys=paid_date_id, post_update=True)
 
     def __repr__(self):
         return '<Invoice %r>' % (self.number)
@@ -92,7 +95,7 @@ class Invoice(db.Model):
 
         if (arrow.now() > self.due_date):
             return True
-        elif self.paid_date and (self.paid_date > self.due_date):
+        elif self.paid_date and (self.paid_date.paid_date > self.due_date):
             return True
 
         return False
@@ -141,3 +144,10 @@ class UnitPrice(db.Model):
 
     def __repr__(self):
         return '<UnitPrice %r>' % (self.description)
+
+
+class InvoicePaidDate(db.Model):
+    __tablename__ = 'invoice_paid_dates'
+    id = db.Column(db.Integer, primary_key=True)
+    paid_date = db.Column(ArrowType)
+    description = db.Column(db.String(150))

@@ -8,7 +8,8 @@
     </tr>
     {% for invoice in invoices.items -%}
     <tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';"
-    {%- if invoice.submitted_date and not invoice.paid_date %} class="pointer w3-orange"
+    {%- if invoice.overdue() and not invoice.paid_date %} class="pointer w3-red"
+    {%- elif invoice.submitted_date and not invoice.paid_date %} class="pointer w3-orange"
     {%- elif invoice.submitted_date and invoice.paid_date %} class="pointer w3-pale-green"
     {%- else %}class="pointer"
     {%- endif -%}

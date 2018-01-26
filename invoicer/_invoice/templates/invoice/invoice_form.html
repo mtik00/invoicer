@@ -34,7 +34,15 @@
     <input class="w3-input w3-border" id="submitted_date" name="submitted_date" type="text" value="{{invoice.submitted_date.format('DD-MMM-YYYY').upper()}}" disabled>
     {% else %}{{ render_field(form.submitted_date) }}{% endif %}
 
-    {{ render_field(form.paid_date) }}
+    <p>
+    <div class="w3-border w3-padding">
+        <label class="w3-text-blue" for="datepicker2">Paid Date</label>
+        <input class="w3-input w3-border" id="datepicker2" name="paid_date" type="text" value="{{form.paid_date.data}}">
+        <label class="w3-text-blue" for="paid_date_notes">Payment Notes</label>
+        <input class="w3-input w3-border" id="paid_date_notes" name="paid_date_notes" type="text" value="{{form.paid_date_notes.data}}" placeholder="e.g. Check 123">
+    </div>
+    </p>
+
     {{ render_field(form.w3_theme) }}
   <p>
     {% if invoice -%}

@@ -14,7 +14,7 @@ from premailer import Premailer
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
-from ..models import Item, Invoice, Customer, UnitPrice, Profile
+from ..models import Item, Invoice, Customer, UnitPrice, Profile, InvoicePaidDate
 from ..common import login_required, color_themes
 
 from .forms import InvoiceForm, ItemForm
@@ -64,7 +64,7 @@ def format_my_address(html=True):
     if address.email and html:
         # Prevent gmail from making this a link
         result += join_with + "<a rel='nofollow' style='text-decoration:none; color:#fff' href='#'>" + address.email + "</a>"
-    elif  address.email:
+    elif address.email:
         result += join_with + address.email
 
     return result
@@ -158,7 +158,8 @@ def update(invoice_number):
     form = InvoiceForm(
         description=invoice.description,
         submitted_date=invoice.submitted_date.format('DD-MMM-YYYY').upper() if invoice.submitted_date else None,
-        paid_date=invoice.paid_date.format('DD-MMM-YYYY').upper() if invoice.paid_date else None,
+        paid_date=invoice.paid_date.paid_date.format('DD-MMM-YYYY').upper() if invoice.paid_date else '',
+        paid_date_notes=invoice.paid_date.description if invoice.paid_date else '',
         terms=invoice.terms,
     )
     form.customer.choices = addr_choices
@@ -178,7 +179,11 @@ def update(invoice_number):
 
             paid_date = None
             if form.paid_date.data:
-                paid_date = arrow.get(form.paid_date.data, 'DD-MMM-YYYY')
+                paid_date = InvoicePaidDate(
+                    paid_date=arrow.get(form.paid_date.data, 'DD-MMM-YYYY'),
+                    description=form.paid_date_notes.data
+                )
+                db.session.flush()
 
             terms = invoice.terms
             if form.terms.data:
@@ -188,15 +193,13 @@ def update(invoice_number):
             if submitted_date and terms:
                 due_date = submitted_date.replace(days=+terms)
 
-            Invoice.query.filter(Invoice.number == invoice_number).update({
-                'description': form.description.data,
-                'customer_id': form.customer.data,
-                'submitted_date': submitted_date,
-                'paid_date': paid_date,
-                'terms': terms,
-                'due_date': due_date,
-                'w3_theme': form.w3_theme.data,
-            })
+            invoice.description = form.description.data
+            invoice.customer_id = form.customer.data
+            invoice.submitted_date = submitted_date
+            invoice.paid_date = paid_date
+            invoice.terms = terms
+            invoice.due_date = due_date
+            invoice.w3_theme = form.w3_theme.data
 
             db.session.commit()
 
@@ -271,7 +274,10 @@ def create():
 
         paid_date = None
         if form.paid_date.data:
-            paid_date = arrow.get(form.paid_date.data, 'DD-MMM-YYYY')
+            paid_date = InvoicePaidDate(
+                paid_date=arrow.get(form.paid_date.data, 'DD-MMM-YYYY'),
+                description=form.paid_date_notes.data
+            )
 
         db.session.add(
             Invoice(
@@ -301,6 +307,10 @@ def delete(invoice_number):
 
     invoice = Invoice.query.filter(Invoice.number == invoice_number).first()
     items = Item.query.filter(Item.invoice == invoice).all()
+
+    if invoice.paid_date:
+        pd = InvoicePaidDate.query.get(invoice.paid_date.id)
+        db.session.delete(pd)
 
     db.session.delete(invoice)
 
