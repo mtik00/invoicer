@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 from ..common import login_required, color_themes
-from ..models import Profile
+from ..models import Profile, User
 from ..database import db
 from .forms import ProfileForm
 
@@ -17,8 +17,9 @@ def index():
 @profile_page.route('/edit', methods=["GET", "POST"])
 @login_required
 def edit():
-    profile = Profile.query.get(1)
-    form = ProfileForm(request.form, obj=profile)
+    user = User.query.get(session['user_id'])
+    # profile = user.profile
+    form = ProfileForm(request.form, obj=user.profile)
 
     theme_choices = [(x, x) for x in color_themes]
     form.w3_theme.choices = theme_choices
@@ -26,26 +27,26 @@ def edit():
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
-        form.w3_theme.process_data(profile.w3_theme if profile else 'blue-grey')
-        form.w3_theme_invoice.process_data(profile.w3_theme_invoice if profile else 'dark-grey')
+        form.w3_theme.process_data(user.profile.w3_theme if user.profile else 'blue-grey')
+        form.w3_theme_invoice.process_data(user.profile.w3_theme_invoice if user.profile else 'dark-grey')
 
     if form.validate_on_submit():
         if 'cancel' in request.form:
             flash('invoice updated canceled', 'warning')
         else:
-            if not profile:
-                profile = Profile()
+            if not user.profile:
+                user.profile = Profile()
 
             form['state'].data = form['state'].data.upper()
-            form.populate_obj(profile)
+            form.populate_obj(user.profile)
 
-            db.session.add(profile)
+            db.session.add(user)
             db.session.commit()
 
-            if profile.w3_theme:
-                current_app.config['W3_THEME'] = profile.w3_theme
+            if user.profile.w3_theme:
+                current_app.config['W3_THEME'] = user.profile.w3_theme
 
             flash('profile updated', 'success')
         return redirect(url_for('profile_page.index'))
 
-    return render_template('profile/profile_form.html', form=form, profile=profile)
+    return render_template('profile/profile_form.html', form=form, profile=user.profile)

@@ -157,4 +157,7 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150))
-    hashed_password = db.Column(db.String(100))  # FYI: Argon2 hashes to 73 chars
+    hashed_password = db.Column(db.String(100))  # FYI: Argon2 hashes to 73 chars w/ single-digit time_cost
+
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id', use_alter=True, name='fk_profile_id'))
+    profile = db.relationship('Profile', foreign_keys=profile_id, post_update=True)

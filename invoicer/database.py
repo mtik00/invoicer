@@ -19,18 +19,18 @@ def init_db(sample_data=False):
     db.create_all()
 
     if sample_data:
-        user = models.User(
-            username='admin',
-            hashed_password=hash_password('default')
-        )
-        db.session.add(user)
 
         addr = models.Profile(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45
         )
-        db.session.add_all([addr])
+        user = models.User(
+            username='admin',
+            hashed_password=hash_password('default'),
+            profile=addr
+        )
+        db.session.add_all([addr, user])
 
         customer1 = models.Customer(
             name1='Some Employer', addrline1='111 9th Ave N', city='New York',

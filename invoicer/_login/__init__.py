@@ -32,6 +32,7 @@ def login():
         else:
             if not error:
                 session['logged_in'] = True
+                session['user_id'] = user.id
                 flash('You were logged in', 'success')
 
                 if 'next' in request.form:
