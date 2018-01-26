@@ -12,11 +12,23 @@
     </div>
     <div class="input-group">
         <span class="input-group-addon w3-padding"><i class="fa fa-key fa-fw"></i></span>
-        <input class="w3-padding" name="password" placeholder="password"
-        {%- if config['DEBUG'] %}type="text" {% else %}type="password" {% endif -%}
-        value="">
+        <input class="w3-padding" id="password" name="password" placeholder="password" type="password" value="">
+        <span class="icon"><i class="fa fa-eye-slash" aria-hidden="true"></i></span>
     </div>
 
     <p><input type=submit value="Login" class="w3-btn w3-theme-action"></p>
 </form>
+{% endblock %}
+
+{% block extrascripts %}
+<script>
+$( document ).ready(function() {
+    $('.icon').hover(function () {
+        $('#password').attr('type', 'text');
+    }, function () {
+        $('#password').attr('type', 'password');
+    });
+});
+
+</script>
 {% endblock %}
