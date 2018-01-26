@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block body %}
 <h1>Invoicer Login</h1>
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
 <form class="w3-container w3-col m5" action="{{ url_for('login_page.login') }}" method="POST">
+    {{ form.hidden_tag() }}
     <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
 
     <div class="input-group">

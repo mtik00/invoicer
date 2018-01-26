@@ -1,6 +1,7 @@
 from argon2 import PasswordHasher
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 
+from .forms import LoginForm
 from ..common import login_required
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
@@ -8,27 +9,32 @@ login_page = Blueprint('login_page', __name__, template_folder='templates')
 
 @login_page.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
-    if request.method == 'POST':
+    form = LoginForm(request.form)
+    error = False
+
+    if form.validate_on_submit():
         try:
             ph = PasswordHasher()
-            ph.verify(current_app.config['PASSWORD_HASH'], request.form['password'])
+            ph.verify(current_app.config['PASSWORD_HASH'], form.password.data)
         except Exception:
-            error = 'Invalid username/password'
+            error = True
 
-        if request.form['username'] != current_app.config['USERNAME']:
-            error = 'Invalid username/password'
+        if form.username.data != current_app.config['USERNAME']:
+            error = True
 
-        if not error:
-            session['logged_in'] = True
-            flash('You were logged in', 'success')
+        if error:
+            flash('Invalid username and/or password', 'error')
+        else:
+            if not error:
+                session['logged_in'] = True
+                flash('You were logged in', 'success')
 
-            if 'next' in request.form:
-                return redirect(request.form['next'])
+                if 'next' in request.form:
+                    return redirect(request.form['next'])
 
-            return redirect(url_for('index'))
+                return redirect(url_for('index'))
 
-    return render_template('login/login.html', error=error)
+    return render_template('login/login.html', form=form)
 
 
 @login_page.route('/logout')
