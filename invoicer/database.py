@@ -4,7 +4,7 @@ import string
 import arrow
 from flask_sqlalchemy import SQLAlchemy
 
-from .password import password_hasher
+from .password import hash_password
 
 db = SQLAlchemy()
 
@@ -19,6 +19,12 @@ def init_db(sample_data=False):
     db.create_all()
 
     if sample_data:
+        user = models.User(
+            username='admin',
+            hashed_password=hash_password('default')
+        )
+        db.session.add(user)
+
         addr = models.Profile(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
@@ -364,7 +370,7 @@ def add_user(username, password):
     Adds a new user to the database.
     """
     import models
-    hashed_password = password_hasher.hash(password)
+    hashed_password = hash_password(password)
 
     user = models.User(
         username=username,

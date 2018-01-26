@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 
 from .forms import LoginForm
 from ..common import login_required
-from ..password import password_hasher
+from ..password import verify_password
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
 
@@ -14,7 +14,7 @@ def login():
 
     if form.validate_on_submit():
         try:
-            password_hasher.verify(current_app.config['PASSWORD_HASH'], form.password.data)
+            verify_password(current_app.config['PASSWORD_HASH'], form.password.data)
         except Exception:
             error = True
 
