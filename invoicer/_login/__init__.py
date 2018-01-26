@@ -1,8 +1,8 @@
-from argon2 import PasswordHasher
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 
 from .forms import LoginForm
 from ..common import login_required
+from ..password import password_hasher
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
 
@@ -14,8 +14,7 @@ def login():
 
     if form.validate_on_submit():
         try:
-            ph = PasswordHasher()
-            ph.verify(current_app.config['PASSWORD_HASH'], form.password.data)
+            password_hasher.verify(current_app.config['PASSWORD_HASH'], form.password.data)
         except Exception:
             error = True
 

@@ -4,6 +4,8 @@ import string
 import arrow
 from flask_sqlalchemy import SQLAlchemy
 
+from .password import password_hasher
+
 db = SQLAlchemy()
 
 
@@ -354,4 +356,20 @@ def import_clean_json(path):
         models.UnitPrice(**data) for data in unit_prices
     ])
 
+    db.session.commit()
+
+
+def add_user(username, password):
+    """
+    Adds a new user to the database.
+    """
+    import models
+    hashed_password = password_hasher.hash(password)
+
+    user = models.User(
+        username=username,
+        hashed_password=hashed_password
+    )
+
+    db.session.add(user)
     db.session.commit()

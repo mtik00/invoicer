@@ -151,3 +151,10 @@ class InvoicePaidDate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     paid_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150))
+    hashed_password = db.Column(db.String(100))  # FYI: Argon2 hashes to 73 chars

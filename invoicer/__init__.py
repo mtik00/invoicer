@@ -9,8 +9,8 @@ from flask import render_template, url_for, redirect
 
 from .app import create_app
 from .submitter import sendmail
-from .database import init_db, export as export_db, import_clean_json
-from .models import Invoice, Customer
+from .database import init_db, export as export_db, import_clean_json, add_user
+from .models import Invoice, Customer, User
 from .common import login_required
 
 app = create_app()
@@ -167,3 +167,12 @@ def import_json(path):
     init_db(False)
     import_clean_json(path)
     click.echo('JSON data has been imported')
+
+
+@app.cli.command('add-user')
+@click.option('--username', prompt=True)
+@click.option('--password', prompt=True, hide_input=True,
+              confirmation_prompt=True)
+def new_user(username, password):
+    add_user(username=username, password=password)
+    click.echo("User [%s] has been added to the database" % username)
