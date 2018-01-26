@@ -15,7 +15,7 @@ Paid Date: {{invoice.paid_date.format('DD-MMM-YYYY')|upper}} {% if overdue %}OVE
 Invoice Total: {{invoice.total|currency}}
 
 {% for item in invoice.items -%}
-{{loop.index}}) {% if item.date -%}{{item.date.format('DD-MMM-YYYY')}}: {% endif %}{{item.description}}
+{{loop.index}}) {% if item.date -%}{{item.date.format('DD-MMM-YYYY')|upper}}: {% endif %}{{item.description}}
     {{item.unit_price|currency}}{% if item.units %}/{{item.units}}{% endif %} * {{item.quantity}} = {{ (item.unit_price * item.quantity) | currency}}
 {% endfor %}
 
