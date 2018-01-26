@@ -1,7 +1,7 @@
 import arrow
 from sqlalchemy import event
 from sqlalchemy_utils.types import ArrowType
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 
 from .database import db
 
@@ -152,6 +152,9 @@ class InvoicePaidDate(db.Model):
     paid_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
 
+    def __repr__(self):
+        return '<InvoicePaidDate %r>' % (self.paid_date)
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -161,3 +164,6 @@ class User(db.Model):
 
     profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id', use_alter=True, name='fk_profile_id'))
     profile = db.relationship('Profile', foreign_keys=profile_id, post_update=True)
+
+    def __repr__(self):
+        return '<User %r>' % (self.username)
