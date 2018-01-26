@@ -11,6 +11,7 @@
     {% block extrahead %}{% endblock%}
 </head>
 <body>
+    {% if session['logged_in'] %}
     {% if config['DEBUG'] %}<div class="w3-bar w3-red w3-center">DEBUG MODE</div>{% endif %}
     
     <div class="w3-bar w3-theme-dark">
@@ -27,6 +28,7 @@
         <a href="{{url_for('profile_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right">Profile</a>
         <a href="#"><i class="w3-bar-item fa fa-cogs w3-right" aria-hidden="true"></i></a>
     </div>
+    {% endif %}
     <div class=w3-container>
         <p></p>
         {% for category, message in get_flashed_messages(with_categories=True) %}
