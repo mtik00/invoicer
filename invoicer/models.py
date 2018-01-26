@@ -121,14 +121,14 @@ class Invoice(db.Model):
         return None
 
 
-# NOTE: I can't get these to work in the application, but they work during
-# initdb.
 @event.listens_for(Invoice, 'before_insert')
 def receive_before_insert(mapper, connection, invoice):
     if (invoice.submitted_date and invoice.terms):
         invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
 
 
+# NOTE: This will not fire if you use Invoice.query.filter(...).update({}).  It
+# will fire, however, if you use: `invoice.description = 'asdf'; db.session.commit()`
 @event.listens_for(Invoice, 'before_update')
 def receive_before_update(mapper, connection, invoice):
     if (invoice.submitted_date and invoice.terms):
