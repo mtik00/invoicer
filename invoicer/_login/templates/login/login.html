@@ -5,12 +5,12 @@
     <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
 
     <div class="input-group">
-        <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-        <input class="form-control" type="text" name="username" placeholder="Login">
+        <span class="input-group-addon w3-padding"><i class="fa fa-envelope-o fa-fw"></i></span>
+        <input class="w3-padding" type="text" name="username" placeholder="username">
     </div>
     <div class="input-group">
-        <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
-        <input class="form-control" name="password" placeholder="Password"
+        <span class="input-group-addon w3-padding"><i class="fa fa-key fa-fw"></i></span>
+        <input class="w3-padding" name="password" placeholder="password"
         {%- if config['DEBUG'] %}type="text" {% else %}type="password" {% endif -%}
         value="">
     </div>
