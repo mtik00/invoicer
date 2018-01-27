@@ -444,12 +444,14 @@ def next_invoice_number(customer_id):
     Returns the next available invoice number in the format:
         YYYY-<customer number>-<invoice number>
     """
-    customer = Customer.query.filter(Customer.id == customer_id).first()
+    customer = Customer.query.get(customer_id)
     number = customer.number
 
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
     ilike = '%s%%' % this_years_invoice_numbers
-    numbers = [x.number for x in Invoice.query.filter(Invoice.number.ilike(ilike)).filter_by(user_id=session['user_id']).all()]
+    numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).filter(Invoice.number.ilike(ilike)).all()]
+
+    # import pdb; pdb.set_trace()
 
     last = 0
     for number in numbers:

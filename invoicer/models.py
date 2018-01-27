@@ -40,6 +40,9 @@ class Customer(db.Model):
     items = relationship("Item", back_populates="customer")
     w3_theme = db.Column(db.String(120))
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = relationship("User", back_populates="customers")
+
     def __repr__(self):
         return '<Customer %r>' % (self.name1)
 
@@ -169,6 +172,7 @@ class User(db.Model):
     hashed_password = db.Column(db.String(100))  # FYI: Argon2 hashes to 73 chars w/ single-digit time_cost
     invoices = relationship("Invoice", back_populates="user")
     units = relationship("UnitPrice", back_populates="user")
+    customers = relationship("Customer", back_populates="user")
 
     profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id', use_alter=True, name='fk_profile_id'))
     profile = db.relationship('Profile', foreign_keys=profile_id, post_update=True)

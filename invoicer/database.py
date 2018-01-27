@@ -35,7 +35,7 @@ def init_db(sample_data=False):
         customer1 = models.Customer(
             name1='Some Employer', addrline1='111 9th Ave N', city='New York',
             state='NY', zip='11222', email='boss|mike|larry@example.com',
-            terms=30, number=1010)
+            terms=30, number=1010, user=user)
 
         invoice1 = models.Invoice(
             customer=customer1,
@@ -256,7 +256,8 @@ def init_db(sample_data=False):
 
         customer2 = models.Customer(
             name1='Employer #2', addrline1='1234 45th St', city='New York',
-            state='NY', zip='11133', email='billing@example.com', number=1020)
+            state='NY', zip='11133', email='billing@example.com', number=1020,
+            user=user)
 
         invoice4 = models.Invoice(
             customer=customer2,
@@ -265,7 +266,8 @@ def init_db(sample_data=False):
             paid_date=None,
             number='1020-2018-001',
             total=2400,
-            terms=45)
+            terms=45,
+            user=user)
 
         db.session.add_all([
             models.Item(
