@@ -46,7 +46,8 @@ def init_db(sample_data=False):
             terms=30,
             paid_date=models.InvoicePaidDate(
                 paid_date=arrow.get('07-FEB-2018', 'DD-MMM-YYYY'),
-                description='Check 1234')
+                description='Check 1234'),
+            user=user
         )
 
         db.session.add_all([
@@ -79,7 +80,8 @@ def init_db(sample_data=False):
             paid_date=None,
             number='1010-2018-002',
             total=8000,
-            terms=45)
+            terms=45,
+            user=user)
 
         db.session.add_all([
             models.Item(
@@ -111,7 +113,8 @@ def init_db(sample_data=False):
             paid_date=None,
             number='1010-2018-003',
             total=1600,
-            terms=22)
+            terms=22,
+            user=user)
 
         db.session.add_all([
             models.Item(

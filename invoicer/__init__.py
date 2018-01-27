@@ -5,12 +5,12 @@ import zipfile
 
 import click
 import arrow
-from flask import render_template, url_for, redirect
+from flask import render_template, url_for, redirect, session
 
 from .app import create_app
 from .submitter import sendmail
 from .database import init_db, export as export_db, import_clean_json, add_user
-from .models import Invoice, Customer
+from .models import Invoice, Customer, User
 from .common import login_required
 
 app = create_app()
@@ -20,7 +20,7 @@ app = create_app()
 @login_required
 def paginate_index(page):
     try:
-        invoices = Invoice.query.order_by(Invoice.id.desc()).paginate(page=page, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
+        invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=page, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
     except Exception:
         return redirect(url_for('index'))
 
@@ -33,7 +33,7 @@ def paginate_index(page):
 @app.route('/')
 @login_required
 def index():
-    invoices = Invoice.query.order_by(Invoice.id.desc()).paginate(page=1, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
+    invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
     return render_template(
         'index.html',
         invoices=invoices

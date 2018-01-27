@@ -1,4 +1,3 @@
-import os
 import re
 from cStringIO import StringIO
 
@@ -7,16 +6,15 @@ from pdfkit.configuration import Configuration
 import arrow
 from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
-    Response)
+    Response, session)
 from premailer import Premailer
 
-# from .app import create_app
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
-from ..models import Item, Invoice, Customer, UnitPrice, Profile, InvoicePaidDate
+from ..models import (
+    Item, Invoice, Customer, UnitPrice, Profile, InvoicePaidDate, User)
 from ..common import login_required, color_themes
-
 from .forms import InvoiceForm, ItemForm
 
 
@@ -53,7 +51,7 @@ def format_address(customer_id, html=True):
 
 
 def format_my_address(html=True):
-    address = Profile.query.first()
+    address = User.query.get(session['user_id']).profile
     join_with = '<br>' if html else '\n'
 
     result = join_with.join([
@@ -73,9 +71,9 @@ def format_my_address(html=True):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_number):
-    form = EmptyForm()
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     items = Item.query.filter(Item.invoice_id == invoice.id)
+    form = EmptyForm()
 
     if form.validate_on_submit():
         item_ids_to_delete = [y for x, y in request.form.items() if x.startswith('item_')]
@@ -104,7 +102,7 @@ def delete_items(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/create', methods=["GET", "POST"])
 @login_required
 def create_item(invoice_number):
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     form = ItemForm(quantity=1)
     unit_prices = UnitPrice.query.all()
 
@@ -148,7 +146,7 @@ def create_item(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/update', methods=["GET", "POST"])
 @login_required
 def update(invoice_number):
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
 
     customers = Customer.query.all()
     addr_choices = [(x.id, x.name1) for x in customers]
@@ -208,7 +206,7 @@ def update(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
 @login_required
 def invoice_by_number(invoice_number):
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     if not invoice:
         flash('Unknown invoice', 'error')
         return redirect(url_for('index'))
@@ -278,6 +276,7 @@ def create():
                 terms=terms,
                 submitted_date=submitted_date,
                 paid_date=paid_date,
+                user=User.query.get(session['user_id'])
             )
         )
         db.session.commit()
@@ -295,7 +294,7 @@ def delete(invoice_number):
         flash('Invalid delete request', 'error')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     items = Item.query.filter(Item.invoice == invoice).all()
 
     if invoice.paid_date:
@@ -345,7 +344,7 @@ def get_address_emails(customer_id):
 
 @login_required
 def mark_invoice_submitted(invoice_number):
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
 
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
@@ -368,7 +367,7 @@ def submit_invoice(invoice_number):
     if 'mark' in request.form:
         return mark_invoice_submitted(invoice_number)
 
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
 
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
@@ -420,11 +419,12 @@ def submit_invoice(invoice_number):
 
 
 def get_invoice_ids():
-    return [x.id for x in Invoice.query.all()]
+    return [x.id for x in Invoice.query.filter_by(user_id=session['user_id']).all()]
 
 
 def last_invoice_id():
-    invoice = Invoice.query.order_by(Invoice.id.desc()).first()
+    invoice = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).first()
+
     if invoice:
         return invoice.id
 
@@ -432,7 +432,7 @@ def last_invoice_id():
 
 
 def last_invoice_number():
-    invoice = Invoice.query.order_by(Invoice.id.desc()).first()
+    invoice = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).first()
     if invoice:
         return invoice.number
 
@@ -449,7 +449,7 @@ def next_invoice_number(customer_id):
 
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
     ilike = '%s%%' % this_years_invoice_numbers
-    numbers = [x.number for x in Invoice.query.filter(Invoice.number.ilike(ilike)).all()]
+    numbers = [x.number for x in Invoice.query.filter(Invoice.number.ilike(ilike)).filter_by(user_id=session['user_id']).all()]
 
     last = 0
     for number in numbers:
@@ -479,7 +479,7 @@ def raw_invoice(invoice_number):
     """
     Displays a single invoice
     """
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.get(invoice.customer_id)
     customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
@@ -503,7 +503,7 @@ def text_invoice(invoice_number):
     """
     Displays a single invoice
     """
-    invoice = Invoice.query.filter(Invoice.number == invoice_number).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.get(invoice.customer_id)
     customer_address = format_address(invoice.customer_id, html=False)
     submit_address = format_my_address(html=False)

@@ -78,6 +78,9 @@ class Invoice(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = relationship("User", back_populates="invoices")
+
     paid_date_id = db.Column(db.Integer, db.ForeignKey('invoice_paid_dates.id', use_alter=True, name='fk_invoice_paid_dates_id'))
     paid_date = db.relationship('InvoicePaidDate', foreign_keys=paid_date_id, post_update=True)
 
@@ -161,6 +164,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150))
     hashed_password = db.Column(db.String(100))  # FYI: Argon2 hashes to 73 chars w/ single-digit time_cost
+    invoices = relationship("Invoice", back_populates="user")
 
     profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id', use_alter=True, name='fk_profile_id'))
     profile = db.relationship('Profile', foreign_keys=profile_id, post_update=True)
