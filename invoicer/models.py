@@ -145,6 +145,9 @@ class UnitPrice(db.Model):
     unit_price = db.Column(db.Float)
     units = db.Column(db.String(50))
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = relationship("User", back_populates="units")
+
     def __repr__(self):
         return '<UnitPrice %r>' % (self.description)
 
@@ -165,6 +168,7 @@ class User(db.Model):
     username = db.Column(db.String(150))
     hashed_password = db.Column(db.String(100))  # FYI: Argon2 hashes to 73 chars w/ single-digit time_cost
     invoices = relationship("Invoice", back_populates="user")
+    units = relationship("UnitPrice", back_populates="user")
 
     profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id', use_alter=True, name='fk_profile_id'))
     profile = db.relationship('Profile', foreign_keys=profile_id, post_update=True)

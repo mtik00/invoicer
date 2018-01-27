@@ -291,10 +291,10 @@ def init_db(sample_data=False):
         ])
 
         db.session.add_all([
-            models.UnitPrice(description='Design', unit_price=200, units='hr'),
-            models.UnitPrice(description='Development', unit_price=250, units='hr'),
-            models.UnitPrice(description='Maintenance', unit_price=50, units='hr'),
-            models.UnitPrice(description='Employer #2: Design', unit_price=100, units='hr'),
+            models.UnitPrice(description='Design', unit_price=200, units='hr', user=user),
+            models.UnitPrice(description='Development', unit_price=250, units='hr', user=user),
+            models.UnitPrice(description='Maintenance', unit_price=50, units='hr', user=user),
+            models.UnitPrice(description='Employer #2: Design', unit_price=100, units='hr', user=user),
             models.UnitPrice(description='Employer #2: Development', unit_price=150, units='hr'),
             models.UnitPrice(description='Employer #2: Maintenance', unit_price=75, units='hr'),
         ])
