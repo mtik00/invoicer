@@ -131,6 +131,9 @@ class Invoice(db.Model):
 
 @event.listens_for(Invoice, 'before_insert')
 def receive_before_insert(mapper, connection, invoice):
+    if isinstance(invoice.submitted_date, basestring):
+        invoice.submitted_date = arrow.get(invoice.submitted_date)
+
     if (invoice.submitted_date and invoice.terms):
         invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
 
@@ -139,6 +142,9 @@ def receive_before_insert(mapper, connection, invoice):
 # will fire, however, if you use: `invoice.description = 'asdf'; db.session.commit()`
 @event.listens_for(Invoice, 'before_update')
 def receive_before_update(mapper, connection, invoice):
+    if isinstance(invoice.submitted_date, basestring):
+        invoice.submitted_date = arrow.get(invoice.submitted_date)
+
     if (invoice.submitted_date and invoice.terms):
         invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
 

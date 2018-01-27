@@ -318,7 +318,7 @@ def export(path):
 
     # May need to change this if it starts being wierd.  This is also dependent
     # on all of the models located in `models`.
-    model_names = [x for x in dir(models) if (x[0] in string.uppercase) and ('Type' not in x)]
+    model_names = [x for x in dir(models) if (x[0] in string.uppercase) and ('Type' not in x) and ('Constraint' not in x)]
     if not model_names:
         raise Exception('No model names found in `models`')
 
@@ -342,37 +342,37 @@ def import_clean_json(path):
     with open(path) as fh:
         json_data = json.load(fh)
 
-    profiles = json_data['profiles']
+    profiles = json_data.get('profiles', {})
     db.session.add_all([
         models.Profile(**data) for data in profiles
     ])
 
-    users = json_data['users']
+    users = json_data.get('users', {})
     db.session.add_all([
         models.User(**data) for data in users
     ])
 
-    customers = json_data['customers']
+    customers = json_data.get('customers', {})
     db.session.add_all([
         models.Customer(**data) for data in customers
     ])
 
-    paid_dates = json_data['invoice_paid_dates']
+    paid_dates = json_data.get('invoice_paid_dates', {})
     db.session.add_all([
         models.InvoicePaidDate(**data) for data in paid_dates
     ])
 
-    invoices = json_data['invoices']
+    invoices = json_data.get('invoices', {})
     db.session.add_all([
         models.Invoice(**data) for data in invoices
     ])
 
-    items = json_data['items']
+    items = json_data.get('items', {})
     db.session.add_all([
         models.Item(**data) for data in items
     ])
 
-    unit_prices = json_data['unit_prices']
+    unit_prices = json_data.get('unit_prices', {})
     db.session.add_all([
         models.UnitPrice(**data) for data in unit_prices
     ])
