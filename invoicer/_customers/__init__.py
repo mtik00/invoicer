@@ -73,9 +73,6 @@ def create():
             flash('The customer number "%s" is already in use' % form.number.data, 'error')
             form.number.data = get_next_customer_number()
             form.number.raw_data = [form.number.data]
-            # form.number.process_data(get_next_customer_number())
-            # form = CustomerForm(request.form, number=get_next_customer_number())
-            # form.w3_theme.choices = [(x, x) for x in color_themes]
         else:
             customer = Customer()
             form.populate_obj(customer)
@@ -86,8 +83,6 @@ def create():
             flash('address added', 'success')
             return redirect(url_for('customers_page.index'))
 
-    # print form.number.data
-    # import pdb; pdb.set_trace()
     return render_template('customers/customer_form.html', form=form)
 
 
