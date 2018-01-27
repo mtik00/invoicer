@@ -28,8 +28,10 @@ def init_db(sample_data=False):
         user = models.User(
             username='admin',
             hashed_password=hash_password('default'),
-            profile=addr
+            profile=addr,
+            application_settings=models.ApplicationSettings(debug_mode=False)
         )
+
         db.session.add_all([addr, user])
 
         customer1 = models.Customer(
@@ -391,6 +393,9 @@ def add_user(username, password):
         username=username,
         hashed_password=hashed_password
     )
+
+    default_settings = models.ApplicationSettings(debug_mode=False)
+    user.application_settings = default_settings
 
     db.session.add(user)
     db.session.commit()

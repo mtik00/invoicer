@@ -185,5 +185,14 @@ class User(db.Model):
     profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id', use_alter=True, name='fk_profile_id'))
     profile = db.relationship('Profile', foreign_keys=profile_id, post_update=True)
 
+    application_settings_id = db.Column(db.Integer, db.ForeignKey('application_settings.id', use_alter=True, name='fk_application_settings_id'))
+    application_settings = db.relationship('ApplicationSettings', foreign_keys=application_settings_id, post_update=True)
+
     def __repr__(self):
         return '<User %r>' % (self.username)
+
+
+class ApplicationSettings(db.Model):
+    __tablename__ = 'application_settings'
+    id = db.Column(db.Integer, primary_key=True)
+    debug_mode = db.Column(db.Boolean)
