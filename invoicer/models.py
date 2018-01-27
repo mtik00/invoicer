@@ -1,5 +1,5 @@
 import arrow
-from sqlalchemy import event
+from sqlalchemy import event, UniqueConstraint
 from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
 
@@ -25,8 +25,10 @@ class Profile(db.Model):
 
 class Customer(db.Model):
     __tablename__ = 'customers'
+    __table_args__ = (UniqueConstraint('user_id', 'number', name='user_number'),)
+
     id = db.Column(db.Integer, primary_key=True)
-    name1 = db.Column(db.String(50), unique=True)
+    name1 = db.Column(db.String(50))
     name2 = db.Column(db.String(50))
     addrline1 = db.Column(db.String(50))
     addrline2 = db.Column(db.String(50))
@@ -35,7 +37,7 @@ class Customer(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.Integer)
-    number = db.Column(db.Integer, unique=True, nullable=False)
+    number = db.Column(db.Integer, nullable=False)
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
     w3_theme = db.Column(db.String(120))

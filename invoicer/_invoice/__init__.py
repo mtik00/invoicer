@@ -12,8 +12,7 @@ from premailer import Premailer
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
-from ..models import (
-    Item, Invoice, Customer, UnitPrice, Profile, InvoicePaidDate, User)
+from ..models import Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User
 from ..common import login_required, color_themes
 from .forms import InvoiceForm, ItemForm
 
@@ -104,7 +103,7 @@ def delete_items(invoice_number):
 def create_item(invoice_number):
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     form = ItemForm(quantity=1)
-    unit_prices = UnitPrice.query.all()
+    unit_prices = UnitPrice.query.filter_by(user_id=session['user_id']).all()
 
     unit_price_choices = [
         (x.id, "%d: %s ($%.02f/%s)" % (x.id, x.description, x.unit_price, x.units))
@@ -113,7 +112,7 @@ def create_item(invoice_number):
     form.unit_price.choices = unit_price_choices
 
     if form.validate_on_submit():
-        unit_price = UnitPrice.query.filter(UnitPrice.id == request.form['unit_price']).first()
+        unit_price = UnitPrice.query.filter_by(id=request.form['unit_price']).first_or_404()
 
         date = arrow.now()
         if form.date.data:
@@ -131,9 +130,9 @@ def create_item(invoice_number):
 
         db.session.commit()
 
-        items = Item.query.filter(Item.invoice_id == invoice.id).all()
+        items = Item.query.filter_by(invoice_id=invoice.id).all()
         item_total = sum([x.quantity * x.unit_price for x in items])
-        Invoice.query.filter(Invoice.id == invoice.id).update({'total': item_total})
+        Invoice.query.filter_by(id=invoice.id).update({'total': item_total})
 
         db.session.commit()
 
@@ -148,9 +147,8 @@ def create_item(invoice_number):
 def update(invoice_number):
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
 
-    customers = Customer.query.all()
+    customers = Customer.query.filter_by(user_id=session['user_id']).all()
     addr_choices = [(x.id, x.name1) for x in customers]
-
     theme_choices = [(x, x) for x in color_themes]
 
     form = InvoiceForm(
@@ -244,16 +242,21 @@ def invoice_by_number(invoice_number):
 @login_required
 def create():
     form = InvoiceForm(request.form)
-    customers = Customer.query.all()
+    customers = Customer.query.filter_by(user_id=session['user_id']).all()
+
+    if not customers:
+        flash('You must add at least 1 customer before creating invoices', 'error')
+        return redirect(url_for('customers_page.create'))
+
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
     form.w3_theme.choices = [(x, x) for x in color_themes]
-    me = Profile.query.get(1)
+    me = User.query.get(session['user_id']).profile
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
         number = next_invoice_number(customer_id)
-        customer = Customer.query.get(customer_id)
+        customer = Customer.query.filter_by(id=customer_id, user_id=session['user_id']).first_or_404()
 
         submitted_date = None
         if form.submitted_date.data:
@@ -295,7 +298,7 @@ def delete(invoice_number):
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    items = Item.query.filter(Item.invoice == invoice).all()
+    items = Item.query.filter_by(invoice_id=invoice.id).all()
 
     if invoice.paid_date:
         pd = InvoicePaidDate.query.get(invoice.paid_date.id)
@@ -399,7 +402,7 @@ def submit_invoice(invoice_number):
             sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
             to=email_to,
             cc=[current_app.config['EMAIL_USERNAME']],
-            subject='Invoice %s from %s' % (invoice.number, Profile.query.get(1).full_name),
+            subject='Invoice %s from %s' % (invoice.number, User.query.get(session['user_id']).profile.full_name),
             server=current_app.config['EMAIL_SERVER'],
             html_body=Premailer(html_text, cssutils_logging_level='CRITICAL').transform(),
             text_body=raw_text,
@@ -486,7 +489,7 @@ def raw_invoice(invoice_number):
     customer_address = format_address(invoice.customer_id)
     submit_address = format_my_address()
 
-    terms = invoice.terms or customer.terms or Profile.query.get(1).terms
+    terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
 
     return render_template(
         'invoice/w3-invoice.html',
@@ -510,7 +513,7 @@ def text_invoice(invoice_number):
     customer_address = format_address(invoice.customer_id, html=False)
     submit_address = format_my_address(html=False)
 
-    terms = invoice.terms or customer.terms or Profile.query.get(1).terms
+    terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
 
     return render_template(
         'invoice/text-invoice.txt',

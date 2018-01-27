@@ -10,7 +10,7 @@ profile_page = Blueprint('profile_page', __name__, template_folder='templates')
 @profile_page.route('/')
 @login_required
 def index():
-    profile = Profile.query.get(1)
+    profile = User.query.get(session['user_id']).profile
     return render_template('profile/index.html', profile=profile)
 
 
@@ -18,7 +18,6 @@ def index():
 @login_required
 def edit():
     user = User.query.get(session['user_id'])
-    # profile = user.profile
     form = ProfileForm(request.form, obj=user.profile)
 
     theme_choices = [(x, x) for x in color_themes]
