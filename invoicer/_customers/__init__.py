@@ -14,8 +14,9 @@ def customer_has_invoices(customer_id):
 
 
 def get_next_customer_number():
-    starting = current_app.config['STARTING_CUSTOMER_NUMBER']
-    increment = current_app.config['CUSTOMER_INCREMENT']
+    user = User.query.get(session['user_id'])
+    starting = user.profile.starting_customer_number
+    increment = user.profile.customer_increment
 
     numbers = [round(float(x.number), -1) for x in Customer.query.filter_by(user_id=session['user_id']).all()]
 

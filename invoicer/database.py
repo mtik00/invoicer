@@ -38,14 +38,16 @@ def init_db(sample_data=False):
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first()
+            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first(),
         )
 
         user = models.User(
             username='admin',
             hashed_password=hash_password('default'),
             profile=profile,
-            application_settings=models.ApplicationSettings(debug_mode=False),
+            application_settings=models.ApplicationSettings(
+                debug_mode=False,
+            ),
         )
 
         customer1 = models.Customer(
@@ -285,6 +287,7 @@ def add_user(username, password):
     )
 
     default_settings = models.ApplicationSettings(debug_mode=False)
+
     user.application_settings = default_settings
 
     db.session.add(user)

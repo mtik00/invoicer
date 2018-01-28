@@ -19,8 +19,9 @@ app = create_app()
 @app.route('/p<int:page>')
 @login_required
 def paginate_index(page):
+    per_page = User.query.get(session['user_id']).profile.index_items_per_page
     try:
-        invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=page, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
+        invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=page, per_page=per_page)
     except Exception:
         return redirect(url_for('index'))
 
@@ -33,7 +34,8 @@ def paginate_index(page):
 @app.route('/')
 @login_required
 def index():
-    invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=app.config['INDEX_ITEMS_PER_PAGE'])
+    per_page = User.query.get(session['user_id']).profile.index_items_per_page
+    invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
     return render_template(
         'index.html',
         invoices=invoices

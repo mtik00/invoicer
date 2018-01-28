@@ -13,6 +13,7 @@ from ._units import unit_page
 from ._customers import customers_page
 from ._login import login_page
 from ._invoice import invoice_page
+from ._settings import settings_page
 
 
 class RegexConverter(BaseConverter):
@@ -47,11 +48,6 @@ def create_app():
         EMAIL_PASSWORD=None,
         EMAIL_SERVER=None,
         EMAIL_STARTTLS=True,
-
-        INDEX_ITEMS_PER_PAGE=10,
-
-        STARTING_CUSTOMER_NUMBER=1000,
-        CUSTOMER_INCREMENT=10,
     ))
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']
@@ -64,6 +60,7 @@ def create_app():
     app.register_blueprint(unit_page, url_prefix='/units')
     app.register_blueprint(customers_page, url_prefix='/customers')
     app.register_blueprint(invoice_page, url_prefix='/invoice')
+    app.register_blueprint(settings_page, url_prefix='/settings')
     app.register_blueprint(login_page)
 
     if app.config.get('SESSION_TIMEOUT_MINUTES'):

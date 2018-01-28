@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+{% block body %}
+
+<form class="w3-container w3-col m5" action="{{url_for('settings_page.update', settings_id=settings.id)}}" method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        <div class="w3-border w3-padding" id="debug_checkbox">
+            <label class="w3-text-blue" for="debug_mode">Debug mode: </label>
+            <input class="w3-border" id="debug_mode" name="debug_mode" type="checkbox" value="y">
+        </div>
+    </p>
+
+    <input class="w3-btn w3-theme-action" type=submit value="Update">
+    <input class="w3-btn w3-theme-action w3-right" type=submit value="Cancel" name="cancel">
+</form>
+{% endblock %}
+
+{% block extrascripts %}
+<script>
+$(document).ready(function() {
+    $("#debug_checkbox").click(function() {
+        $("#debug_mode").prop("checked", !$("#debug_mode").prop("checked"));
+    });                 
+});
+</script>
+{% endblock %}

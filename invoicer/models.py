@@ -16,6 +16,10 @@ class Profile(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.Integer(), default=30)
+    starting_customer_number = db.Column(db.Integer, default=1000)
+    customer_increment = db.Column(db.Integer, default=10)
+    index_items_per_page = db.Column(db.Integer, default=10)
+
     w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
     w3_theme = relationship("W3Theme", foreign_keys=w3_theme_id)
 
@@ -212,4 +216,3 @@ class ApplicationSettings(db.Model):
     __tablename__ = 'application_settings'
     id = db.Column(db.Integer, primary_key=True)
     debug_mode = db.Column(db.Boolean)
-    theme = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))

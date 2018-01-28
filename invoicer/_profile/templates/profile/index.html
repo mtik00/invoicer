@@ -11,6 +11,10 @@
     <dd>&nbsp;</dd>
     <dd>Site Theme: {{profile.w3_theme}}</dd>
     <dd>Default Invoice Theme: {{profile.w3_theme_invoice or 'None'}}</dd>
+    <dd>&nbsp;</dd>
+    <dd>Starting customer number: {{profile.starting_customer_number}}</dd>
+    <dd>Space in between customers: {{profile.customer_increment}}</dd>
+    <dd>Number of invoices per page: {{profile.index_items_per_page}}</dd>
 </dl>
 <a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-theme-action">Edit</a>
 {% else %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block body %}
+<ul>
+    <li>Debug mode enabled: {{settings.debug_mode}}</li>
+</ul>
+<a href="{{url_for('settings_page.update', settings_id=settings.id)}}" class="w3-btn w3-theme-action">Edit</a>
+
+{% endblock %}

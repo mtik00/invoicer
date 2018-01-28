@@ -17,6 +17,10 @@ class ProfileForm(FlaskForm):
     w3_theme = SelectField('Site Theme')
     w3_theme_invoice = SelectField('Invoice Theme')
 
+    starting_customer_number = IntegerField('Starting customer number')
+    customer_increment = IntegerField('Number of places in between customer numbers')
+    index_items_per_page = IntegerField('Number of invoices per page on index page')
+
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
             if name in ['w3_theme', 'w3_theme_invoice']:
