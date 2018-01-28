@@ -7,7 +7,7 @@
     <p>
         <div class="w3-border w3-padding" id="debug_checkbox">
             <label class="w3-text-blue" for="debug_mode">Debug mode: </label>
-            <input class="w3-border" id="debug_mode" name="debug_mode" type="checkbox" value="y">
+            <input class="w3-border" id="debug_mode" name="debug_mode" type="checkbox" {% if settings.debug_mode %}checked{% endif %}>
         </div>
     </p>
 

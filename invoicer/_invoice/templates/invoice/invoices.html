@@ -33,9 +33,9 @@
             </div>
         </div>
 
-        {% if pdf_enabled %}
+        {% if show_pdf_button and pdf_ok %}
         <button class="w3-bar-item w3-button" formaction="{{ url_for('invoice_page.to_pdf', invoice_number=invoice.number)}}" formtarget="_blank">Download PDF</button>
-        {% else %}
+        {% elif show_pdf_button %}
         <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled>Download PDF</button>
         {% endif %}
 

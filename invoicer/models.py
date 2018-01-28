@@ -26,6 +26,8 @@ class Profile(db.Model):
     w3_theme_invoice_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
     w3_theme_invoice = relationship("W3Theme", foreign_keys=w3_theme_invoice_id)
 
+    enable_pdf = db.Column(db.Boolean, default=True)
+
     def __repr__(self):
         return '<Profile %r>' % (self.full_name)
 

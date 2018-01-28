@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, IntegerField
+from wtforms import StringField, SelectField, IntegerField, BooleanField
 from wtforms.validators import DataRequired
 from wtforms.compat import iteritems
 
@@ -20,6 +20,8 @@ class ProfileForm(FlaskForm):
     starting_customer_number = IntegerField('Starting customer number')
     customer_increment = IntegerField('Number of places in between customer numbers')
     index_items_per_page = IntegerField('Number of invoices per page on index page')
+
+    enable_pdf = BooleanField('Enable PDF')
 
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):

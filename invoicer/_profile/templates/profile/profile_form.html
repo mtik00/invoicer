@@ -21,13 +21,31 @@
     {{ render_field(form.starting_customer_number) }}
     {{ render_field(form.customer_increment) }}
     {{ render_field(form.index_items_per_page) }}
-  <p>
-        {% if profile -%}
+
+    <p>
+        <div class="w3-border w3-padding" id="pdf_checkbox">
+            <label class="w3-text-blue" for="enable_pdf">PDF enabled: </label>
+            <input class="w3-border" id="enable_pdf" name="enable_pdf" type="checkbox" {% if profile.enable_pdf %}checked{% endif %}>
+        </div>
+    </p>
+
+    <p>
+    {% if profile -%}
         <input class="w3-btn w3-theme-action" type=submit value="Update">
         <input type=submit value="Cancel" name="cancel" class="w3-btn w3-theme-action w3-right">
-        {% else -%}
+    {% else -%}
         <input class="w3-btn w3-theme-action" type=submit value="Create">
-        {% endif %}
-  </p>
+    {% endif %}
+    </p>
 </form>
+{% endblock %}
+
+{% block extrascripts %}
+<script>
+    $(document).ready(function() {
+        $("#pdf_checkbox").click(function() {
+        $("#enable_pdf").prop("checked", !$("#enable_pdf").prop("checked"));
+        });                 
+    });
+</script>
 {% endblock %}

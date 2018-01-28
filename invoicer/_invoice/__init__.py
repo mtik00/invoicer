@@ -22,7 +22,7 @@ from .forms import InvoiceForm, ItemForm
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
 
 
-def pdf_enabled():
+def pdf_ok():
     return bool(
         os.path.exists(current_app.config.get('WKHTMLTOPDF') or '') and
         os.access(current_app.config['WKHTMLTOPDF'], os.R_OK)
@@ -244,7 +244,8 @@ def invoice_by_number(invoice_number):
         invoice_obj=invoice,
         to_emails=to_emails,
         can_submit=to_emails and invoice and can_submit(invoice.customer_id),
-        pdf_enabled=pdf_enabled()
+        pdf_ok=pdf_ok(),  # The binary exists
+        show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
     )
 
 
