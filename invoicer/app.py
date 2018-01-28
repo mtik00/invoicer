@@ -42,6 +42,9 @@ def create_app():
         # Replace this with the short name (e.g. w3-theme-cyan --> 'cyan')
         W3_THEME='blue-grey',
 
+        # You must add this to your configuration to enable PDF functionality
+        WKHTMLTOPDF=None,
+
         EMAIL_FROM=None,
         EMAIL_USERNAME=None,
         EMAIL_PASSWORD=None,

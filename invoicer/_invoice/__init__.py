@@ -23,7 +23,10 @@ invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
 
 
 def pdf_enabled():
-    return os.path.exists(current_app.config.get('WKHTMLTOPDF', ''))
+    return bool(
+        os.path.exists(current_app.config.get('WKHTMLTOPDF') or '') and
+        os.access(current_app.config['WKHTMLTOPDF'], os.R_OK)
+    )
 
 
 def can_submit(customer_id):
@@ -393,19 +396,25 @@ def submit_invoice(invoice_number):
 
     html_text = raw_invoice(invoice_number)
     raw_text = text_invoice(invoice_number)
-    fname = "invoice-%s.pdf" % invoice_number
-    config = Configuration(current_app.config['WKHTMLTOPDF'])
-    options = {
-        'print-media-type': None,
-        'page-size': 'letter',
-        'no-outline': None,
-        'quiet': None
-    }
-    pdf_text = pdfkit.from_string(html_text, None, options=options, configuration=config)
-    pdf_fh = StringIO()
 
-    pdf_fh.write(pdf_text)
-    pdf_fh.seek(0)  # Ensure `sendmail` gets the whole thing
+    stream_attachments = []
+    pdf_fh = None
+    if pdf_enabled():
+        fname = "invoice-%s.pdf" % invoice_number
+        config = Configuration(current_app.config['WKHTMLTOPDF'])
+        options = {
+            'print-media-type': None,
+            'page-size': 'letter',
+            'no-outline': None,
+            'quiet': None
+        }
+        pdf_text = pdfkit.from_string(html_text, None, options=options, configuration=config)
+        pdf_fh = StringIO()
+
+        pdf_fh.write(pdf_text)
+        pdf_fh.seek(0)  # Ensure `sendmail` gets the whole thing
+
+        stream_attachments = [(fname, pdf_fh)]
 
     try:
         email_to = get_address_emails(invoice.customer_id)
@@ -421,13 +430,14 @@ def submit_invoice(invoice_number):
             password=current_app.config['EMAIL_PASSWORD'],
             starttls=current_app.config['EMAIL_STARTTLS'],
             encode_body=True,
-            stream_attachments=[(fname, pdf_fh)],
+            stream_attachments=stream_attachments,
         )
         flash('invoice was submitted to ' + ', '.join(email_to), 'success')
     except Exception as e:
         flash('Error while trying to email the invoice: %s' % e, 'error')
     finally:
-        pdf_fh.close()
+        if pdf_fh:
+            pdf_fh.close()
 
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
