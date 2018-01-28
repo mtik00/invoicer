@@ -68,3 +68,13 @@ a server.  For example, `mary|tim@example.com` would be expanded to
 the following list of email addresses:  
     `['mary@example.com', 'tim@example.com']`
 Each of these addresses will be put on the `to` line of the email.
+
+# Deployment (WIP)
+*   Make sure any DB migrations are stored:  
+    `flask db migrate`
+*   Push everything w/ Git
+*   Remote server:
+    *   Pull the project
+    *   Apply DB migrations:
+        `flask db upgrade`
+    *   Restart the service

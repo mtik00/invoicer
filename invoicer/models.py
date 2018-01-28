@@ -196,3 +196,4 @@ class ApplicationSettings(db.Model):
     __tablename__ = 'application_settings'
     id = db.Column(db.Integer, primary_key=True)
     debug_mode = db.Column(db.Boolean)
+    theme = db.Column(db.String(50))

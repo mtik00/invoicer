@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from flask import Flask, current_app, session
 from werkzeug.routing import BaseConverter
+from flask_migrate import Migrate
 
 from .database import db
 
@@ -70,6 +71,8 @@ def create_app():
 
     db.init_app(app)
     app.db = db
+
+    migrate = Migrate(app, db)
 
     with app.app_context():
         try:

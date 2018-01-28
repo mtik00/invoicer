@@ -3,6 +3,7 @@ import string
 
 import arrow
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import init, migrate
 
 from .password import hash_password
 
@@ -17,6 +18,16 @@ def init_db(sample_data=False):
     import models
     db.drop_all()
     db.create_all()
+
+    try:
+        init()
+    except:
+        pass
+
+    try:
+        migrate()
+    except:
+        pass
 
     if sample_data:
 
