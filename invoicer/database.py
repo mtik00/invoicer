@@ -34,19 +34,19 @@ def init_db(sample_data=False):
         pass
 
     if sample_data:
-        addr = models.Profile(
+        profile = models.Profile(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
-            state='NY', zip='11111', terms=45
+            state='NY', zip='11111', terms=45,
+            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first()
         )
+
         user = models.User(
             username='admin',
             hashed_password=hash_password('default'),
-            profile=addr,
-            application_settings=models.ApplicationSettings(debug_mode=False)
+            profile=profile,
+            application_settings=models.ApplicationSettings(debug_mode=False),
         )
-
-        db.session.add_all([addr, user])
 
         customer1 = models.Customer(
             name1='Some Employer', addrline1='111 9th Ave N', city='New York',
@@ -132,143 +132,19 @@ def init_db(sample_data=False):
             terms=22,
             user=user)
 
-        db.session.add_all([
-            models.Item(
-                date=arrow.get('01-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('04-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('05-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-            models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
-                description='Website maintenance', unit_price=50, units='hr',
-                quantity=8, invoice=invoice3, customer=customer1
-            ),
-        ])
+        lots_of_items = []
+        item_date = arrow.get('01-MAR-2018', 'DD-MMM-YYYY')
+        for x in range(40):
+            lots_of_items.append(
+                models.Item(
+                    date=item_date,
+                    description='Website maintenance', unit_price=50, units='hr',
+                    quantity=8, invoice=invoice3, customer=customer1
+                )
+            )
+            item_date = item_date.replace(days=+1)
+
+        db.session.add_all(lots_of_items)
 
         customer2 = models.Customer(
             name1='Employer #2', addrline1='1234 45th St', city='New York',
