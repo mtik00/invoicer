@@ -1,3 +1,4 @@
+import os
 import re
 from cStringIO import StringIO
 
@@ -19,6 +20,10 @@ from .forms import InvoiceForm, ItemForm
 
 
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
+
+
+def pdf_enabled():
+    return os.path.exists(current_app.config.get('WKHTMLTOPDF', ''))
 
 
 def can_submit(customer_id):
@@ -235,7 +240,8 @@ def invoice_by_number(invoice_number):
         previous_id=previous_id,
         invoice_obj=invoice,
         to_emails=to_emails,
-        can_submit=to_emails and invoice and can_submit(invoice.customer_id)
+        can_submit=to_emails and invoice and can_submit(invoice.customer_id),
+        pdf_enabled=pdf_enabled()
     )
 
 
@@ -318,6 +324,10 @@ def delete(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/pdf')
 @login_required
 def to_pdf(invoice_number):
+    if not pdf_enabled():
+        flash('PDF configuration not supported', 'error')
+        return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
+
     text = raw_invoice(invoice_number)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
