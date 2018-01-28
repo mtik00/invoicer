@@ -126,12 +126,12 @@ class Invoice(db.Model):
         if customer.w3_theme:
             return customer.w3_theme
 
-        user = Profile.query.get(1)
-        if user.w3_theme_invoice:
-            return user.w3_theme_invoice
+        profile = User.query.get(self.user_id).profile
+        if profile.w3_theme_invoice:
+            return profile.w3_theme_invoice
 
-        if user.w3_theme:
-            return user.w3_theme
+        if profile.w3_theme:
+            return profile.w3_theme
 
         return None
 
