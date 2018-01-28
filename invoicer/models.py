@@ -16,8 +16,11 @@ class Profile(db.Model):
     zip = db.Column(db.String(10))
     email = db.Column(db.String(120))
     terms = db.Column(db.Integer(), default=30)
-    w3_theme = db.Column(db.String(120), default='blue-grey')
-    w3_theme_invoice = db.Column(db.String(120), default='dark-grey')
+    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
+    w3_theme = relationship("W3Theme", foreign_keys=w3_theme_id)
+
+    w3_theme_invoice_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
+    w3_theme_invoice = relationship("W3Theme", foreign_keys=w3_theme_invoice_id)
 
     def __repr__(self):
         return '<Profile %r>' % (self.full_name)
@@ -40,7 +43,9 @@ class Customer(db.Model):
     number = db.Column(db.Integer, nullable=False)
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
-    w3_theme = db.Column(db.String(120))
+
+    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
+    w3_theme = relationship("W3Theme")
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = relationship("User", back_populates="customers")
@@ -78,7 +83,9 @@ class Invoice(db.Model):
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
     terms = db.Column(db.Integer)
-    w3_theme = db.Column(db.String(120))
+
+    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
+    w3_theme = relationship("W3Theme")
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
@@ -192,8 +199,17 @@ class User(db.Model):
         return '<User %r>' % (self.username)
 
 
+class W3Theme(db.Model):
+    __tablename__ = 'w3_themes'
+    id = db.Column(db.Integer, primary_key=True)
+    theme = db.Column(db.String(50))
+
+    def __str__(self):
+        return self.theme
+
+
 class ApplicationSettings(db.Model):
     __tablename__ = 'application_settings'
     id = db.Column(db.Integer, primary_key=True)
     debug_mode = db.Column(db.Boolean)
-    theme = db.Column(db.String(50))
+    theme = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))

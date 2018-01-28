@@ -12,7 +12,8 @@ from premailer import Premailer
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
-from ..models import Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User
+from ..models import (
+    Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
 from ..common import login_required, color_themes
 from .forms import InvoiceForm, ItemForm
 
@@ -190,7 +191,7 @@ def update(invoice_number):
             invoice.submitted_date = submitted_date
             invoice.paid_date = paid_date
             invoice.terms = terms
-            invoice.w3_theme = form.w3_theme.data
+            invoice.w3_theme = W3Theme.query.filter_by(theme=form.w3_theme.data).first()
 
             db.session.commit()
 

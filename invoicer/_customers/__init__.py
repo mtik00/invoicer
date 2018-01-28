@@ -2,7 +2,7 @@ from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
     current_app, session)
 from ..common import login_required, color_themes
-from ..models import Customer, Invoice, User
+from ..models import Customer, Invoice, User, W3Theme
 from ..database import db
 from .forms import CustomerForm
 
@@ -37,12 +37,10 @@ def update(customer_id):
     customer = get_customer(customer_id)
     form = CustomerForm(request.form, obj=customer)
 
-    theme_choices = [(x, x) for x in color_themes]
+    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
     form.w3_theme.choices = theme_choices
 
     if form.validate_on_submit():
-        form['state'].data = form['state'].data.upper()
-
         # Only change the customer number there are no invoices and the new
         # number isn't already taken.
         number = form['number'].data
@@ -54,6 +52,7 @@ def update(customer_id):
             form['number'].data = customer.number
 
         form.populate_obj(customer)
+
         db.session.add(customer)
         db.session.commit()
         flash('address updated', 'success')
@@ -66,7 +65,8 @@ def update(customer_id):
 @login_required
 def create():
     form = CustomerForm(request.form, number=get_next_customer_number())
-    form.w3_theme.choices = [(x, x) for x in color_themes]
+    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
+    form.w3_theme.choices = theme_choices
 
     if form.validate_on_submit():
         if Customer.query.filter_by(user_id=session['user_id'], number=form.number.data).first():

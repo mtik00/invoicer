@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import init, migrate
 
 from .password import hash_password
+from .common import color_themes
 
 db = SQLAlchemy()
 
@@ -19,6 +20,9 @@ def init_db(sample_data=False):
     db.drop_all()
     db.create_all()
 
+    themes = [models.W3Theme(theme=x) for x in sorted(color_themes) if x]
+    db.session.add_all(themes)
+
     try:
         init()
     except:
@@ -30,7 +34,6 @@ def init_db(sample_data=False):
         pass
 
     if sample_data:
-
         addr = models.Profile(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
