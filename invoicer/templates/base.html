@@ -32,7 +32,13 @@
     <div class=w3-container>
         <p></p>
         {% for category, message in get_flashed_messages(with_categories=True) %}
-        <div class="w3-panel w3-display-container pointer {{category}}" onclick="this.style.display='none'">
+        <div
+            {% if category == 'success' -%}
+            class="w3-panel w3-display-container pointer {{category}} timeoutmessage"
+            {% else -%}
+            class="w3-panel w3-display-container pointer {{category}}"
+            {%- endif -%}
+            onclick="this.style.display='none'">
             <span onclick="this.parentElement.style.display='none'"
             class="w3-button {{category}} w3-large w3-display-topright">&times;</span>
             <p>{{ message|safe }}</p>
@@ -40,7 +46,14 @@
         {% endfor %}
         {% block body %}{% endblock %}
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            setTimeout(function() {
+                $('.timeoutmessage').fadeOut('slow');
+            }, 3000); // <-- time in milliseconds
+        });
+    </script>
     {% block extrascripts %}{% endblock %}
 </body>
 </html>
