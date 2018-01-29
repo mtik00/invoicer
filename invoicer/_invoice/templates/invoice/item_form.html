@@ -2,11 +2,6 @@
 
 {% block body %}
 {% from "_formhelpers.html" import render_field %}
-{% if form.errors %}
-{% for error in form.errors.values() %}
-<li>{{ error }}</li>
-{% endfor %}
-{% endif %}
 <form class="w3-container w3-col m5" action="{{url_for('invoice_page.create_item', invoice_number=invoice.number)}}" method="POST">
     <dl>
         {{ form.hidden_tag() }}
@@ -24,10 +19,16 @@
                     {% endfor %}
                 </select>
 
-                <label class="w3-text-blue" for="unit_pricex">Cost (required)</label>
-                <input class="w3-input w3-border" id="unit_pricex" name="unit_pricex" required/>
-                <label class="w3-text-blue" for="unit_price_units">Units (required)</label>
-                <input class="w3-input w3-border" id="unit_price_units" name="unit_price_units" placeholder="e.g. hr, day, etc" required/>
+                <div class="w3-cell-row">
+                    <div class="w3-container w3-cell no-left-padding">
+                        <label class="w3-text-blue" for="unit_pricex">Cost (required)</label>
+                        <input class="w3-input w3-border" id="unit_pricex" name="unit_pricex" required/>
+                    </div>
+                    <div class="w3-container w3-cell no-right-padding">
+                        <label class="w3-text-blue" for="unit_price_units">Units (optional)</label>
+                        <input class="w3-input w3-border" id="unit_price_units" name="unit_price_units" placeholder="e.g. hr, day, etc"/>
+                    </div>
+                </div>
             </div>
         </p>
         
