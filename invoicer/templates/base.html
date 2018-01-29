@@ -15,7 +15,7 @@
         {% if config['DEBUG'] -%}
             <div class="w3-bar w3-red w3-center">FLASK IS RUNNING IN DEBUG MODE</div>
         {% elif session['user_debug'] -%}
-            <div class="w3-bar w3-orange w3-center">DEBUG MODE</div>
+            <a href="{{url_for('settings_page.index')}}"><div class="w3-bar w3-orange w3-center">DEBUG MODE</div></a>
         {% endif -%}
         
         <div class="w3-bar w3-theme-dark">

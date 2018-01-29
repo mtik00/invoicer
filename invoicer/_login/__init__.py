@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
+from flask import (
+    Blueprint, render_template, request, flash, redirect, url_for, current_app,
+    session)
 
 from .forms import LoginForm
 from ..common import login_required
