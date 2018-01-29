@@ -4,18 +4,36 @@
 {% from "_formhelpers.html" import render_field %}
 {% if form.errors %}
 {% for error in form.errors.values() %}
-      <li>{{ error }}</li>
+<li>{{ error }}</li>
 {% endfor %}
 {% endif %}
 <form class="w3-container w3-col m5" action="{{url_for('invoice_page.create_item', invoice_number=invoice.number)}}" method="POST">
-  <dl>
-    {{ form.hidden_tag() }}
-    {{ render_field(form.date) }}
-    {{ render_field(form.description) }}
-    {{ render_field(form.unit_price) }}
-    {{ render_field(form.quantity) }}
-  </dl>
-  <p><input type=submit value="Add" class="w3-btn w3-theme-action"></p>
+    <dl>
+        {{ form.hidden_tag() }}
+        {{ render_field(form.date) }}
+        {{ render_field(form.description) }}
+
+        {# Splitting out Unit Price since it's more complicated #}
+        <p>
+            <div class="w3-border w3-padding">
+                <label class="w3-text-blue" for="unit_price">Billable Unit (optional)</label>
+                <select class="w3-input w3-border" id="unit_price" name="unit_price">
+                    <option value=""></option>
+                    {% for unit_price in unit_price_objects -%}
+                    <option value="{{unit_price.id}}">{{unit_price.description}} ({{unit_price.unit_price|currency}}/{{unit_price.units}})</option>
+                    {% endfor %}
+                </select>
+
+                <label class="w3-text-blue" for="unit_pricex">Cost (required)</label>
+                <input class="w3-input w3-border" id="unit_pricex" name="unit_pricex" required/>
+                <label class="w3-text-blue" for="unit_price_units">Units (required)</label>
+                <input class="w3-input w3-border" id="unit_price_units" name="unit_price_units" placeholder="e.g. hr, day, etc" required/>
+            </div>
+        </p>
+        
+        {{ render_field(form.quantity) }}
+    </dl>
+    <p><input type=submit value="Add" class="w3-btn w3-theme-action"></p>
 </form>
 {% endblock %}
 
@@ -24,13 +42,25 @@
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
-$( document ).ready(function() {
-  $( function() {
-    $( "#datepicker" ).datepicker({
-      dateFormat: "dd-M-yy"
-    });
-  } );
-});
+    var $unit_price_data = {
+        '' : {'unit_price': '', 'units': ''},
+        {%- for x in unit_price_objects %}
+        '{{x.id}}': {'unit_price':'{{x.unit_price}}', 'units':'{{x.units}}'},{% endfor -%}
+    };
 
+    $( document ).ready(function() {
+        $( function() {
+            $( "#datepicker" ).datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        } );
+
+        $('#unit_price').on('change', function() {
+            var $up = $unit_price_data[$('#unit_price').val()];
+            $('#unit_pricex').val($up['unit_price']);
+            $('#unit_price_units').val($up['units']);
+        });
+    });
+    
 </script>
 {% endblock %}

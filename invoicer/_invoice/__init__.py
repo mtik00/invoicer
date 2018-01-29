@@ -114,14 +114,9 @@ def create_item(invoice_number):
     form = ItemForm(quantity=1)
     unit_prices = UnitPrice.query.filter_by(user_id=session['user_id']).all()
 
-    unit_price_choices = [
-        (x.id, "%d: %s ($%.02f/%s)" % (x.id, x.description, x.unit_price, x.units))
-        for x in unit_prices
-    ]
-    form.unit_price.choices = unit_price_choices
-
     if form.validate_on_submit():
-        unit_price = UnitPrice.query.filter_by(id=request.form['unit_price']).first_or_404()
+        unit_price = float(request.form['unit_pricex'])
+        units = request.form['unit_price_units']
 
         date = arrow.now()
         if form.date.data:
@@ -131,9 +126,9 @@ def create_item(invoice_number):
             invoice_id=invoice.id,
             date=date,
             description=form.description.data,
-            unit_price=unit_price.unit_price,
+            unit_price=unit_price,
             quantity=form.quantity.data,
-            units=unit_price.units,
+            units=units,
             customer=invoice.customer
         ))
 
@@ -141,14 +136,18 @@ def create_item(invoice_number):
 
         items = Item.query.filter_by(invoice_id=invoice.id).all()
         item_total = sum([x.quantity * x.unit_price for x in items])
-        Invoice.query.filter_by(id=invoice.id).update({'total': item_total})
-
+        invoice.total = item_total
         db.session.commit()
 
         flash('item added to invoice %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/item_form.html', form=form, invoice=invoice)
+    return render_template(
+        'invoice/item_form.html',
+        form=form,
+        invoice=invoice,
+        unit_price_objects=unit_prices,
+    )
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/update', methods=["GET", "POST"])
