@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-{{config['W3_THEME']}}.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css">
     {% block extrahead %}{% endblock%}
 </head>
 <body>
@@ -19,14 +20,15 @@
         {% endif -%}
         
         <div class="w3-bar w3-theme-dark">
-            <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
-            <a href="{{url_for('invoice_page.last_invoice')}}" class="w3-bar-item w3-button w3-mobile">Invoices</a>
-            <a href="{{url_for('customers_page.index')}}" class="w3-bar-item w3-button w3-mobile">Customers</a>
-            <a href="{{url_for('unit_page.units')}}" class="w3-bar-item w3-button w3-mobile">Billable Units</a>
+            <a href="/" class="w3-bar-item w3-button w3-mobile" data-hint='Show a table of all invoices'>Home</a>
+            <a href="{{url_for('invoice_page.last_invoice')}}" class="w3-bar-item w3-button w3-mobile" data-hint='Show detailed invoice'>Invoices</a>
+            <a href="{{url_for('customers_page.index')}}" class="w3-bar-item w3-button w3-mobile" data-hint='Add/edit your billable customers'>Customers</a>
+            <a href="{{url_for('unit_page.units')}}" class="w3-bar-item w3-button w3-mobile" data-hint='Add/edit things that you bill often'>Billable Units</a>
             
             <a href="{{url_for('login_page.logout')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="Sign out"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
             <a href="{{url_for('profile_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="User Profile"><i class="fa fa-user" aria-hidden="true"></i></a>
             <a href="{{url_for('settings_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="Application Settings"><i class="fa fa-cogs" aria-hidden="true"></i></a>
+            <a href="#" class="w3-bar-item w3-button w3-mobile w3-right" title="Help" onclick="introJs().showHints();"><i class="fa fa-question" aria-hidden="true"></i></a>
         </div>
     {% endif %}
     <div class=w3-container>
@@ -47,6 +49,7 @@
         {% block body %}{% endblock %}
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js"></script>
     <script>
         $(document).ready(function(){
             setTimeout(function() {
