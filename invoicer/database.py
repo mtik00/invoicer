@@ -124,23 +124,25 @@ def init_db(sample_data=False):
             ),
         ])
 
+        lots_of_items_count = 40
+        lots_of_items_cost = 50
         invoice3 = models.Invoice(
             customer=customer1,
             submitted_date=None,
             description='2018 Website Maintenance',
             paid_date=None,
             number='1010-2018-003',
-            total=1600,
+            total=lots_of_items_count*lots_of_items_cost,
             terms=22,
             user=user)
 
         lots_of_items = []
         item_date = arrow.get('01-MAR-2018', 'DD-MMM-YYYY')
-        for x in range(40):
+        for x in range(lots_of_items_count):
             lots_of_items.append(
                 models.Item(
                     date=item_date,
-                    description='Website maintenance', unit_price=50, units='hr',
+                    description='Website maintenance', unit_price=lots_of_items_cost, units='hr',
                     quantity=8, invoice=invoice3, customer=customer1
                 )
             )
