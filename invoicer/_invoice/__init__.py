@@ -328,7 +328,7 @@ def delete(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/pdf')
 @login_required
 def to_pdf(invoice_number):
-    if not pdf_enabled():
+    if not pdf_ok():
         flash('PDF configuration not supported', 'error')
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
