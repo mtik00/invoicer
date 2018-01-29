@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
   <a href="{{url_for('unit_page.create')}}" class="w3-btn w3-theme-action">New unit</a>
-  <ul>
+  <ul class="w3-ul">
   {% for unit in units %}
     <li><a href="{{ url_for('unit_page.update', unit_id=unit.id) }}">{{unit.description}}</a>
         <ul>
