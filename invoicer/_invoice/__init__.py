@@ -9,6 +9,7 @@ from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
 from premailer import Premailer
+from sqlalchemy.orm.attributes import flag_modified
 
 from ..forms import EmptyForm
 from ..submitter import sendmail
@@ -92,13 +93,10 @@ def delete_items(invoice_number):
         for item in items:
             db.session.delete(item)
 
-        db.session.commit()
-
         # Recalculate the invoice total
         items = Item.query.filter(Item.invoice_id == invoice.id).all()
         item_total = sum([x.quantity * x.unit_price for x in items])
         Invoice.query.filter(Invoice.id == invoice.id).update({'total': item_total})
-
         db.session.commit()
 
         flash('Item(s) deleted from %s' % invoice.number, 'success')
@@ -122,7 +120,7 @@ def create_item(invoice_number):
         if form.date.data:
             date = arrow.get(form.date.data, 'DD-MMM-YYYY')
 
-        db.session.add(Item(
+        item = Item(
             invoice_id=invoice.id,
             date=date,
             description=form.description.data,
@@ -130,13 +128,15 @@ def create_item(invoice_number):
             quantity=form.quantity.data,
             units=units,
             customer=invoice.customer
-        ))
+        )
 
+        invoice.items.append(item)
+        db.session.add_all([invoice, item])
         db.session.commit()
 
-        items = Item.query.filter_by(invoice_id=invoice.id).all()
-        item_total = sum([x.quantity * x.unit_price for x in items])
-        invoice.total = item_total
+        # items = Item.query.filter_by(invoice_id=invoice.id).all()
+        # item_total = sum([x.quantity * x.unit_price for x in items])
+        # invoice.total = item_total
         db.session.commit()
 
         flash('item added to invoice %s' % invoice.number, 'success')

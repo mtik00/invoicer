@@ -150,6 +150,11 @@ def receive_before_insert(mapper, connection, invoice):
     if (invoice.submitted_date and invoice.terms):
         invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
 
+    # For an insert, we can't assume that all of the Items have been inserted
+    # prior to this invoice.  However, any items will be associated through the
+    # `relationship`.
+    invoice.total = sum([x.unit_price * x.quantity for x in invoice.items])
+
 
 # NOTE: This will not fire if you use Invoice.query.filter(...).update({}).  It
 # will fire, however, if you use: `invoice.description = 'asdf'; db.session.commit()`
@@ -160,6 +165,11 @@ def receive_before_update(mapper, connection, invoice):
 
     if (invoice.submitted_date and invoice.terms):
         invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
+
+    # For the update, we can't assume that the invoice has all of the items
+    # associated yet.  Therefore, run a query, and use that sum.
+    items = Item.query.filter_by(invoice=invoice).all()
+    invoice.total = sum([x.unit_price * x.quantity for x in items])
 
 
 class UnitPrice(db.Model):

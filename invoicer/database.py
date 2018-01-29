@@ -60,7 +60,6 @@ def init_db(sample_data=False):
             submitted_date=arrow.get('20-JAN-2018', 'DD-MMM-YYYY'),
             description='2018 Website Redesign',
             number='1010-2018-001',
-            total=6400,
             terms=30,
             paid_date=models.InvoicePaidDate(
                 paid_date=arrow.get('07-FEB-2018', 'DD-MMM-YYYY'),
@@ -97,7 +96,6 @@ def init_db(sample_data=False):
             description='2018 Website Development',
             paid_date=None,
             number='1010-2018-002',
-            total=8000,
             terms=45,
             user=user)
 
@@ -132,7 +130,6 @@ def init_db(sample_data=False):
             description='2018 Website Maintenance',
             paid_date=None,
             number='1010-2018-003',
-            total=lots_of_items_count*lots_of_items_cost,
             terms=22,
             user=user)
 
@@ -161,7 +158,6 @@ def init_db(sample_data=False):
             description='2018 Website Maintenance',
             paid_date=None,
             number='1020-2018-001',
-            total=2400,
             terms=45,
             user=user)
 
