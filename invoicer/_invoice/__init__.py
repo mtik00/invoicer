@@ -348,7 +348,7 @@ def to_pdf(invoice_number):
 
 
 def get_address_emails(customer_id):
-    if current_app.config['DEBUG'] and ('EMAIL_USERNAME' in current_app.config):
+    if (session['user_debug'] or current_app.config['DEBUG']) and ('EMAIL_USERNAME' in current_app.config):
         return [current_app.config['EMAIL_USERNAME'] or '']
 
     email = Customer.query.get(customer_id).email

@@ -12,22 +12,26 @@
 </head>
 <body>
     {% if session['logged_in'] %}
-    {% if config['DEBUG'] %}<div class="w3-bar w3-red w3-center">DEBUG MODE</div>{% endif %}
-    
-    <div class="w3-bar w3-theme-dark">
-        <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
-        <a href="{{url_for('invoice_page.last_invoice')}}" class="w3-bar-item w3-button w3-mobile">Invoices</a>
-        <a href="{{url_for('customers_page.index')}}" class="w3-bar-item w3-button w3-mobile">Customers</a>
-        <a href="{{url_for('unit_page.units')}}" class="w3-bar-item w3-button w3-mobile">Billable Units</a>
+        {% if config['DEBUG'] -%}
+            <div class="w3-bar w3-red w3-center">FLASK IS RUNNING IN DEBUG MODE</div>
+        {% elif session['user_debug'] -%}
+            <div class="w3-bar w3-orange w3-center">DEBUG MODE</div>
+        {% endif -%}
         
-        {% if not session.logged_in %}
-        <a href="{{ url_for('login_page.login') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log In</a>
-        {% else %}
-        <a href="{{ url_for('login_page.logout') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log out</a>
-        {% endif %}
-        <a href="{{url_for('profile_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right">Profile</a>
-        <a href="{{url_for('settings_page.index')}}"><i class="w3-bar-item fa fa-cogs w3-right" aria-hidden="true"></i></a>
-    </div>
+        <div class="w3-bar w3-theme-dark">
+            <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
+            <a href="{{url_for('invoice_page.last_invoice')}}" class="w3-bar-item w3-button w3-mobile">Invoices</a>
+            <a href="{{url_for('customers_page.index')}}" class="w3-bar-item w3-button w3-mobile">Customers</a>
+            <a href="{{url_for('unit_page.units')}}" class="w3-bar-item w3-button w3-mobile">Billable Units</a>
+            
+            {% if not session.logged_in %}
+            <a href="{{ url_for('login_page.login') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log In</a>
+            {% else %}
+            <a href="{{ url_for('login_page.logout') }}" class="w3-bar-item w3-button w3-mobile w3-right">Log out</a>
+            {% endif %}
+            <a href="{{url_for('profile_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right">Profile</a>
+            <a href="{{url_for('settings_page.index')}}"><i class="w3-bar-item fa fa-cogs w3-right" aria-hidden="true"></i></a>
+        </div>
     {% endif %}
     <div class=w3-container>
         <p></p>

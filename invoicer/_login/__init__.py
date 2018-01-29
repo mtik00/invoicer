@@ -32,6 +32,7 @@ def login():
             if not error:
                 session['logged_in'] = True
                 session['user_id'] = user.id
+                session['user_debug'] = user.application_settings.debug_mode
                 flash('You were logged in', 'success')
 
                 if 'next' in request.form:

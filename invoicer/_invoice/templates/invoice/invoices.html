@@ -22,7 +22,7 @@
                 {% if (not invoice_obj.submitted_date) -%}
                 <button class="w3-bar-item w3-button list-group-item" formaction="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
                 <button class="w3-bar-item w3-button list-group-item" formaction="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
-                {% elif config['DEBUG'] %}
+                {% elif (config['DEBUG'] or session['user_debug']) %}
                 <button class="w3-bar-item w3-button list-group-item" formaction="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed in debug mode)</button>
                 <button class="w3-bar-item w3-button list-group-item" formaction="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed in debug mode)</button>
                 {% else -%}
@@ -39,7 +39,7 @@
         <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled>Download PDF</button>
         {% endif %}
 
-        {% if can_submit and (invoice_obj.submitted_date or config['DEBUG']) %}
+        {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
         <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button">Submit Invoice</span>
         {% endif -%}
         

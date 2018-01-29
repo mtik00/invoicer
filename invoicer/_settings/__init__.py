@@ -31,6 +31,8 @@ def update(settings_id):
             db.session.commit()
             flash('settings updated', 'success')
 
+            session['user_debug'] = settings.debug_mode
+
         return redirect(url_for('settings_page.index'))
 
     return render_template('settings/settings_form.html', form=form, settings=settings)
