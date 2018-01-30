@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import locale
 import zipfile
 
 import click
@@ -13,6 +14,8 @@ from .database import init_db, export as export_db, import_clean_json, add_user
 from .models import Invoice, Customer, User
 from .common import login_required
 
+
+locale.setlocale(locale.LC_ALL, '')
 app = create_app()
 
 
@@ -44,7 +47,7 @@ def index():
 
 @app.template_filter('currency')
 def currency(value):
-    return "${:,.2f}".format(float(value or 0.0))
+    return locale.currency(value or 0, symbol=True, grouping=True, international=False)
 
 
 @app.template_filter('billto')
