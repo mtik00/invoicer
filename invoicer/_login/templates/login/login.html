@@ -8,7 +8,7 @@
 
     <div class="input-group">
         <span class="input-group-addon w3-padding"><i class="fa fa-envelope-o"></i></span>
-        <input class="w3-padding" id="username" type="text" name="username" placeholder="username">
+        <input class="w3-padding" id="username" type="text" name="username" placeholder="username" autofocus>
     </div>
     <div class="input-group">
         <span class="input-group-addon w3-padding"><i class="fa fa-key"></i></span>
@@ -23,8 +23,6 @@
 {% block extrascripts %}
 <script>
 $( document ).ready(function() {
-    $('#username').focus();
-
     $('.icon').click(function () {
         if ($('#password').attr('type') === 'text') {
             $('#password').attr('type', 'password');
