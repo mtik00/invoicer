@@ -59,6 +59,28 @@ class Customer(db.Model):
     def __repr__(self):
         return '<Customer %r>' % (self.name1)
 
+    def format_address(self, html=True, include_email=True):
+        join_with = '<br>' if html else '\n'
+        name = join_with.join([x for x in [self.name1, self.name2] if x])
+        street = join_with.join([x for x in [self.addrline1, self.addrline2] if x])
+        city = '%s, %s %s' % (self.city, self.state.upper(), self.zip)
+
+        lines = [name, street, city]
+        if include_email:
+            lines.append(self.email)
+
+        return join_with.join(lines)
+
+    def format_email(self, html=True):
+        join_with = '<br>' if html else '\n'
+        email = self.email
+
+        if '|' in email:
+            name, domain = email.split('@')
+            return join_with.join(['%s@%s' % (x, domain) for x in name.split('|')])
+
+        return email
+
 
 class Item(db.Model):
     __tablename__ = 'items'

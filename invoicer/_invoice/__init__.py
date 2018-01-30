@@ -9,7 +9,6 @@ from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
 from premailer import Premailer
-from sqlalchemy.orm.attributes import flag_modified
 
 from ..forms import EmptyForm
 from ..submitter import sendmail
@@ -47,16 +46,6 @@ def can_submit(customer_id):
         return False
 
     return True
-
-
-def format_address(customer_id, html=True):
-    join_with = '<br>' if html else '\n'
-    customer = Customer.query.filter(Customer.id == customer_id).first()
-    name = join_with.join([x for x in [customer.name1, customer.name2] if x])
-    street = join_with.join([x for x in [customer.addrline1, customer.addrline2] if x])
-    city = '%s, %s %s' % (customer.city, customer.state.upper(), customer.zip)
-
-    return join_with.join([name, street, city, customer.email])
 
 
 def format_my_address(html=True):
@@ -507,7 +496,7 @@ def raw_invoice(invoice_number):
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.get(invoice.customer_id)
-    customer_address = format_address(invoice.customer_id)
+    customer_address = customer.format_address()
     submit_address = format_my_address()
 
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
@@ -531,7 +520,7 @@ def text_invoice(invoice_number):
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.get(invoice.customer_id)
-    customer_address = format_address(invoice.customer_id, html=False)
+    customer_address = customer.format_address()
     submit_address = format_my_address(html=False)
 
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms

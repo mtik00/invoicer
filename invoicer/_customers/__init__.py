@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
-    current_app, session)
-from ..common import login_required, color_themes
+    session)
+from ..common import login_required
 from ..models import Customer, Invoice, User, W3Theme
 from ..database import db
 from .forms import CustomerForm
@@ -59,7 +59,7 @@ def update(customer_id):
         flash('address updated', 'success')
         return redirect(url_for('customers_page.index'))
 
-    return render_template('customers/customer_form.html', form=form, customer_id=customer_id)
+    return render_template('customers/customer_form.html', form=form, customer=customer)
 
 
 @customers_page.route('/create', methods=["GET", "POST"])
@@ -92,3 +92,33 @@ def create():
 def index():
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
     return render_template('customers/customers.html', customers=customers)
+
+
+@customers_page.route('/<number>')
+@login_required
+def detail(number):
+    customer = Customer.query.filter_by(user_id=session['user_id'], number=number).first_or_404()
+    summary = {}
+
+    for invoice in customer.invoices:
+        if not invoice.submitted_date:
+            continue
+
+        year = invoice.submitted_date.format('YYYY')
+
+        if year not in summary:
+            summary[year] = {'submitted': 0, 'paid': 0, 'year': year}
+
+        summary[year]['submitted'] += invoice.total
+
+        if invoice.paid_date:
+            summary[year]['paid'] += invoice.total
+
+    # Reformat the dict into a sorted list
+    summary = [summary[key] for key in sorted(summary.keys(), reverse=True)]
+
+    return render_template(
+        'customers/detail.html',
+        customer=customer,
+        summary=summary
+    )

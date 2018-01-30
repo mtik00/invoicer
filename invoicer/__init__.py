@@ -44,7 +44,7 @@ def index():
 
 @app.template_filter('currency')
 def currency(value):
-    return "$%.2f" % float(value or 0.0)
+    return "${:,.2f}".format(float(value or 0.0))
 
 
 @app.template_filter('billto')

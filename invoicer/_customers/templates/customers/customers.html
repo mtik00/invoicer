@@ -1,20 +1,29 @@
 {% set current_page = 'customers' %}
 {% extends "base.html" %}
 {% block body %}
-  <a href="{{url_for('customers_page.create')}}" class="w3-btn w3-theme-action">New customer</a>
-  <ul class=entries>
-  {% for customer in customers %}
-    <li>{{ customer.number }}: <a href="{{ url_for('customers_page.update', customer_id=customer.id) }}">{{customer.name1}}</a>
-        <ul>
-            {% if customer.name2 %}<li>{{customer.name2}}</li>{% endif %}
-            <li>{{customer.addrline1}}</li>
-            {% if customer.addrline2 %}<li>{{customer.addrline2}}</li>{% endif %}
-            <li>{{customer.city}}, {{customer.state|upper}} {{customer.zip}}</li>
-            {% if customer.email %}<li>{{customer.email}}</li>{% endif %}
-            {% if customer.terms %}<li>Terms: NET {{customer.terms}} days</li>{% endif %}
-            {% if customer.w3_theme %}<li>Default invoice theme: {{customer.w3_theme.theme}}</li>{% endif %}
-        </ul>
-    </li>
-  {% endfor %}
-  </ul>
+
+<div class="w3-container">
+    <a href="{{url_for('customers_page.create')}}" class="w3-btn w3-theme-action">New customer</a>
+</div>
+
+<div class="w3-col m8">
+    <table class="w3-table w3-striped w3-hoverable" data-hint='Listing of all customers'>
+        <tr>
+            <th>Number</th><th>Address</th><th>Email(s)</th><th># Invoices</th>
+        </tr>
+        {% for customer in customers -%}
+        <tr
+            onclick="window.location='{{url_for('customers_page.detail', number=customer.number)}}';"
+            class="pointer"
+        >
+            <td>{{customer.number}}</td>
+            <td>{{customer.format_address(include_email=False)|safe}}</td>
+            <td>{{customer.format_email()|safe}}</td>
+            <td>{{customer.invoices|length}}</td>
+        </tr>
+        {% endfor%}
+    </table>
+</div>
+
+
 {% endblock %}
