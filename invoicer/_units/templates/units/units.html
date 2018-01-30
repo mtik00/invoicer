@@ -1,14 +1,24 @@
 {% set current_page = 'units' %}
 {% extends "base.html" %}
 {% block body %}
-  <a href="{{url_for('unit_page.create')}}" class="w3-btn w3-theme-action">New unit</a>
-  <ul class="w3-ul">
-  {% for unit in units %}
-    <li><a href="{{ url_for('unit_page.update', unit_id=unit.id) }}">{{unit.description}}</a>
-        <ul>
-            <li>{{unit.unit_price|currency}}{% if unit.units %}/{{unit.units}}{% endif %}</li>
-        </ul>
-    </li>
-  {% endfor %}
-  </ul>
+
+<div class="w3-container">
+<a href="{{url_for('unit_page.create')}}" class="w3-btn w3-theme-action">New unit</a>
+</div>
+
+<div class="w3-col m8">
+    <table class="w3-table w3-striped w3-hoverable">
+        <tr>
+            <th>Description</th><th>Unit Cost</th><th>Units</th>
+        </tr>
+        {% for unit in units %}
+        <tr onclick="window.location='{{url_for('unit_page.update', unit_id=unit.id)}}';" class="pointer">
+            <td>{{unit.description}}</td>
+            <td>{{unit.unit_price|currency}}</td>
+            <td>{{unit.units}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
 {% endblock %}
