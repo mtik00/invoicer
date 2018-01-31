@@ -31,7 +31,7 @@
                 <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
                 <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
                 {% endif %}
-                <span onclick="document.getElementById('delete-modal').style.display='block'" class="w3-bar-item w3-button w3-red"><i class="fa fa-trash fa-fw" aria-hidden="true"></i>&nbsp;Delete Invoice</span>
+                <span onclick="show_delete_modal();" class="w3-bar-item w3-button w3-red"><i class="fa fa-trash fa-fw" aria-hidden="true"></i>&nbsp;Delete Invoice</span>
             </div>
         </div>
 
@@ -167,6 +167,12 @@
                 $('#delete-modal').css({ 'display': "none" });
             }
         });
+
     });
+
+    function show_delete_modal() {
+        $('#delete-modal').css({ 'display': 'block' });
+        $('#validate_delete').focus();
+    };
 </script>
 {% endblock%}
