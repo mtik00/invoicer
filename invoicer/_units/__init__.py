@@ -53,3 +53,19 @@ def create():
         return redirect(url_for('unit_page.units'))
 
     return render_template('units/unit_form.html', form=form)
+
+
+@unit_page.route('/<unit_id>/delete', methods=["POST"])
+@login_required
+def delete(unit_id):
+    if request.form['validate_delete'].lower() != 'delete':
+        flash('Invalid delete request', 'error')
+        return redirect(url_for('.units'))
+
+    unit = UnitPrice.query.filter_by(user_id=session['user_id'], id=unit_id).first_or_404()
+
+    db.session.delete(unit)
+    db.session.commit()
+
+    flash("Unit deleted successfully", "warning")
+    return redirect(url_for('.units'))

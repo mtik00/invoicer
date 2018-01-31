@@ -78,7 +78,6 @@
                 $('#delete_customer_button').prop('disabled', false);
             } else {
                 $('#delete_customer_button').prop('disabled', true);
-
             }
         });
 
@@ -95,11 +94,9 @@
                 $('#delete-modal').css({ 'display': "none" });
             }
         });
-
     });
 
     function show_delete_modal() {
-        // document.getElementById('delete-modal').style.display='block'
         $('#delete-modal').css({ 'display': 'block' });
         $('#validate_delete').focus();
     };

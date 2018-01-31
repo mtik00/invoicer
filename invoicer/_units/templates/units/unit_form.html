@@ -24,8 +24,70 @@
      >
 
      {%- if unit %}
-     <input class="w3-btn w3-red w3-right" type="submit" value="Delete" name="delete">
+     <span onclick="show_delete_modal();" class="w3-btn w3-red w3-right">Delete Unit</span>
      {% endif %}
   </p>
 </form>
+
+<!-- Delete Modal -->
+{% if unit %}
+<div id="delete-modal" class="w3-modal">
+    <div class="w3-modal-content">
+        <header class="w3-container w3-red"> 
+            <span onclick="document.getElementById('delete-modal').style.display='none'" 
+            class="w3-button w3-red w3-xlarge w3-display-topright">&times;</span>
+            <h2>Delete Unit</h2>
+        </header>
+
+        <form action="{{url_for('unit_page.delete', unit_id=unit.id)}}" method='POST'>
+            <div class="w3-container">
+                <p>WARNING: This action cannot be undone</p>
+                <p>Enter DELETE in the input box below to really delete this billable unit</p>
+                <input id="validate_delete" name='validate_delete'>
+            </div>
+
+            <div class="w3-container w3-light-grey w3-padding">
+                <input class="w3-button w3-left w3-white w3-border" type="submit" value="Submit" id="delete_unit_button" disabled>
+                <span onclick="document.getElementById('delete-modal').style.display='none'" class="w3-button w3-right w3-white w3-border">Close</span>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
+
+{% block extrascripts %}
+<script>
+    $( document ).ready(function() {
+
+        // Make sure the user *really* wants to delete the invoice
+        $( "#validate_delete" ).keyup(function() {
+            if ($(this).val().toLowerCase() == 'delete') {
+                $('#delete_unit_button').prop('disabled', false);
+            } else {
+                $('#delete_unit_button').prop('disabled', true);
+            }
+        });
+
+        // Close the submit modal when the escape key is pressed
+        $(document).on('keydown',function(event) {
+            if (event.keyCode == 27) {
+                $('#delete-modal').css({ 'display': "none" });
+             }
+         });
+
+        // Close the submit modal when clicking outside of the window
+        $(window).on('click', function(event){
+            if (event.target == $('#delete-modal').get()[0]) {
+                $('#delete-modal').css({ 'display': "none" });
+            }
+        });
+    });
+
+    function show_delete_modal() {
+        $('#delete-modal').css({ 'display': 'block' });
+        $('#validate_delete').focus();
+    };
+</script>
+{% endblock%}
