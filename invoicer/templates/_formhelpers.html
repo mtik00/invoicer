@@ -13,3 +13,27 @@
 </div>
 </p>
 {% endmacro %}
+
+{% macro render_row() %}
+<div class="w3-cell-row">
+    {% for item in varargs %}
+    {% if loop.first %}
+    <div class="w3-container w3-cell no-left-padding">
+    {% elif loop.last %}
+    <div class="w3-container w3-cell no-right-padding">
+    {% else %}
+    <div class="w3-container w3-cell no-left-padding no-right-padding">
+    {% endif %}
+        {% if item|isfield %}
+        {{ render_field(item) }}
+        {% elif item|count == 3 and item[1] %}
+        <div data-intro="{{item[1]}}">{{ render_field(item[0], **item[2]) }}</div>
+        {% elif item|count == 3 %}
+        {{ render_field(item[0], **item[2]) }}
+        {% else%}
+        {{ render_field(item[0]) }}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}

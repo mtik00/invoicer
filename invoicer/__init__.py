@@ -7,6 +7,7 @@ import zipfile
 import click
 import arrow
 from flask import render_template, url_for, redirect, session
+from wtforms import Field
 
 from .app import create_app
 from .submitter import sendmail
@@ -53,6 +54,12 @@ def currency(value):
 @app.template_filter('billto')
 def billto(customer_id):
     return Customer.query.filter(Customer.id == customer_id).first().name1
+
+
+@app.template_filter('isfield')
+def is_field(item):
+    """Returns `True` if the item is a WTForm Field object, False otherwise"""
+    return isinstance(item, Field)
 
 
 def last_backup():

@@ -1,29 +1,33 @@
 {% extends "base.html" %}
+{% set help_step = '6' %}
 {% block body %}
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field, render_row %}
 {% if form.errors %}
 {% for error in form.errors.values() %}
       <li>{{ error }}</li>
 {% endfor %}
 {% endif %}
 
-<form class="w3-container w3-col m5" action="{{url_for('profile_page.edit')}}" method="POST">
+<form class="w3-container w3-col m6" action="{{url_for('profile_page.edit')}}" method="POST" data-step='6' data-intro='Basic information about yourself.  This info will be shown on your invoices'>
     {{ form.hidden_tag() }}
-    {{ render_field(form.full_name) }}
+    {{ render_field(form.full_name, required=True) }}
     {{ render_field(form.email) }}
     {{ render_field(form.street) }}
-    {{ render_field(form.city) }}
-    {{ render_field(form.state) }}
-    {{ render_field(form.zip) }}
-    {{ render_field(form.terms) }}
-    {{ render_field(form.w3_theme) }}
-    {{ render_field(form.w3_theme_invoice) }}
-    {{ render_field(form.starting_customer_number) }}
-    {{ render_field(form.customer_increment) }}
+
+    {{ render_row(form.city, form.state, form.zip) }}
+    {{ render_row((form.terms, '', {'size': 5}), form.w3_theme, form.w3_theme_invoice) }}
+    {{ render_row(
+        (form.starting_customer_number, 'The first customer number.  <b>NOTE</b>: This will only change new customers.', {'required': true}),
+        (form.customer_increment, 'This is number of places put in between customers.  This makes adding customers slightly easier.')
+    )}}
+
     {{ render_field(form.index_items_per_page) }}
 
     <p>
-        <div class="w3-border w3-padding" id="pdf_checkbox">
+        <div class="w3-border w3-padding" id="pdf_checkbox" data-intro="This will allow you to download and submit a PDF
+        version of your invoice, as long as your application configuration
+        supports it.  If you don't want this and/or are unable to configure
+        the application to support PDF, uncheck this box">
             <label class="w3-text-blue" for="enable_pdf">PDF enabled: </label>
             <input class="w3-border" id="enable_pdf" name="enable_pdf" type="checkbox" {% if profile.enable_pdf %}checked{% endif %}>
         </div>
