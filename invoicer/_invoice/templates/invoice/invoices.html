@@ -1,25 +1,26 @@
 {% set current_page = 'invoices' %}
+{% set help_step = '6' %}
 {% extends "base.html" %}
 {% block body %}
 
 
 <form method="GET">        
-    <div class="w3-bar w3-theme-d2">
-        <button class="w3-bar-item w3-button" data-hint='Show the previous invoice' 
+    <div class="w3-bar w3-theme-d2" data-step='6' data-intro='This is where you create/modify invoices'>
+        <button class="w3-bar-item w3-button"
         {%- if previous_id -%}
         formaction="{{ url_for('invoice_page.invoice_by_number', invoice_number=previous_id)}}">
         {%- else -%}disabled>{%- endif -%}
         Previous</button>
 
-        <button class="w3-bar-item w3-button" data-hint="Show the next invoice (if available)"
+        <button class="w3-bar-item w3-button"
         {%- if next_id -%}
         formaction="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">
         {% else %}disabled>{% endif -%}
         Next</button>
 
         <div class="w3-dropdown-hover">
-            <button class="w3-button" data-hint="Edit the invoice: Add/remove items, mark as submitted/paid, etc">Modify</button>
-            <div class="w3-dropdown-content w3-bar-block w3-card-4 list-group">
+            <button class="w3-button" data-intro="Edit the invoice: Add/remove items, mark as submitted/paid, etc">Modify</button>
+            <div class="w3-dropdown-content w3-bar-block w3-card-4 list-group" id="invoice_edit_dropdown">
                 <button class="w3-bar-item w3-button list-group-item" formaction="{{ url_for('invoice_page.update', invoice_number=invoice.number) }}"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i>&nbsp;Edit</button>
                 {% if (not invoice_obj.submitted_date) -%}
                 <button class="w3-bar-item w3-button list-group-item" formaction="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
@@ -36,7 +37,7 @@
         </div>
 
         {% if show_pdf_button -%}
-        <button class="w3-bar-item w3-button"  data-hint="Download the invoice as a PDF for offline-viewing"
+        <button class="w3-bar-item w3-button"data-intro="Download the invoice as a PDF for offline-viewing"
         {% if pdf_ok -%}
         formaction="{{ url_for('invoice_page.to_pdf', invoice_number=invoice.number)}}" formtarget="_blank">
         {%- else -%}
@@ -46,7 +47,7 @@
         {%- endif -%}
 
         {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
-        <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button" data-hint="Various options for submitting the invoice">Submit Invoice</span>
+        <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button" data-intro="Various options for submitting the invoice">Submit Invoice</span>
         {% endif -%}
         
         <button class="w3-bar-item w3-button w3-right" formaction="{{url_for('invoice_page.create')}}">Add New Invoice</button>
@@ -119,7 +120,7 @@
 </div>
 
 <div class="fluidMedia">
-    <iframe src="{{url_for('invoice_page.raw_invoice', invoice_number=invoice.number)}}" frameborder="1"></iframe>
+    <iframe src="{{url_for('invoice_page.raw_invoice', invoice_number=invoice.number)}}" frameborder="1" data-step='7' data-intro='This is the HTML representation of your invoice that will be submitted and/or converted to PDF (if available)'></iframe>
 </div>
 
 {% endblock %}

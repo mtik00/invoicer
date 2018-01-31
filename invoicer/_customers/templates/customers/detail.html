@@ -1,4 +1,5 @@
 {% set current_page = 'customers' %}
+{% set help_step = '6' %}
 {% extends "base.html" %}
 {% block body %}
 
@@ -7,10 +8,12 @@
 </div>
 
 <ul class="w3-ul">
+    <div data-step='6' data-intro='Some basic customer information'>
     <li>Customer Number: {{customer.number}}</li>
     <li>Address:<br>{{customer.format_address()|safe}}</li>
+    </div>
     {% if summary %}
-    <li>
+    <li data-intro='This shows the annual summary for this customer'>
         <h2>Annual Summary</h2>
         <table class="w3-table w3-striped w3-hoverable" data-hint='Listing of all customers'>
             <tr><th>Year</th><th>Total Submitted</th><th>Total Paid</th></tr>
@@ -25,7 +28,7 @@
     </li>
     {% endif %}
     {% if customer.invoices %}
-    <li>
+    <li data-intro='This is a listing of all invoices associated with this customer.  Clicking a row will take you to the invoice.'>
         <h2>Invoices</h2>
         <table class="w3-table w3-striped w3-hoverable" data-hint='Listing of all customers'>
             <tr>

@@ -1,4 +1,5 @@
 {% set current_page = 'customers' %}
+{% set help_step = '6' %}
 {% extends "base.html" %}
 {% block body %}
 
@@ -7,7 +8,7 @@
 </div>
 
 <div class="w3-col m8">
-    <table class="w3-table w3-striped w3-hoverable" data-hint='Listing of all customers'>
+    <table class="w3-table w3-striped w3-hoverable" data-intro="Listing of all customers.  Clicking on a row will take you the customer's detail page." data-step='6'>
         <tr>
             <th>Number</th><th>Address</th><th>Email(s)</th><th># Invoices</th>
         </tr>

@@ -1,3 +1,4 @@
+{# set intro_start_at = 'help_index' #}
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-{{config['W3_THEME']}}.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css">
     {% block extrahead %}{% endblock%}
 </head>
 <body>
@@ -18,11 +20,11 @@
             <a href="{{url_for('settings_page.index')}}"><div class="w3-bar w3-orange w3-center">DEBUG MODE</div></a>
         {% endif -%}
         
-        <div class="w3-bar w3-theme-dark">
-            <a href="{{url_for('index')}}" class="w3-bar-item w3-button w3-mobile{%if current_page=='home'%} w3-theme-l4{%endif%}" id="nav_home" data-hint='Show a table of all invoices'>Home</a>
-            <a href="{{url_for('invoice_page.last_invoice')}}" id="nav_invoices" class="w3-bar-item w3-button w3-mobile{%if current_page=='invoices'%} w3-theme-l4{%endif%}" data-hint='Show detailed invoice'>Invoices</a>
-            <a href="{{url_for('customers_page.index')}}" id="nav_customers" class="w3-bar-item w3-button w3-mobile{%if current_page=='customers'%} w3-theme-l4{%endif%}" data-hint='Add/edit your billable customers'>Customers</a>
-            <a href="{{url_for('unit_page.index')}}" id="nav_units" class="w3-bar-item w3-button w3-mobile{%if current_page=='units'%} w3-theme-l4{%endif%}" data-hint='Add/edit things that you bill often'>Billable Units</a>
+        <div class="w3-bar w3-theme-dark" data-intro="These are all of the places you can go" data-step='1'>
+            <a href="{{url_for('index')}}" class="w3-bar-item w3-button w3-mobile{%if current_page=='home'%} w3-theme-l4{%endif%}" id="nav_home" data-intro='Show a table of all invoices' data-step='2'>Home</a>
+            <a href="{{url_for('invoice_page.last_invoice')}}" id="nav_invoices" class="w3-bar-item w3-button w3-mobile{%if current_page=='invoices'%} w3-theme-l4{%endif%}" data-intro='Show detailed invoice' data-step='3'>Invoices</a>
+            <a href="{{url_for('customers_page.index')}}" id="nav_customers" class="w3-bar-item w3-button w3-mobile{%if current_page=='customers'%} w3-theme-l4{%endif%}" data-intro='Add/edit your billable customers' data-step='4'>Customers</a>
+            <a href="{{url_for('unit_page.index')}}" id="nav_units" class="w3-bar-item w3-button w3-mobile{%if current_page=='units'%} w3-theme-l4{%endif%}" data-intro='Add/edit things that you bill often' data-step='5'>Billable Units</a>
             
             <a href="{{url_for('login_page.logout')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="Sign out"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
             <a href="{{url_for('profile_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="User Profile"><i class="fa fa-user" aria-hidden="true"></i></a>
@@ -50,8 +52,6 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js"></script>
     <script>
-        var intro_loaded = false;
-
         $(document).ready(function(){
             setTimeout(function() {
                 $('.timeoutmessage').fadeOut('slow');
@@ -59,16 +59,12 @@
         });
 
         function show_help() {
-            if (!intro_loaded) {
-                load_intro();
-            }
-            introJs().showHints();
-        };
-
-        function load_intro() {
-            $('head').append('<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css">');
-            $.getScript('https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js');
-            intro_loaded = true;
+            {% if help_step -%}
+            introJs().goToStepNumber({{help_step}}).start();
+            console.log('going to step number ' + {{help_step}})
+            {%- else %}
+            introJs().start();
+            {% endif %}
         };
     </script>
     {% block extrascripts %}{% endblock %}
