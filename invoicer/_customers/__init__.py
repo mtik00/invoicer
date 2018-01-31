@@ -127,6 +127,10 @@ def detail(number):
 @customers_page.route('/<number>/delete', methods=["POST"])
 @login_required
 def delete(number):
+    if request.form['validate_delete'].lower() != 'delete':
+        flash('Invalid delete request', 'error')
+        return redirect(url_for('.detail', number=number))
+
     customer = Customer.query.filter_by(user_id=session['user_id'], number=number).first_or_404()
     if customer.invoices:
         flash("You cannot delete a customer that has invoices", "error")
