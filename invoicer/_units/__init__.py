@@ -10,9 +10,9 @@ unit_page = Blueprint('unit_page', __name__, template_folder='templates')
 
 @unit_page.route('/')
 @login_required
-def units():
+def index():
     units = UnitPrice.query.filter_by(user_id=session['user_id']).all()
-    return render_template('units/units.html', units=units)
+    return render_template('units/index.html', units=units)
 
 
 @unit_page.route('/<unit_id>/update', methods=["GET", "POST"])
@@ -32,7 +32,7 @@ def update(unit_id):
 
         db.session.commit()
 
-        return redirect(url_for('unit_page.units'))
+        return redirect(url_for('.index'))
 
     return render_template('units/unit_form.html', form=form, unit=unit)
 
@@ -50,7 +50,7 @@ def create():
         db.session.commit()
 
         flash('unit added', 'success')
-        return redirect(url_for('unit_page.units'))
+        return redirect(url_for('.index'))
 
     return render_template('units/unit_form.html', form=form)
 
@@ -60,7 +60,7 @@ def create():
 def delete(unit_id):
     if request.form['validate_delete'].lower() != 'delete':
         flash('Invalid delete request', 'error')
-        return redirect(url_for('.units'))
+        return redirect(url_for('.index'))
 
     unit = UnitPrice.query.filter_by(user_id=session['user_id'], id=unit_id).first_or_404()
 
@@ -68,4 +68,4 @@ def delete(unit_id):
     db.session.commit()
 
     flash("Unit deleted successfully", "warning")
-    return redirect(url_for('.units'))
+    return redirect(url_for('.index'))

@@ -23,7 +23,7 @@
             <a href="{{url_for('index')}}" class="w3-bar-item w3-button w3-mobile{%if current_page=='home'%} w3-theme-l4{%endif%}" id="nav_home" data-hint='Show a table of all invoices'>Home</a>
             <a href="{{url_for('invoice_page.last_invoice')}}" id="nav_invoices" class="w3-bar-item w3-button w3-mobile{%if current_page=='invoices'%} w3-theme-l4{%endif%}" data-hint='Show detailed invoice'>Invoices</a>
             <a href="{{url_for('customers_page.index')}}" id="nav_customers" class="w3-bar-item w3-button w3-mobile{%if current_page=='customers'%} w3-theme-l4{%endif%}" data-hint='Add/edit your billable customers'>Customers</a>
-            <a href="{{url_for('unit_page.units')}}" id="nav_units" class="w3-bar-item w3-button w3-mobile{%if current_page=='units'%} w3-theme-l4{%endif%}" data-hint='Add/edit things that you bill often'>Billable Units</a>
+            <a href="{{url_for('unit_page.index')}}" id="nav_units" class="w3-bar-item w3-button w3-mobile{%if current_page=='units'%} w3-theme-l4{%endif%}" data-hint='Add/edit things that you bill often'>Billable Units</a>
             
             <a href="{{url_for('login_page.logout')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="Sign out"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
             <a href="{{url_for('profile_page.index')}}" class="w3-bar-item w3-button w3-mobile w3-right" title="User Profile"><i class="fa fa-user" aria-hidden="true"></i></a>
