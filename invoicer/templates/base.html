@@ -13,6 +13,9 @@
     {% block extrahead %}{% endblock%}
 </head>
 <body>
+    <div class="w3-row">
+        <div class="w3-col" style="width:5%">&nbsp;</div>
+        <div class="w3-col" style="width:90%">
     {% if session['logged_in'] %}
         {% if config['DEBUG'] -%}
             <div class="w3-bar w3-red w3-center">FLASK IS RUNNING IN DEBUG MODE</div>
@@ -32,22 +35,24 @@
             <a href="#" class="w3-bar-item w3-button w3-mobile w3-right" title="Help" onclick="show_help();"><i class="fa fa-question" aria-hidden="true"></i></a>
         </div>
     {% endif %}
-    <div class=w3-container>
-        <p></p>
-        {% for category, message in get_flashed_messages(with_categories=True) %}
-        <div
-            {% if category == 'success' -%}
-            class="w3-panel w3-display-container pointer {{category}} timeoutmessage"
-            {% else -%}
-            class="w3-panel w3-display-container pointer {{category}}"
-            {%- endif -%}
-            onclick="this.style.display='none'">
-            <span onclick="this.parentElement.style.display='none'"
-            class="w3-button {{category}} w3-large w3-display-topright">&times;</span>
-            <p>{{ message|safe }}</p>
+        <div class=w3-container>
+            <p></p>
+            {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div
+                {% if category == 'success' -%}
+                class="w3-panel w3-display-container pointer {{category}} timeoutmessage"
+                {% else -%}
+                class="w3-panel w3-display-container pointer {{category}}"
+                {%- endif -%}
+                onclick="this.style.display='none'">
+                <span onclick="this.parentElement.style.display='none'"
+                class="w3-button {{category}} w3-large w3-display-topright">&times;</span>
+                <p>{{ message|safe }}</p>
+            </div>
+            {% endfor %}
+            {% block body %}{% endblock %}
         </div>
-        {% endfor %}
-        {% block body %}{% endblock %}
+        <div class="w3-col" style="width:5%">&nbsp;</div>
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js"></script>
