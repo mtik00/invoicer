@@ -122,3 +122,18 @@ def detail(number):
         customer=customer,
         summary=summary
     )
+
+
+@customers_page.route('/<number>/delete', methods=["POST"])
+@login_required
+def delete(number):
+    customer = Customer.query.filter_by(user_id=session['user_id'], number=number).first_or_404()
+    if customer.invoices:
+        flash("You cannot delete a customer that has invoices", "error")
+        return redirect(url_for('.detail', number=number))
+
+    db.session.delete(customer)
+    db.session.commit()
+
+    flash("Customer %s deleted successfully" % number, "warning")
+    return redirect(url_for('.index'))
