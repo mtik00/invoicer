@@ -9,7 +9,7 @@
 <form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.update', customer_id=customer.id)}}" method="POST">
 {% else %}
 <form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.create')}}" method="POST">
-{% endif %}
+{%- endif %}
     {{ form.hidden_tag() }}
     <div data-step='6' data-intro='You need at least 1 name here.  The second one is most useful for a <i>Care Of</i>.  E.g. <tt>C/O Michael Smith</tt>'>
     {{ render_field(form.name1, autofocus=true, required=true) }}
@@ -35,20 +35,20 @@
     {{ render_field(form.w3_theme) }}</div>
   <p>
       <input class="w3-btn w3-theme-action" type=submit value="{% if customer %}Update{%else%}Add{%endif%}">
-      {% if customer %}
-        {% if customer.invoices %}
+      {%- if customer %}
+        {%- if customer.invoices %}
         <input class="w3-btn w3-red w3-right" type=submit value="Delete" name="delete" disabled title="You cannot delete a customer if it has invoices">
-        {% else %}
+        {%- else %}
         <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
         <span onclick="show_delete_modal();" class="w3-btn w3-red w3-right">Delete Customer</span>
-        {% endif %}
-      {% endif %}
+        {%- endif %}
+      {%- endif %}
   </p>
 </form>
 
-{% if customer %}
+{%- if customer %}
 {{ render_delete_modal() }}
-{% endif %}
+{%- endif %}
     
 {% endblock %}
 

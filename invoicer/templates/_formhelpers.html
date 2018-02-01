@@ -1,39 +1,37 @@
 {% macro render_field(field) %}
-<p>
-<div class="w3-border w3-padding">
-  {% if field.errors %}
-    <ul class="w3-red">
-    {% for error in field.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-  {{ field.label(class_="w3-text-blue") }}
-  {{ field(class_="w3-input w3-border", **kwargs)|safe }}
-</div>
-</p>
-{% endmacro %}
+  <p><div class="w3-border w3-padding">
+    {% if field.errors -%}
+      <ul class="w3-red">
+      {% for error in field.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {%- endif -%}
+    {{ field.label(class_="w3-text-blue") }}
+    {{ field(class_="w3-input w3-border", **kwargs)|safe }}
+  </div></p>
+{%- endmacro %}
 
 {% macro render_row() %}
-<div class="w3-cell-row">
-    {% for item in varargs %}
-    {% if loop.first %}
-    <div class="w3-container w3-cell no-left-padding">
-    {% elif loop.last %}
-    <div class="w3-container w3-cell no-right-padding">
-    {% else %}
-    <div class="w3-container w3-cell no-left-padding no-right-padding">
-    {% endif %}
-        {% if item|isfield %}
-        {{ render_field(item, **kwargs) }}
-        {% elif item|count == 3 and item[1] %}
-        <div data-intro="{{item[1]}}">{{ render_field(item[0], **item[2]) }}</div>
-        {% elif item|count == 3 %}
-        {{ render_field(item[0], **item[2]) }}
-        {% else%}
-        {{ render_field(item[0]) }}
-        {% endif %}
-    </div>
-    {% endfor %}
-</div>
-{% endmacro %}
+  <div class="w3-cell-row">
+      {% for item in varargs %}
+      {%- if loop.first -%}
+      <div class="w3-container w3-cell no-left-padding">
+      {%- elif loop.last -%}
+      <div class="w3-container w3-cell no-right-padding">
+      {%- else -%}
+      <div class="w3-container w3-cell no-left-padding no-right-padding">
+      {%- endif -%}
+          {%- if item|isfield -%}
+          {{ render_field(item, **kwargs) }}
+          {%- elif item|count == 3 and item[1] -%}
+          <div data-intro="{{item[1]}}">{{ render_field(item[0], **item[2]) }}</div>
+          {%- elif item|count == 3 -%}
+          {{ render_field(item[0], **item[2]) }}
+          {%- else -%}
+          {{ render_field(item[0]) }}
+          {%- endif -%}
+      </div>
+      {%- endfor %}
+  </div>
+{%- endmacro %}
