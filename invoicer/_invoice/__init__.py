@@ -395,7 +395,7 @@ def submit_invoice(invoice_number):
 
     stream_attachments = []
     pdf_fh = None
-    if pdf_enabled():
+    if pdf_ok():
         fname = "invoice-%s.pdf" % invoice_number
         config = Configuration(current_app.config['WKHTMLTOPDF'])
         options = {
