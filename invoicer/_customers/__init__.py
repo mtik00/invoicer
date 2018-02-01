@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
     session)
-from ..common import login_required
+from ..common import login_required, form_is_deleting
 from ..models import Customer, Invoice, User, W3Theme
 from ..database import db
 from .forms import CustomerForm
@@ -42,6 +42,9 @@ def update(customer_id):
     form.w3_theme.choices = theme_choices
 
     if form.validate_on_submit():
+        if form_is_deleting():
+            return redirect(url_for('.delete', number=customer.number), code=307)
+
         # Only change the customer number there are no invoices and the new
         # number isn't already taken.
         number = form['number'].data

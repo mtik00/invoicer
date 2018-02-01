@@ -1,10 +1,12 @@
 {% set current_page = 'invoices' %}
 {% set help_step = '6' %}
+{% from "_modals.html" import render_delete_modal %}
 {% extends "base.html" %}
 {% block body %}
 
 
-<form method="GET">        
+<form method="GET">
+    {{ form.hidden_tag() }}
     <div class="w3-bar w3-theme-d2" data-step='6' data-intro='This is where you create/modify invoices'>
         <button class="w3-bar-item w3-button"
         {%- if previous_id -%}
@@ -32,6 +34,7 @@
                 <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
                 <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
                 {% endif %}
+                <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="" data-submit-url="{{url_for('invoice_page.delete', invoice_number=invoice.number) }}">
                 <span onclick="show_delete_modal();" class="w3-bar-item w3-button w3-red"><i class="fa fa-trash fa-fw" aria-hidden="true"></i>&nbsp;Delete Invoice</span>
             </div>
         </div>
@@ -91,29 +94,7 @@
     </div>
 </div>
 
-<!-- Delete Modal -->
-<div id="delete-modal" class="w3-modal">
-    <div class="w3-modal-content">
-        <header class="w3-container w3-red"> 
-            <span onclick="document.getElementById('delete-modal').style.display='none'" 
-            class="w3-button w3-red w3-xlarge w3-display-topright">&times;</span>
-            <h2>Delete Invoice</h2>
-        </header>
-
-        <form action="{{url_for('invoice_page.delete', invoice_number=invoice.number)}}" method='POST'>
-            <div class="w3-container">
-                <p>WARNING: This action cannot be undone</p>
-                <p>Enter DELETE in the input box below to really delete this invoice</p>
-                <input id="validate_delete" name='validate_delete'>
-            </div>
-
-            <div class="w3-container w3-light-grey w3-padding">
-                <input class="w3-button w3-left w3-white w3-border" type="submit" value="Submit" id="delete_invoice_button" disabled>
-                <span onclick="document.getElementById('delete-modal').style.display='none'" class="w3-button w3-right w3-white w3-border">Close</span>
-            </div>
-        </form>
-    </div>
-</div>
+{{ render_delete_modal() }}
 
 <div id="email-modal" class="w3-modal">
     <div class="loader w3-display-middle"></div>
@@ -126,19 +107,9 @@
 {% endblock %}
 
 {% block extrascripts %}
+{% include '_delete_modal.js' %}
 <script>
     $( document ).ready(function() {
-
-        // Make sure the user *really* wants to delete the invoice
-        $( "#validate_delete" ).keyup(function() {
-            if ($(this).val().toLowerCase() == 'delete') {
-                $('#delete_invoice_button').prop('disabled', false);
-            } else {
-                $('#delete_invoice_button').prop('disabled', true);
-
-            }
-        });
-
         // Handle the email submit button
         $('#email_btn').on('click', function(event) {
             // Close the submit modal
@@ -157,7 +128,6 @@
         $(document).on('keydown',function(event) {
             if (event.keyCode == 27) {
                 $('#submit-modal').css({ 'display': "none" });
-                $('#delete-modal').css({ 'display': "none" });
              }
          });
 
@@ -165,15 +135,9 @@
         $(window).on('click', function(event){
             if ((event.target == $('#submit-modal').get()[0]) || (event.target == $('#delete-modal').get()[0])) {
                 $('#submit-modal').css({ 'display': "none" });
-                $('#delete-modal').css({ 'display': "none" });
             }
         });
 
     });
-
-    function show_delete_modal() {
-        $('#delete-modal').css({ 'display': 'block' });
-        $('#validate_delete').focus();
-    };
 </script>
 {% endblock%}

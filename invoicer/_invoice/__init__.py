@@ -74,6 +74,10 @@ def delete_items(invoice_number):
     form = EmptyForm()
 
     if form.validate_on_submit():
+        if request.form.get('validate_delete', '').lower() != 'delete':
+            flash('Invalid delete request', 'error')
+            return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
         item_ids_to_delete = [y for x, y in request.form.items() if x.startswith('item_')]
         items = Item.query.filter(Item.id.in_(item_ids_to_delete)).all()
         if not items:
@@ -121,11 +125,6 @@ def create_item(invoice_number):
 
         invoice.items.append(item)
         db.session.add_all([invoice, item])
-        db.session.commit()
-
-        # items = Item.query.filter_by(invoice_id=invoice.id).all()
-        # item_total = sum([x.quantity * x.unit_price for x in items])
-        # invoice.total = item_total
         db.session.commit()
 
         flash('item added to invoice %s' % invoice.number, 'success')
@@ -201,6 +200,7 @@ def update(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
 @login_required
 def invoice_by_number(invoice_number):
+    form = EmptyForm(request.form)
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     if not invoice:
         flash('Unknown invoice', 'error')
@@ -226,6 +226,7 @@ def invoice_by_number(invoice_number):
 
     return render_template(
         'invoice/invoices.html',
+        form=form,
         invoice=invoice,
         next_id=next_id,
         previous_id=previous_id,
@@ -292,25 +293,31 @@ def create():
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete', methods=['POST'])
 @login_required
 def delete(invoice_number):
-    if request.form['validate_delete'].lower() != 'delete':
-        flash('Invalid delete request', 'error')
-        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
-
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    items = Item.query.filter_by(invoice_id=invoice.id).all()
+    form = EmptyForm(request.form)
 
-    if invoice.paid_date:
-        pd = InvoicePaidDate.query.get(invoice.paid_date.id)
-        db.session.delete(pd)
+    if request.form.get('validate_delete', '').lower() != 'delete':
+        flash('Invalid delete request', 'error')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    db.session.delete(invoice)
+    if form.validate_on_submit():
+        items = Item.query.filter_by(invoice_id=invoice.id).all()
 
-    for item in items:
-        db.session.delete(item)
+        if invoice.paid_date:
+            pd = InvoicePaidDate.query.get(invoice.paid_date.id)
+            db.session.delete(pd)
 
-    db.session.commit()
-    flash('Invoice %s has been deleted' % invoice_number, 'warning')
-    return redirect(url_for('invoice_page.last_invoice'))
+        db.session.delete(invoice)
+
+        for item in items:
+            db.session.delete(item)
+
+        db.session.commit()
+        flash('Invoice %s has been deleted' % invoice_number, 'warning')
+        return redirect(url_for('invoice_page.last_invoice'))
+    else:
+        flash('Error occurred when attempting to delete form', 'error')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/pdf')

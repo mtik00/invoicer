@@ -3,16 +3,12 @@
 {% extends "base.html" %}
 {% block body %}
 {% from "_formhelpers.html" import render_field %}
-{% if form.errors %}
-{% for error in form.errors.values() %}
-      <li>{{ error }}</li>
-{% endfor %}
-{% endif %}
+{% from "_modals.html" import render_delete_modal %}
 
 {% if customer %}
-<form class="w3-container w3-col m5" action="{{url_for('customers_page.update', customer_id=customer.id)}}" method="POST">
+<form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.update', customer_id=customer.id)}}" method="POST">
 {% else %}
-<form class="w3-container w3-col m5" action="{{url_for('customers_page.create')}}" method="POST">
+<form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.create')}}" method="POST">
 {% endif %}
     {{ form.hidden_tag() }}
     <div data-step='6' data-intro='You need at least 1 name here.  The second one is most useful for a <i>Care Of</i>.  E.g. <tt>C/O Michael Smith</tt>'>
@@ -44,71 +40,19 @@
         {% if customer.invoices %}
         <input class="w3-btn w3-red w3-right" type=submit value="Delete" name="delete" disabled title="You cannot delete a customer if it has invoices">
         {% else %}
+        <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
         <span onclick="show_delete_modal();" class="w3-btn w3-red w3-right">Delete Customer</span>
         {% endif %}
       {% endif %}
   </p>
 </form>
 
-<!-- Delete Modal -->
 {% if customer %}
-<div id="delete-modal" class="w3-modal">
-    <div class="w3-modal-content">
-        <header class="w3-container w3-red"> 
-            <span onclick="document.getElementById('delete-modal').style.display='none'" 
-            class="w3-button w3-red w3-xlarge w3-display-topright">&times;</span>
-            <h2>Delete Customer</h2>
-        </header>
-
-        <form action="{{url_for('customers_page.delete', number=customer.number)}}" method='POST'>
-            <div class="w3-container">
-                <p>WARNING: This action cannot be undone</p>
-                <p>Enter DELETE in the input box below to really delete this customer</p>
-                <input id="validate_delete" name='validate_delete'>
-            </div>
-
-            <div class="w3-container w3-light-grey w3-padding">
-                <input class="w3-button w3-left w3-white w3-border" type="submit" value="Submit" id="delete_customer_button" disabled>
-                <span onclick="document.getElementById('delete-modal').style.display='none'" class="w3-button w3-right w3-white w3-border">Close</span>
-            </div>
-        </form>
-    </div>
-</div>
+{{ render_delete_modal() }}
 {% endif %}
     
 {% endblock %}
 
 {% block extrascripts %}
-<script>
-    $( document ).ready(function() {
-
-        // Make sure the user *really* wants to delete the invoice
-        $( "#validate_delete" ).keyup(function() {
-            if ($(this).val().toLowerCase() == 'delete') {
-                $('#delete_customer_button').prop('disabled', false);
-            } else {
-                $('#delete_customer_button').prop('disabled', true);
-            }
-        });
-
-        // Close the submit modal when the escape key is pressed
-        $(document).on('keydown',function(event) {
-            if (event.keyCode == 27) {
-                $('#delete-modal').css({ 'display': "none" });
-             }
-         });
-
-        // Close the submit modal when clicking outside of the window
-        $(window).on('click', function(event){
-            if (event.target == $('#delete-modal').get()[0]) {
-                $('#delete-modal').css({ 'display': "none" });
-            }
-        });
-    });
-
-    function show_delete_modal() {
-        $('#delete-modal').css({ 'display': 'block' });
-        $('#validate_delete').focus();
-    };
-</script>
-{% endblock%}
+{% include '_delete_modal.js' %}
+{% endblock %}

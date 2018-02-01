@@ -1,0 +1,31 @@
+<!-- Delete Modal -->
+{#
+    Usage:
+        :param str delete_url: The URL of the POST endpoint to handle 
+#}
+{% macro render_delete_modal() %}
+<div id="delete-modal" class="w3-modal">
+    <div class="w3-modal-content">
+        <header class="w3-container w3-red"> 
+            <span onclick="document.getElementById('delete-modal').style.display='none'" 
+            class="w3-button w3-red w3-xlarge w3-display-topright">&times;</span>
+            <h2>Delete</h2>
+        </header>
+
+        {# <form action="{{delete_url}}" method='POST'> #}
+        <form>
+            {# `form` is needed if you are using `validate_on_submit` due to the CSRF token #}
+            <div class="w3-container">
+                <p>WARNING: This action cannot be undone</p>
+                <p>Enter DELETE in the input box below to really delete this item</p>
+                <input id="validate_delete" name='validate_delete'>
+            </div>
+
+            <div class="w3-container w3-light-grey w3-padding">
+                <input class="w3-button w3-left w3-white w3-border" type="button" value="Submit" id="confirm_delete_button" disabled onclick='delete_modal_submit();'>
+                <span onclick="document.getElementById('delete-modal').style.display='none'" class="w3-button w3-right w3-white w3-border">Close</span>
+            </div>
+        </form>
+    </div>
+</div>
+{% endmacro %}

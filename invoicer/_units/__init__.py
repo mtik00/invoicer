@@ -1,6 +1,6 @@
 from flask import (
     Blueprint, render_template, request, flash, redirect, url_for, session)
-from ..common import login_required
+from ..common import login_required, form_is_deleting
 from ..models import UnitPrice, User
 from ..database import db
 from .forms import UnitForm
@@ -22,9 +22,8 @@ def update(unit_id):
     form = UnitForm(request.form, obj=unit)
 
     if form.validate_on_submit():
-        if 'delete' in request.form:
-            db.session.delete(unit)
-            flash('unit deleted', 'warning')
+        if form_is_deleting():
+            return redirect(url_for('.delete', unit_id=unit_id), code=307)
         else:
             form.populate_obj(unit)
             db.session.add(unit)
@@ -58,7 +57,7 @@ def create():
 @unit_page.route('/<unit_id>/delete', methods=["POST"])
 @login_required
 def delete(unit_id):
-    if request.form['validate_delete'].lower() != 'delete':
+    if request.form.get('validate_delete', '').lower() != 'delete':
         flash('Invalid delete request', 'error')
         return redirect(url_for('.index'))
 

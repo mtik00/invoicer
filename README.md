@@ -78,3 +78,44 @@ Each of these addresses will be put on the `to` line of the email.
     *   Apply DB migrations:
         `flask db upgrade`
     *   Restart the service
+
+# Delete confirmation modals
+To use the application's delete confirmation modal, you must create your form
+like so:  
+```
+<form...action="{{url_for(...)}}" method="POST">
+    <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+
+    <span onclick="show_delete_modal();" class="w3-btn w3-red">Delete My Things</span>
+</form>
+
+{{ render_delete_modal() }}
+{% endblock %}
+
+{% block extrascripts %}
+{% include '_delete_modal.js' %}
+{% endblock %}
+```
+
+The javascript will take care of ensuring the user types in `delete` and then
+submit the form.  It finds the form by the `id="delete_modal_target"` field.
+This means that we don't currently support multiple confirmations.
+
+The endpoint can also ensure the user entered the field by doing this:
+```python
+    from .common import form_is_deleting
+    def update(...):
+        if form_is_deleting():
+            # NOTE: The ``code=307`` will preserve the ``POST`` method
+            return redirect(url_for('.delete', item_id=item_id), code=307)
+    def delete(...):
+        if request.form.get('validate_delete', '').lower() != 'delete':
+            flash('Invalid delete request', 'error')
+            return redirect(url_for(...))
+```
+
+You may also check the value of `#delete_modal_target`, which gets set to
+`delete` if things validate:  
+```python
+if ('delete' in request.form.get('delete_modal_target', '')
+```
