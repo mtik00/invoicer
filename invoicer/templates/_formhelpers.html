@@ -25,7 +25,7 @@
     <div class="w3-container w3-cell no-left-padding no-right-padding">
     {% endif %}
         {% if item|isfield %}
-        {{ render_field(item) }}
+        {{ render_field(item, **kwargs) }}
         {% elif item|count == 3 and item[1] %}
         <div data-intro="{{item[1]}}">{{ render_field(item[0], **item[2]) }}</div>
         {% elif item|count == 3 %}

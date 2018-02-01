@@ -2,7 +2,7 @@
 {% set help_step = '6' %}
 {% extends "base.html" %}
 {% block body %}
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field, render_row %}
 {% from "_modals.html" import render_delete_modal %}
 
 {% if customer %}
@@ -16,9 +16,8 @@
     {{ render_field(form.name2) }}</div>
     {{ render_field(form.addrline1, required=true) }}
     {{ render_field(form.addrline2) }}
-    {{ render_field(form.city, required=true) }}
-    {{ render_field(form.state, required=true) }}
-    {{ render_field(form.zip, required=true) }}
+    {{ render_row(form.city, form.state, form.zip, required=true) }}
+
     <div data-intro='You can have only 1 email address.  However, this application allows you to enter multiple users
     at a single domain.  You do this by separating the users with <tt>|</tt>.  For example: <tt>jane|mary|tom@example.com</tt>.
     All three of these users will be emailed the invoice when you submit it.'>
