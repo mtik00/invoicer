@@ -15,4 +15,5 @@ setup(
         'premailer==3.1.1',
         'SQLAlchemy-Utils==0.32.21'
     ],
+    tests_require=['pytest-flask=0.10.0'],
 )
