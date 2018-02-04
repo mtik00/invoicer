@@ -121,10 +121,10 @@ def initdb_command():
         raise click.Abort()
 
     if click.confirm('Populate with sample data?'):
-        init_db(True)
+        init_db(True, apply_migrations=True)
         click.echo('Sample data added to database.')
     else:
-        init_db(False)
+        init_db(False, apply_migrations=True)
     click.echo('Initialized the database.')
 
 

@@ -11,7 +11,7 @@ from .common import color_themes
 db = SQLAlchemy()
 
 
-def init_db(sample_data=False):
+def init_db(sample_data=False, apply_migrations=False):
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
@@ -23,15 +23,16 @@ def init_db(sample_data=False):
     themes = [models.W3Theme(theme=x) for x in sorted(color_themes) if x]
     db.session.add_all(themes)
 
-    try:
-        init()
-    except:
-        pass
+    if apply_migrations:
+        try:
+            init()
+        except:
+            pass
 
-    try:
-        migrate()
-    except:
-        pass
+        try:
+            migrate()
+        except:
+            pass
 
     if sample_data:
         profile = models.Profile(

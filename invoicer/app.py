@@ -5,7 +5,7 @@ from flask import Flask, current_app, session
 from werkzeug.routing import BaseConverter
 from flask_migrate import Migrate
 
-from .database import db
+from .database import db, init_db
 
 from .models import Profile
 from ._profile import profile_page
