@@ -335,9 +335,12 @@ def add_user(username, password):
     import models
     hashed_password = hash_password(password)
 
+    profile = models.Profile()
+
     user = models.User(
         username=username,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        profile=profile
     )
 
     default_settings = models.ApplicationSettings(debug_mode=False)
