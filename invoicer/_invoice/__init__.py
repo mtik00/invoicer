@@ -211,7 +211,7 @@ def invoice_by_number(invoice_number):
         return redirect(url_for('index_page.index'))
 
     # Figure out next/previous
-    invoice_numbers = [x.number for x in Invoice.query.all()]
+    invoice_numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).all()]
     if not invoice_numbers:
         current_pos = next_id = previous_id = 0
         to_emails = None
