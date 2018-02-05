@@ -194,6 +194,61 @@ def init_db(sample_data=False, apply_migrations=False):
             models.UnitPrice(description='Employer #2: Maintenance', unit_price=75, units='hr'),
         ])
 
+        profile2 = models.Profile(
+            full_name='John Doe', email='j.doe@____.com',
+            street='1313 Mockingbird Ln', city='New York',
+            state='NY', zip='11111', terms=45,
+            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first(),
+        )
+
+        user2 = models.User(
+            username='user2',
+            hashed_password=hash_password('default'),
+            profile=profile,
+            application_settings=models.ApplicationSettings(
+                debug_mode=False,
+            ),
+        )
+
+        user2_customer1 = models.Customer(
+            name1='Employer #3', addrline1='1234 45th St', city='New York',
+            state='NY', zip='11133', email='billing@example.com', number=1010,
+            user=user2)
+
+        user2_invoice1 = models.Invoice(
+            customer=user2_customer1,
+            submitted_date=None,
+            description='2018 Website Maintenance',
+            paid_date=None,
+            number='1010-2018-001',
+            terms=45,
+            user=user2)
+
+        db.session.add_all([
+            models.Item(
+                date=arrow.get('01-MAR-2018', 'DD-MMM-YYYY'),
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=user2_invoice1, customer=user2_customer1
+            ),
+            models.Item(
+                date=arrow.get('04-MAR-2018', 'DD-MMM-YYYY'),
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=user2_invoice1, customer=user2_customer1
+            ),
+            models.Item(
+                date=arrow.get('05-MAR-2018', 'DD-MMM-YYYY'),
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=user2_invoice1, customer=user2_customer1
+            ),
+            models.Item(
+                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
+                description='Website maintenance', unit_price=75, units='hr',
+                quantity=8, invoice=user2_invoice1, customer=user2_customer1
+            ),
+        ])
+
+        db.session.add_all([profile2, user2, user2_customer1, user2_invoice1])
+
         db.session.commit()
 
 

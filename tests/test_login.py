@@ -1,7 +1,7 @@
 import re
 from urlparse import urlparse
 
-from flask import url_for
+from flask import url_for, session
 
 
 def test_login_everywhere(client, app):
@@ -32,3 +32,31 @@ def test_login_everywhere(client, app):
         print "testing:", url
         assert response.status_code != 404, "url was not found: %s" % url
         assert urlparse(response.location).path == login_url, "url wasn't the login page: %s" % url
+
+
+def test_admin_login(client):
+    login_url = url_for('login_page.login')
+    client.post(login_url, data=dict(username='admin', password='default'))
+
+    assert session.get('user_id', 0) == 1
+    assert session.get('logged_in') is True
+
+    # Make sure we can log out
+    logout_url = url_for('login_page.logout')
+    client.get(logout_url)
+    assert 'user_id' not in session
+    assert 'logged_in' not in session
+
+
+def test_user2_login(client):
+    login_url = url_for('login_page.login')
+    client.post(login_url, data=dict(username='user2', password='default'))
+
+    assert session.get('user_id', 0) == 2
+    assert session.get('logged_in') is True
+
+    # Make sure we can log out
+    logout_url = url_for('login_page.logout')
+    client.get(logout_url)
+    assert 'user_id' not in session
+    assert 'logged_in' not in session

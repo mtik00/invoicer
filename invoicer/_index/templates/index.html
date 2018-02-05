@@ -25,7 +25,7 @@
   </table>
 
   {% if invoices.has_next or invoices.has_prev %}
-  {{ render_pagination(invoices, 'paginate_index') }}
+  {{ render_pagination(invoices, 'index_page.paginate_index') }}
   {% endif %}
 </div>
 {% endblock %}

@@ -103,11 +103,13 @@ class Item(db.Model):
 
 class Invoice(db.Model):
     __tablename__ = 'invoices'
+    __table_args__ = (UniqueConstraint('user_id', 'number', name='user_number'),)
+
     id = db.Column(db.Integer, primary_key=True)
     submitted_date = db.Column(ArrowType)
     description = db.Column(db.String(150))
     due_date = db.Column(ArrowType)
-    number = db.Column(db.String(50), unique=True, nullable=False)
+    number = db.Column(db.String(50))
     total = db.Column(db.Float)
     items = relationship("Item", back_populates="invoice")
     terms = db.Column(db.Integer)

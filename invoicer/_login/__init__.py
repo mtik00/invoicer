@@ -30,6 +30,7 @@ def login():
 
         if error:
             flash('Invalid username and/or password', 'error')
+            return redirect(url_for('.login'), code=401)
         else:
             if not error:
                 session['logged_in'] = True
@@ -40,7 +41,7 @@ def login():
                 if 'next' in request.form:
                     return redirect(request.form['next'])
 
-                return redirect(url_for('index'))
+                return redirect(url_for('index_page.index'))
 
     return render_template('login/login.html', form=form)
 
@@ -49,5 +50,6 @@ def login():
 @login_required
 def logout():
     session.pop('logged_in', None)
+    session.pop('user_id', None)
     flash('You were logged out', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('index_page.index'))

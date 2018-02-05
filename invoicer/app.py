@@ -5,9 +5,10 @@ from flask import Flask, current_app, session
 from werkzeug.routing import BaseConverter
 from flask_migrate import Migrate
 
-from .database import db, init_db
+from .database import db
 
 from .models import Profile
+from ._index import index_page
 from ._profile import profile_page
 from ._units import unit_page
 from ._customers import customers_page
@@ -56,8 +57,10 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_envvar('INVOICER_SETTINGS', silent=True)
     app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
+
     app.url_map.converters['regex'] = RegexConverter
 
+    app.register_blueprint(index_page)
     app.register_blueprint(profile_page, url_prefix='/profile')
     app.register_blueprint(unit_page, url_prefix='/units')
     app.register_blueprint(customers_page, url_prefix='/customers')
@@ -70,15 +73,14 @@ def create_app():
 
     db.init_app(app)
     app.db = db
+    Migrate(app, db)
 
-    migrate = Migrate(app, db)
-
-    with app.app_context():
-        try:
-            profile = Profile.query.first()
-            if profile:
-                app.config['W3_THEME'] = profile.w3_theme or app.config['W3_THEME']
-        except Exception:
-            app.config['W3_THEME'] = 'dark-grey'
+    # with app.app_context():
+    #     try:
+    #         profile = Profile.query.first()
+    #         if profile:
+    #             app.config['W3_THEME'] = profile.w3_theme or app.config['W3_THEME']
+    #     except Exception:
+    #         app.config['W3_THEME'] = 'dark-grey'
 
     return app

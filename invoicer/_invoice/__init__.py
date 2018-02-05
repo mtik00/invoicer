@@ -204,7 +204,7 @@ def invoice_by_number(invoice_number):
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     if not invoice:
         flash('Unknown invoice', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('index_page.index'))
 
     # Figure out next/previous
     invoice_numbers = [x.number for x in Invoice.query.all()]
@@ -499,7 +499,7 @@ def last_invoice():
 @login_required
 def raw_invoice(invoice_number):
     """
-    Displays a single invoice
+    Displays a single invoice in HTML format
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.get(invoice.customer_id)

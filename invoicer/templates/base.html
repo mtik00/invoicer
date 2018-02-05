@@ -24,7 +24,7 @@
         {% endif -%}
         
             <div class="w3-bar w3-theme-dark" data-intro="These are all of the places you can go" data-step='1'>
-                <a href="{{url_for('index')}}" class="w3-bar-item w3-button w3-mobile{%if current_page=='home'%} w3-theme-l4{%endif%}" id="nav_home" data-intro='Show a table of all invoices' data-step='2'>Home</a>
+                <a href="{{url_for('index_page.index')}}" class="w3-bar-item w3-button w3-mobile{%if current_page=='home'%} w3-theme-l4{%endif%}" id="nav_home" data-intro='Show a table of all invoices' data-step='2'>Home</a>
                 <a href="{{url_for('invoice_page.last_invoice')}}" id="nav_invoices" class="w3-bar-item w3-button w3-mobile{%if current_page=='invoices'%} w3-theme-l4{%endif%}" data-intro='Show detailed invoice' data-step='3'>Invoices</a>
                 <a href="{{url_for('customers_page.index')}}" id="nav_customers" class="w3-bar-item w3-button w3-mobile{%if current_page=='customers'%} w3-theme-l4{%endif%}" data-intro='Add/edit your billable customers' data-step='4'>Customers</a>
                 <a href="{{url_for('unit_page.index')}}" id="nav_units" class="w3-bar-item w3-button w3-mobile{%if current_page=='units'%} w3-theme-l4{%endif%}" data-intro='Add/edit things that you bill often' data-step='5'>Billable Units</a>
