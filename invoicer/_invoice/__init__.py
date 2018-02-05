@@ -105,6 +105,10 @@ def create_item(invoice_number):
     form = ItemForm(quantity=1)
     unit_prices = UnitPrice.query.filter_by(user_id=session['user_id']).all()
 
+    if (request.method == 'POST') and ('cancel' in request.form):
+        flash('Action canceled', 'warning')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
     if form.validate_on_submit():
         unit_price = float(request.form['unit_pricex'])
         units = request.form['unit_price_units']
