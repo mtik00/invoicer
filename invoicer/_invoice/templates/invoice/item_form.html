@@ -6,8 +6,8 @@
 <form class="w3-container w3-col m5" action="{{url_for('invoice_page.create_item', invoice_number=invoice.number)}}" method="POST">
     <dl>
         {{ form.hidden_tag() }}
-        {{ render_field(form.date) }}
-        {{ render_field(form.description) }}
+        {{ render_field(form.date, required=True) }}
+        {{ render_field(form.description, required=True) }}
 
         {# Splitting out Unit Price since it's more complicated #}
         <p>
