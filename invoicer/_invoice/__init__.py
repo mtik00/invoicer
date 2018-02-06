@@ -41,7 +41,7 @@ def can_submit(customer_id):
     ):
         return False
 
-    customer = Customer.query.filter(Customer.id == customer_id).first()
+    customer = Customer.query.filter_by(id=customer_id).first()
     if not (customer and customer.email):
         return False
 
@@ -350,7 +350,8 @@ def get_address_emails(customer_id):
     if (session['user_debug'] or current_app.config['DEBUG']) and ('EMAIL_USERNAME' in current_app.config):
         return [current_app.config['EMAIL_USERNAME'] or '']
 
-    email = Customer.query.get(customer_id).email
+    customer = Customer.query.filter_by(user_id=session['user_id'], id=customer_id).first_or_404()
+    email = customer.email
 
     if '|' in email:
         name, domain = email.split('@')
@@ -468,7 +469,7 @@ def next_invoice_number(customer_id):
     Returns the next available invoice number in the format:
         YYYY-<customer number>-<invoice number>
     """
-    customer = Customer.query.get(customer_id)
+    customer = Customer.query.filter_by(user_id=session['user_id'], id=customer_id).first_or_404()
     number = customer.number
 
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
@@ -506,7 +507,7 @@ def raw_invoice(invoice_number):
     Displays a single invoice in HTML format
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    customer = Customer.query.get(invoice.customer_id)
+    customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address()
 
@@ -530,7 +531,7 @@ def text_invoice(invoice_number):
     Displays a single invoice
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    customer = Customer.query.get(invoice.customer_id)
+    customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address(html=False)
 
