@@ -1,0 +1,92 @@
+{% set current_page = 'customers' %}
+{% set help_step = '6' %}
+{% extends "lb/base.html" %}
+
+{% block topleftnav %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
+        <a class="nav-link" title="New Customer" href="{{url_for('customers_page.update', customer_id=customer.id)}}">
+            Edit
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="card col-md-6">
+    <div class="card-header">
+        <h4 class="card-title"><a href="{{url_for('customers_page.detail', number=customer.number)}}">{{customer.name1}}</a></h4>
+        <p class="card-category">Number: {{customer.number}}; # invoices: {{customer.invoices|length}}</p>
+    </div>
+    <div class="card-body ">
+        {{customer.format_address(include_email=False)|safe}}<br><hr>
+        {{customer.format_email(', ')|safe}}
+    </div>
+    <div class="card-footer ">
+    </div>
+</div>
+
+{% if summary %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card strpied-tabled-with-hover">
+            <div class="card-header ">
+                <h4 class="card-title">Annual Summary</h4>
+            </div>
+            <div class="card-body table-full-width table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <th>Year</th>
+                        <th>Total Submitted</th>
+                        <th>Total Paid</th>
+                    </thead>
+                    <tbody>
+                        {% for year in summary %}
+                        <tr>
+                            <td>{{year.year}}</td>
+                            <td>{{year.submitted|currency}}</td>
+                            <td>{{year.paid|currency}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if customer.invoices %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card strpied-tabled-with-hover">
+            <div class="card-header ">
+                <h4 class="card-title">Invoices</h4>
+            </div>
+            <div class="card-body table-full-width table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <th>Invoice Number</th>
+                        <th>Total</th>
+                        <th>Submitted Date</th>
+                        <th>Paid Date</th>
+                    </thead>
+                    <tbody>
+                    {% for invoice in customer.invoices %}
+                    <tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';" class="pointer">
+                        <td>{{invoice.number}}</td>
+                        <td>{{invoice.total|currency}}</td>
+                        <td>{{invoice.submitted_date.format('YYYY-MMM-DD').upper() if invoice.submitted_date}}</td>
+                        <td>{{invoice.paid_date.paid_date.format('YYYY-MMM-DD').upper() if invoice.paid_date}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+{% endblock %}

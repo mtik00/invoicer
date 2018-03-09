@@ -1,0 +1,33 @@
+{% set current_page = 'customers' %}
+{% set help_step = '6' %}
+{% extends "lb/base.html" %}
+
+{% block topleftnav %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
+        <a class="nav-link" title="New Customer" href="{{url_for('customers_page.create')}}">
+            New Customer
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="card-deck">
+{% for customer in customers -%}
+    <div class="card ">
+        <div class="card-header ">
+            <h4 class="card-title"><a href="{{url_for('customers_page.detail', number=customer.number)}}">{{customer.name1}}</a></h4>
+            <p class="card-category">Number: {{customer.number}}; # invoices: {{customer.invoices|length}}</p>
+        </div>
+        <div class="card-body ">
+            {{customer.format_address(include_email=False)|safe}}<br><hr>
+            {{customer.format_email(', ')|safe}}
+        </div>
+        <div class="card-footer ">
+        </div>
+    </div>
+    {% endfor%}
+</div>
+
+{% endblock %}

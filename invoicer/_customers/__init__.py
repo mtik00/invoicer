@@ -62,7 +62,8 @@ def update(customer_id):
         flash('address updated', 'success')
         return redirect(url_for('customers_page.index'))
 
-    return render_template('customers/customer_form.html', form=form, customer=customer)
+    theme_choices2 = [('', '', '')] + [(x.theme, x.theme, ' '.join(x.theme.split('-'))) for x in W3Theme.query.all()]
+    return render_template('customers/lb-customer-form.html', form=form, customer=customer, theme_choices=theme_choices2)
 
 
 @customers_page.route('/create', methods=["GET", "POST"])
@@ -87,14 +88,14 @@ def create():
             flash('address added', 'success')
             return redirect(url_for('customers_page.index'))
 
-    return render_template('customers/customer_form.html', form=form)
+    return render_template('customers/lb-customer-form.html', form=form)
 
 
 @customers_page.route('/')
 @login_required
 def index():
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
-    return render_template('customers/customers.html', customers=customers)
+    return render_template('customers/lb-customers.html', customers=customers)
 
 
 @customers_page.route('/<number>')
@@ -121,7 +122,7 @@ def detail(number):
     summary = [summary[key] for key in sorted(summary.keys(), reverse=True)]
 
     return render_template(
-        'customers/detail.html',
+        'customers/lb-detail.html',
         customer=customer,
         summary=summary
     )

@@ -1,0 +1,156 @@
+{% set current_page = 'customers' %}
+{% set help_step = '6' %}
+{% extends "lb/base.html" %}
+{% block content %}
+{% from "_formhelpers.html" import render_field, render_row %}
+{% from "_modals.html" import render_delete_modal %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                {% if customer %}
+                <form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.update', customer_id=customer.id)}}" method="POST">
+                {% else %}
+                <form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.create')}}" method="POST">
+                {%- endif %}
+
+                    {{ form.hidden_tag() }}
+                    <div data-step='6' data-intro='You need at least 1 name here.  The second one is most useful for a <i>Care Of</i>.  E.g. <tt>C/O Michael Smith</tt>'>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Name 1*</label>
+                                    <input type="text" class="form-control" placeholder="Name" value="{{customer.name1}}" required autofocus>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Name 2</label>
+                                    <input type="text" class="form-control" placeholder="Name 2" value="{{customer.name2}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Address Line 1*</label>
+                                    <input type="text" class="form-control" placeholder="1313 Mockingbird Lane" value="{{customer.addrline1}}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Address Line 2</label>
+                                    <input type="text" class="form-control" placeholder="" value="{{customer.addrline2}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 pr-1">
+                                <div class="form-group">
+                                    <label>City</label>
+                                    <input type="text" class="form-control" placeholder="City" value="{{customer.city}}">
+                                </div>
+                            </div>
+                            <div class="col-md-2 pr-1">
+                                <div class="form-group">
+                                    <label>State</label>
+                                    <input type="text" class="form-control" placeholder="State" value="{{customer.state}}">
+                                </div>
+                            </div>
+                            <div class="col-md-2 pr-1">
+                                <div class="form-group">
+                                    <label>Zipcode</label>
+                                    <input type="text" class="form-control" placeholder="11111" value="{{customer.zip}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div data-intro='You can have only 1 email address.  However, this application allows you to enter multiple users'>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="text" class="form-control" placeholder="" value="{{customer.email}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div data-intro='This is the number of days until the customer must pay it.  I.e. the <i>NET</i>'>
+                                    <div class="form-group">
+                                        <label>Terms</label>
+                                        <input type="text" class="form-control" placeholder="45" value="{{customer.terms}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Number<br><b>NOTE: You cannot change the customer number once an invoice has been submitted</b></label>
+                                    {% if customer and customer.invoices %}
+                                    <input type="text" class="form-control col-md-4" placeholder="45" value="{{customer.number}}" disabled>
+                                    {% else %}
+                                    <input type="text" class="form-control col-md-4" placeholder="45" value="{{customer.number}}">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div data-intro='You can select a theme that is associated with the customer.  The default invoice theme will be set
+                                    to this theme, instead of your profile theme.  Also note that you can modify the invoice theme manually.'>
+                                    <div class="form-group">
+                                        <label>Default Invoice Theme</label>
+                                        <select class="selectpicker form-control" data-live-search="true">
+                                            {% for choice in theme_choices %}
+                                            <option class="form-control" value="{{choice[0]}}" data-tokens="{{choice[2]}}">{{choice[1]}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div data-intro='You can select a theme that is associated with the customer.  The default invoice theme will be set
+                        to this theme, instead of your profile theme.  Also note that you can modify the invoice theme manually.'>
+                        {{ render_field(form.w3_theme) }}</div>
+                      <p>
+                          <input class="w3-btn w3-theme-action" type=submit value="{% if customer %}Update{%else%}Add{%endif%}">
+                          {%- if customer %}
+                            {%- if customer.invoices %}
+                            <input class="w3-btn w3-red w3-right" type=submit value="Delete" name="delete" disabled title="You cannot delete a customer if it has invoices">
+                            {%- else %}
+                            <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+                            <span onclick="show_delete_modal();" class="w3-btn w3-red w3-right">Delete Customer</span>
+                            {%- endif %}
+                          {%- endif %}
+                      </p>
+                </form>
+            </div> {# card-body #}
+        </div> {# card #}
+    </div> {# col-md-8 #}
+</div> {# row #}
+
+{%- if customer %}
+{{ render_delete_modal() }}
+{%- endif %}
+
+{% endblock %}
+
+{% block extrascripts %}
+{% include '_delete_modal.js' %}
+<script src="{{ url_for('static', filename='js/bootstrap-select.js') }}"></script>
+{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+{% endblock %}

@@ -28,6 +28,10 @@ def index():
     per_page = User.query.get(session['user_id']).profile.index_items_per_page
     invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
     return render_template(
-        'index.html',
+        'index/lb-index.html',
         invoices=invoices
     )
+
+@index_page.route('/t1')
+def t1():
+    return render_template('lb/dashboard.html')

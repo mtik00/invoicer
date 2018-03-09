@@ -71,8 +71,7 @@ class Customer(db.Model):
 
         return join_with.join(lines)
 
-    def format_email(self, html=True):
-        join_with = '<br>' if html else '\n'
+    def format_email(self, join_with='<br>'):
         email = self.email
 
         if '|' in email:
