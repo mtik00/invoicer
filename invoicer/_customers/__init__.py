@@ -60,10 +60,9 @@ def update(customer_id):
         db.session.add(customer)
         db.session.commit()
         flash('address updated', 'success')
-        return redirect(url_for('customers_page.index'))
+        return redirect(url_for('customers_page.detail', number=customer.number))
 
-    theme_choices2 = [('', '', '')] + [(x.theme, x.theme, ' '.join(x.theme.split('-'))) for x in W3Theme.query.all()]
-    return render_template('customers/lb-customer-form.html', form=form, customer=customer, theme_choices=theme_choices2)
+    return render_template('customers/lb-customer-form.html', form=form, customer=customer, theme_choices=theme_choices)
 
 
 @customers_page.route('/create', methods=["GET", "POST"])
@@ -86,9 +85,9 @@ def create():
             db.session.commit()
 
             flash('address added', 'success')
-            return redirect(url_for('customers_page.index'))
+            return redirect(url_for('customers_page.detail', number=customer.number))
 
-    return render_template('customers/lb-customer-form.html', form=form)
+    return render_template('customers/lb-customer-form.html', form=form, customer=None, theme_choices=theme_choices)
 
 
 @customers_page.route('/')

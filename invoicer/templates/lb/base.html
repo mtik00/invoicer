@@ -59,6 +59,15 @@
             <!-- End Navbar -->
             <div class="content">
                 <div class="container-fluid">
+                    {% for category, message in get_flashed_messages(with_categories=True) %}
+                    <div class="alert alert-{{category}}">
+                        <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
+                            <i class="nc-icon nc-simple-remove"></i>
+                        </button>
+                        <span>
+                            <b> {{category}} - </b> {{message}}</span>
+                    </div>
+                    {% endfor %}
                     {% block content %}{% endblock %}
                 </div>
             </div>

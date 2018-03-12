@@ -136,13 +136,10 @@ demo = {
         });
     },
 
-    showNotification: function(from, align, text='Testing!', icon_class="nc-icon nc-app") {
-        color = Math.floor((Math.random() * 4) + 1);
-
+    showNotification: function(text='Testing!', color='info', from='top', align='center', icon_class="nc-icon nc-app") {
         $.notify({
             icon: icon_class,
-            message: text  //"Welcome to <b>Light Bootstrap Dashboard</b> - a beautiful freebie for every web developer."
-
+            message: text
         }, {
             type: type[color],
             timer: 8000,
