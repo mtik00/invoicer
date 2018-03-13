@@ -36,6 +36,8 @@ def login():
                 session['logged_in'] = True
                 session['user_id'] = user.id
                 session['user_debug'] = user.application_settings.debug_mode
+                current_app.config['BS4_THEME'] = user.profile.bs4_theme
+
                 flash('You were logged in', 'success')
 
                 if 'next' in request.form:

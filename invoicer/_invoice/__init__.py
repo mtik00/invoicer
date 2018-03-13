@@ -15,7 +15,7 @@ from ..submitter import sendmail
 from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
-from ..common import login_required, color_themes
+from ..common import login_required, w3_color_themes
 from .forms import InvoiceForm, ItemForm
 
 
@@ -149,7 +149,7 @@ def update(invoice_number):
 
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
     addr_choices = [(x.id, x.name1) for x in customers]
-    theme_choices = [(x, x) for x in color_themes]
+    theme_choices = [(x, x) for x in w3_color_themes]
 
     form = InvoiceForm(
         description=invoice.description,
@@ -254,7 +254,7 @@ def create():
 
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
-    form.w3_theme.choices = [(x, x) for x in color_themes]
+    form.w3_theme.choices = [(x, x) for x in w3_color_themes]
     me = User.query.get(session['user_id']).profile
 
     if form.validate_on_submit():

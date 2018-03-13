@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import init, migrate
 
 from .password import hash_password
-from .common import color_themes
+from .common import w3_color_themes, bs4_color_themes
 
 db = SQLAlchemy()
 
@@ -20,18 +20,18 @@ def init_db(sample_data=False, apply_migrations=False):
     db.drop_all()
     db.create_all()
 
-    themes = [models.W3Theme(theme=x) for x in sorted(color_themes) if x]
-    db.session.add_all(themes)
+    db.session.add_all([models.W3Theme(theme=x) for x in sorted(w3_color_themes) if x])
+    db.session.add_all([models.BS4Theme(theme=x) for x in sorted(bs4_color_themes) if x])
 
     if apply_migrations:
         try:
             init()
-        except:
+        except Exception:
             pass
 
         try:
             migrate()
-        except:
+        except Exception:
             pass
 
     if sample_data:
@@ -39,7 +39,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first(),
+            bs4_theme=models.BS4Theme.query.filter_by(theme='black').first(),
         )
 
         user = models.User(
@@ -198,7 +198,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='John Doe', email='j.doe@____.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first(),
+            bs4_theme=models.BS4Theme.query.filter_by(theme='orange').first(),
         )
 
         user2 = models.User(

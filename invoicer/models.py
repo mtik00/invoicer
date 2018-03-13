@@ -20,8 +20,8 @@ class Profile(db.Model):
     customer_increment = db.Column(db.Integer, default=10)
     index_items_per_page = db.Column(db.Integer, default=10)
 
-    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("W3Theme", foreign_keys=w3_theme_id)
+    bs4_theme_id = db.Column(db.Integer, db.ForeignKey('bs4_themes.id'))
+    bs4_theme = relationship("BS4Theme", foreign_keys=bs4_theme_id)
 
     w3_theme_invoice_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
     w3_theme_invoice = relationship("W3Theme", foreign_keys=w3_theme_invoice_id)
@@ -159,9 +159,6 @@ class Invoice(db.Model):
         if profile.w3_theme_invoice:
             return profile.w3_theme_invoice
 
-        if profile.w3_theme:
-            return profile.w3_theme
-
         return None
 
 
@@ -251,3 +248,12 @@ class ApplicationSettings(db.Model):
     __tablename__ = 'application_settings'
     id = db.Column(db.Integer, primary_key=True)
     debug_mode = db.Column(db.Boolean)
+
+
+class BS4Theme(db.Model):
+    __tablename__ = 'bs4_themes'
+    id = db.Column(db.Integer, primary_key=True)
+    theme = db.Column(db.String(50))
+
+    def __str__(self):
+        return self.theme

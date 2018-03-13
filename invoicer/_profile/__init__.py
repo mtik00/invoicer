@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
-from ..common import login_required, color_themes
-from ..models import Profile, User, W3Theme
+from ..common import login_required
+from ..models import Profile, User, W3Theme, BS4Theme
 from ..database import db
 from .forms import ProfileForm
 
@@ -20,13 +20,15 @@ def edit():
     user = User.query.get(session['user_id'])
     form = ProfileForm(request.form, obj=user.profile)
 
+    bs4_theme_choices = [(x.theme, x.theme) for x in BS4Theme.query.all()]
+    form.bs4_theme.choices = bs4_theme_choices
+
     theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
-    # form.w3_theme.choices = theme_choices
     form.w3_theme_invoice.choices = theme_choices
 
-    default_user_theme = current_app.config['W3_THEME']
-    if user.profile and user.profile.w3_theme:
-        default_user_theme = user.profile.w3_theme.theme
+    default_user_theme = current_app.config['BS4_THEME']
+    if user.profile and user.profile.bs4_theme:
+        default_user_theme = user.profile.bs4_theme.theme
 
     default_invoice_theme = ''
     if user.profile and user.profile.w3_theme_invoice:
@@ -34,7 +36,7 @@ def edit():
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
-        # form.w3_theme.process_data(default_user_theme)
+        form.bs4_theme.process_data(default_user_theme)
         form.w3_theme_invoice.process_data(default_invoice_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:
@@ -48,10 +50,13 @@ def edit():
             db.session.add(user)
             db.session.commit()
 
-            if user.profile.w3_theme:
-                current_app.config['W3_THEME'] = user.profile.w3_theme
+            if user.profile.w3_theme_invoice:
+                current_app.config['W3_THEME'] = user.profile.w3_theme_invoice
+
+            if user.profile.bs4_theme:
+                current_app.config['BS4_THEME'] = user.profile.bs4_theme
 
             flash('profile updated', 'success')
         return redirect(url_for('profile_page.index'))
 
-    return render_template('profile/profile_form.html', form=form, profile=user.profile, theme_choices=theme_choices)
+    return render_template('profile/profile_form.html', form=form, profile=user.profile, theme_choices=theme_choices, bs4_theme_choices=bs4_theme_choices)

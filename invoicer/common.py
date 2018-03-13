@@ -2,11 +2,15 @@ from functools import wraps
 from flask import request, redirect, session, url_for
 
 
-color_themes = [
+w3_color_themes = [
     '',
     'red', 'pink', 'purple', 'deep-purple', 'blue', 'light-blue', 'cyan', 'teal',
     'green', 'light-green', 'lime', 'khaki', 'yellow', 'amber', 'orange',
     'deep-orange', 'blue-grey', 'brown', 'grey', 'dark-grey', 'black'
+]
+
+bs4_color_themes = [
+    'black', 'blue', 'azure', 'green', 'orange', 'red', 'purple'
 ]
 
 
