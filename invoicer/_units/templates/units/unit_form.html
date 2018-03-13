@@ -32,14 +32,12 @@
                         {% endif %}
                     </div>
 
-                    <div class="card-footer ">
-                        <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
-                        <input class="btn btn-info btn-fill" type=submit value="{%if unit%}Update{%else%}Add{%endif%}">
+                    <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+                    <input class="btn btn-info btn-fill" type=submit value="{%if unit%}Update{%else%}Add{%endif%}">
 
-                        {%- if unit %}
-                        <a data-toggle="modal" data-target="#delete-modal" class="btn btn-danger btn-fill pull-right text-light">Delete Unit</a>
-                        {% endif %}
-                    </div>
+                    {%- if unit %}
+                    <a data-toggle="modal" data-target="#delete-modal" class="btn btn-danger btn-fill pull-right text-light">Delete Unit</a>
+                    {% endif %}
                 </form>
             </div>
         </div>

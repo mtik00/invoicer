@@ -60,7 +60,7 @@
             <div class="content">
                 <div class="container-fluid">
                     {% for category, message in get_flashed_messages(with_categories=True) %}
-                    <div class="alert alert-{{category}}">
+                    <div class="alert alert-{{category}}" data-dismiss="alert">
                         <button type="button" aria-hidden="true" class="close" data-dismiss="alert">
                             <i class="nc-icon nc-simple-remove"></i>
                         </button>

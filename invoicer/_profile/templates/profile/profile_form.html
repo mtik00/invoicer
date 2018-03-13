@@ -5,7 +5,7 @@
 {% from "_formhelpers.html" import bs_render_field, bs_render_select, bs_render_checkbox %}
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col">
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">Edit Profile</h4>
@@ -40,7 +40,7 @@
                     <div class="row">
                         {{ bs_render_field(form.starting_customer_number) }}
                         {{ bs_render_field(form.customer_increment) }}
-                        {{ bs_render_field(form.index_items_per_page) }}
+                        {# bs_render_field(form.index_items_per_page) #}
                     </div>
 
                     <div class="row">
