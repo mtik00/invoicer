@@ -1,38 +1,50 @@
 {% set current_page = 'units' %}
 {% set help_step = '6' %}
-{% extends "base.html" %}
-{% block body %}
-{% from "_formhelpers.html" import render_field, render_row %}
+{% extends "lb/base.html" %}
+{% block content %}
+{% from "_formhelpers.html" import bs_render_field %}
 {% from "_modals.html" import render_delete_modal %}
 
-{% if unit %}
-<form id='unit_form' class="w3-container w3-col m5" action="{{url_for('unit_page.update', unit_id=unit.id)}}" method="POST">
-    <p>NOTE: Changing this will only change <i>future</i> invoice items</p>
-{% else %}
-<form id='unit_form' class="w3-container w3-col m5" action="{{url_for('unit_page.create')}}" method="POST">
-{% endif %}
-    {{ form.hidden_tag() }}
-    <div data-step='6' data-intro='A description of the work to be performed.  This only helps you select this unit when adding an item to the invoice, the description will not be shown.'>
-    {{ render_field(form.description, required=True) }}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">{% if unit %}Edit {%else%}Add {%endif%}Unit</h4>
+            </div>
+            <div class="card-body">
+                {% if unit %}
+                <form id='unit_form' class="w3-container w3-col m5" action="{{url_for('unit_page.update', unit_id=unit.id)}}" method="POST">
+                    <p>NOTE: Changing this will only change <i>future</i> invoice items</p>
+                {% else %}
+                <form id='unit_form' class="w3-container w3-col m5" action="{{url_for('unit_page.create')}}" method="POST">
+                {% endif %}
+                    {{ form.hidden_tag() }}
+                    <div class="row" data-step='6' data-intro='A description of the work to be performed.  This only helps you select this unit when adding an item to the invoice, the description will not be shown.'>
+                            {% if unit %}{{ bs_render_field(form.description, unit.description) }}{%else%}{{ bs_render_field(form.description) }}{%endif%}
+                    </div>
+                    <div class="row">
+                        {% if unit %}
+                        {{ bs_render_field(form.unit_price, unit.unit_price, None, 6) }}
+                        {{ bs_render_field(form.units, unit.units, None, 6) }}
+                        {% else %}
+                        {{ bs_render_field(form.unit_price, None, None, 6) }}
+                        {{ bs_render_field(form.units, None, None, 6) }}
+                        {% endif %}
+                    </div>
+
+                    <div class="card-footer ">
+                        <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+                        <input class="btn btn-info btn-fill" type=submit value="{%if unit%}Update{%else%}Add{%endif%}">
+
+                        {%- if unit %}
+                        <a data-toggle="modal" data-target="#delete-modal" class="btn btn-danger btn-fill pull-right text-light">Delete Unit</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    {{ render_row(
-        (form.unit_price, 'This is the cost of a single unit of work.  This makes more sense when combined with the <i>Units</i> field below', {'required': True}),
-        (form.units, 'This is a description of the single unit of work.  For example, "day", "month", "hour", etc.  This item is optional.  If it exists, it will be shown on the invoice and combined with the price.')
-    )}}
-
-  <p>
-      <input class="w3-btn w3-theme-action" type=submit value=
-      {%- if unit %}"Update"{% else %}"Add"{% endif -%}
-     >
-
-     <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
-
-     {%- if unit %}
-     <span onclick="show_delete_modal();" class="w3-btn w3-red w3-right">Delete Unit</span>
-     {% endif %}
-  </p>
-</form>
+</div>
 
 {% if unit %}
 {{ render_delete_modal() }}

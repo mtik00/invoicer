@@ -1,25 +1,33 @@
 {% set current_page = 'units' %}
 {% set help_step = '6' %}
-{% extends "base.html" %}
-{% block body %}
+{% extends "lb/base.html" %}
 
-<div class="w3-container no-left-padding">
-<a href="{{url_for('unit_page.create')}}" class="w3-btn w3-theme-action">New unit</a>
-</div>
+{% block topleftnav %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
+        <a class="nav-link" title="New Unit" href="{{url_for('unit_page.create')}}">
+            New Unit
+        </a>
+    </li>
+</ul>
+{% endblock %}
 
-<div class="w3-col m8">
-    <table class="w3-table w3-striped w3-hoverable" data-intro='Clicking a row here will allow you to modify the billable unit'>
-        <tr data-step='6' data-intro='A listing of the units available when adding an item to an invoice.  This is optional, however, it speeds up invoice item entry'.>
-            <th>Description</th><th>Unit Cost</th><th>Units</th>
-        </tr>
-        {% for unit in units %}
-        <tr onclick="window.location='{{url_for('unit_page.update', unit_id=unit.id)}}';" class="pointer">
-            <td>{{unit.description}}</td>
-            <td>{{unit.unit_price|currency}}</td>
-            <td>{{unit.units}}</td>
-        </tr>
-        {% endfor %}
-    </table>
+{% block content %}
+<div class="card-deck">
+{% for unit in units -%}
+    <div class="card ">
+        <div class="card-header ">
+            <h4 class="card-title"><a href="{{url_for('unit_page.update', unit_id=unit.id)}}">{{unit.description}}</a></h4>
+        </div>
+        <div class="card-body ">
+            <p class="card-category">Price: {{unit.unit_price|currency}}</p>
+            <p class="card-category">Units: {{unit.units}}</p>
+        </div>
+        <div class="card-footer ">
+        </div>
+    </div>
+    {% endfor%}
 </div>
 
 {% endblock %}
+
