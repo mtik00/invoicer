@@ -1,8 +1,19 @@
-{% extends "base.html" %}
-{% block body %}
-<ul>
-    <li>Debug mode enabled: {{settings.debug_mode}}</li>
+{% extends "lb/base.html" %}
+{% block topleftnav %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
+        <a class="nav-link" title="Edit Settings" href="{{url_for('settings_page.update', settings_id=settings.id)}}">
+            Edit Settings
+        </a>
+    </li>
 </ul>
-<a href="{{url_for('settings_page.update', settings_id=settings.id)}}" class="w3-btn w3-theme-action">Edit</a>
+{% endblock %}
+
+{% block content %}
+<div class="card col-md-3">
+    <div class="card-body">
+        <p>Debug mode enabled: {{settings.debug_mode}}</p>
+    </div>
+</div>
 
 {% endblock %}
