@@ -514,7 +514,7 @@ def raw_invoice(invoice_number):
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
 
     return render_template(
-        'invoice/w3-invoice.html',
+        'invoice/b4-invoice.html',
         invoice=invoice,
         customer_address=customer_address,
         submit_address=submit_address,

@@ -21,7 +21,7 @@ def edit():
     form = ProfileForm(request.form, obj=user.profile)
 
     theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
-    form.w3_theme.choices = theme_choices
+    # form.w3_theme.choices = theme_choices
     form.w3_theme_invoice.choices = theme_choices
 
     default_user_theme = current_app.config['W3_THEME']
@@ -34,7 +34,7 @@ def edit():
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
-        form.w3_theme.process_data(default_user_theme)
+        # form.w3_theme.process_data(default_user_theme)
         form.w3_theme_invoice.process_data(default_invoice_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:

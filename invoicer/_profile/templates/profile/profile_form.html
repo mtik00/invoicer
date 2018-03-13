@@ -33,7 +33,7 @@
 
                     <div class="row">
                         {{ bs_render_field(form.terms) }}
-                        {{ bs_render_select(form.w3_theme, theme_choices, selected=profile.w3_theme.theme) }}
+                        {# bs_render_select(form.w3_theme, theme_choices, selected=profile.w3_theme.theme) #}
                         {{ bs_render_select(form.w3_theme_invoice, theme_choices, selected=profile.w3_theme_invoice.theme) }}
                     </div>
 
@@ -54,42 +54,6 @@
         </div> <!-- card -->
     </div>
 </div>
-
-{#
-<form action="{{url_for('profile_page.edit')}}" method="POST" data-step='6' data-intro='Basic information about yourself.  This info will be shown on your invoices'>
-    {{ form.hidden_tag() }}
-    {{ render_field(form.full_name, required=True) }}
-    {{ render_field(form.email) }}
-    {{ render_field(form.street) }}
-
-    {{ render_row(form.city, form.state, form.zip) }}
-    {{ render_row((form.terms, '', {'size': 5}), form.w3_theme, form.w3_theme_invoice) }}
-    {{ render_row(
-        (form.starting_customer_number, 'The first customer number.  <b>NOTE</b>: This will only change new customers.', {'required': true}),
-        (form.customer_increment, 'This is number of places put in between customers.  This makes adding customers slightly easier.')
-    )}}
-
-    {{ render_field(form.index_items_per_page) }}
-
-    <p>
-        <div class="w3-border w3-padding" id="pdf_checkbox" data-intro="This will allow you to download and submit a PDF
-        version of your invoice, as long as your application configuration
-        supports it.  If you don't want this and/or are unable to configure
-        the application to support PDF, uncheck this box">
-            <label class="w3-text-blue" for="enable_pdf">PDF enabled: </label>
-            <input class="w3-border" id="enable_pdf" name="enable_pdf" type="checkbox" {% if profile.enable_pdf %}checked{% endif %}>
-        </div>
-    </p>
-
-    <p>
-    {% if profile -%}
-        <input class="w3-btn w3-theme-action" type=submit value="Update">
-        <input type=submit value="Cancel" name="cancel" class="w3-btn w3-theme-action w3-right">
-    {% else -%}
-        <input class="w3-btn w3-theme-action" type=submit value="Create">
-    {% endif %}
-    </p>
-</form>#}
 {% endblock %}
 
 {% block extrascripts %}

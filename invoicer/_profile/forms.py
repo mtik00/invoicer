@@ -14,14 +14,14 @@ class ProfileForm(FlaskForm):
     state = StringField('State')
     zip = StringField('Zipcode')
     terms = IntegerField('Terms (NET number of days)')
-    w3_theme = SelectField('Site Theme')
+    # w3_theme = SelectField('Site Theme')
     w3_theme_invoice = SelectField('Invoice Theme')
 
     starting_customer_number = IntegerField('Starting customer number')
     customer_increment = IntegerField('Number of places in between customer numbers')
     index_items_per_page = IntegerField('Number of invoices per page on index page')
 
-    enable_pdf = BooleanField('Enable PDF')
+    enable_pdf = BooleanField('Enable PDF Generation')
 
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
