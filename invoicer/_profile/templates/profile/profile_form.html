@@ -1,14 +1,62 @@
-{% extends "base.html" %}
+{% set current_page = 'profile' %}
 {% set help_step = '6' %}
-{% block body %}
-{% from "_formhelpers.html" import render_field, render_row %}
-{% if form.errors %}
-{% for error in form.errors.values() %}
-      <li>{{ error }}</li>
-{% endfor %}
-{% endif %}
+{% extends "lb/base.html" %}
+{% block content %}
+{% from "_formhelpers.html" import bs_render_field, bs_render_select, bs_render_checkbox %}
 
-<form class="w3-container w3-col m6" action="{{url_for('profile_page.edit')}}" method="POST" data-step='6' data-intro='Basic information about yourself.  This info will be shown on your invoices'>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{url_for('profile_page.edit')}}" method="POST" data-step='6' data-intro='Basic information about yourself.  This info will be shown on your invoices'>
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        {{ bs_render_field(form.full_name) }}
+                    </div>
+
+                    <div class="row">
+                        {{ bs_render_field(form.email) }}
+                    </div>
+
+                    <div class="row">
+                        {{ bs_render_field(form.street) }}
+                    </div>
+
+                    <div class="row">
+                        {{ bs_render_field(form.city, cols=9) }}
+                        {{ bs_render_field(form.state, cols=1) }}
+                        {{ bs_render_field(form.zip, cols=2) }}
+                    </div>
+
+                    <div class="row">
+                        {{ bs_render_field(form.terms) }}
+                        {{ bs_render_select(form.w3_theme, theme_choices, selected=profile.w3_theme.theme) }}
+                        {{ bs_render_select(form.w3_theme_invoice, theme_choices, selected=profile.w3_theme_invoice.theme) }}
+                    </div>
+
+                    <div class="row">
+                        {{ bs_render_field(form.starting_customer_number) }}
+                        {{ bs_render_field(form.customer_increment) }}
+                        {{ bs_render_field(form.index_items_per_page) }}
+                    </div>
+
+                    <div class="row">
+                        {{ bs_render_checkbox(form.enable_pdf, profile.enable_pdf) }}
+                    </div>
+
+                    <input class="btn btn-info btn-fill" type=submit value="Update">
+                    <input type=submit value="Cancel" name="cancel" class="btn btn-fill pull-right text-light">
+                </form>
+            </div> <!-- card-body -->
+        </div> <!-- card -->
+    </div>
+</div>
+
+{#
+<form action="{{url_for('profile_page.edit')}}" method="POST" data-step='6' data-intro='Basic information about yourself.  This info will be shown on your invoices'>
     {{ form.hidden_tag() }}
     {{ render_field(form.full_name, required=True) }}
     {{ render_field(form.email) }}
@@ -41,7 +89,7 @@
         <input class="w3-btn w3-theme-action" type=submit value="Create">
     {% endif %}
     </p>
-</form>
+</form>#}
 {% endblock %}
 
 {% block extrascripts %}
@@ -49,7 +97,7 @@
     $(document).ready(function() {
         $("#pdf_checkbox").click(function() {
         $("#enable_pdf").prop("checked", !$("#enable_pdf").prop("checked"));
-        });                 
+        });
     });
 </script>
 {% endblock %}

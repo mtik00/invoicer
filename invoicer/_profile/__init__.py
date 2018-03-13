@@ -38,7 +38,7 @@ def edit():
         form.w3_theme_invoice.process_data(default_invoice_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:
-            flash('invoice updated canceled', 'warning')
+            flash('profile updated canceled', 'warning')
         else:
             if not user.profile:
                 user.profile = Profile()
@@ -54,4 +54,4 @@ def edit():
             flash('profile updated', 'success')
         return redirect(url_for('profile_page.index'))
 
-    return render_template('profile/profile_form.html', form=form, profile=user.profile)
+    return render_template('profile/profile_form.html', form=form, profile=user.profile, theme_choices=theme_choices)

@@ -1,28 +1,40 @@
-{% extends "base.html" %}
-{% block body %}
-{% if profile %}
-<dl>
-    <dd>{{profile.full_name}}</dd>
-    <dd>{{profile.street}}</dd>
-    <dd>{{profile.city}}, {{profile.state}} {{profile.zip}}</dd>
-    <dd>{{profile.email}}</dd>
-    <dd>&nbsp;</dd>
-    <dd>Terms: NET {{profile.terms}} days</dd>
-    <dd>&nbsp;</dd>
-    <dd>Site Theme: {{profile.w3_theme}}</dd>
-    <dd>Default Invoice Theme: {{profile.w3_theme_invoice or 'None'}}</dd>
-    <dd>&nbsp;</dd>
-    <dd>Starting customer number: {{profile.starting_customer_number}}</dd>
-    <dd>Space in between customers: {{profile.customer_increment}}</dd>
-    <dd>Number of invoices per page: {{profile.index_items_per_page}}</dd>
-    <dd>&nbsp;</dd>
-    <dd>Enable PDF: {{profile.enable_pdf}}</dd>
-</dl>
-<a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-theme-action">Edit</a>
-{% else %}
-No profile yet<br>
-<a href="{{url_for('profile_page.edit')}}" class="w3-btn w3-theme-action">Create</a>
-{% endif %}
+{% extends "lb/base.html" %}
+{% block topleftnav %}
+{% if profile %}{% set action = 'Edit' %}{% else %}{% set action = 'Create' %}{% endif %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
+        <a class="nav-link" title="{{action}} Settings" href="{{url_for('profile_page.edit')}}">
+            {{action}} Profile
+        </a>
+    </li>
+</ul>
+{% endblock %}
 
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        {% if profile %}
+        <dl>
+            <dd>{{profile.full_name}}</dd>
+            <dd>{{profile.street}}</dd>
+            <dd>{{profile.city}}, {{profile.state}} {{profile.zip}}</dd>
+            <dd>{{profile.email}}</dd>
+            <dd>&nbsp;</dd>
+            <dd>Terms: NET {{profile.terms}} days</dd>
+            <dd>&nbsp;</dd>
+            <dd>Site Theme: {{profile.w3_theme}}</dd>
+            <dd>Default Invoice Theme: {{profile.w3_theme_invoice or 'None'}}</dd>
+            <dd>&nbsp;</dd>
+            <dd>Starting customer number: {{profile.starting_customer_number}}</dd>
+            <dd>Space in between customers: {{profile.customer_increment}}</dd>
+            <dd>Number of invoices per page: {{profile.index_items_per_page}}</dd>
+            <dd>&nbsp;</dd>
+            <dd>Enable PDF: {{profile.enable_pdf}}</dd>
+        </dl>
+        {% else %}
+        No profile yet<br>
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}
