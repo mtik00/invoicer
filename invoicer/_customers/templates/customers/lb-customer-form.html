@@ -68,7 +68,7 @@
                             <input class="btn btn-danger btn-fill pull-right" type=submit value="Delete" name="delete" disabled title="You cannot delete a customer if it has invoices">
                             {%- else %}
                             <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
-                            <span onclick="show_delete_modal();" class="btn btn-danger btn-fill pull-right">Delete Customer</span>
+                            <a data-toggle="modal" data-target="#delete-modal" class="btn btn-danger btn-fill pull-right text-light">Delete Customer</a>
                             {%- endif %}
                           {%- endif %}
                       </p>
@@ -78,9 +78,9 @@
     </div> {# col-md-8 #}
 </div> {# row #}
 
-{#- if customer %}
+{%- if customer %}
 {{ render_delete_modal() }}
-{%- endif #}
+{%- endif %}
 
 {% endblock %}
 
