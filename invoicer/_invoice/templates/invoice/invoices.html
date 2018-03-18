@@ -12,7 +12,7 @@
                 Previous
             </a>
             {% else -%}
-            <a class="nav-link" disabled>Previous</a>
+            <a class="nav-link nav-link-disabled" disabled>Previous</a>
             {% endif %}
         </li>
 
@@ -20,7 +20,7 @@
             {%- if next_id -%}
             <a class="nav-link" title="Next Invoice" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">Next</a>
             {% else -%}
-            <span class="nav-link" disabled>Next</span>
+            <span class="nav-link nav-link-disabled" disabled>Next</span>
             {% endif %}
         </li>
     </ul>

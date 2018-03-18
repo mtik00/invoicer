@@ -2044,6 +2044,7 @@ fieldset[disabled] .form-control {
     line-height: 1.2;
 }
 
+
 .navbar .navbar-nav .nav-item .nav-link.btn {
     margin: 15px 3px;
     padding: 8px 16px;
@@ -2062,6 +2063,15 @@ fieldset[disabled] .form-control {
 
 .navbar .navbar-nav .nav-item .nav-link:hover {
     color: #1DC7EA;
+}
+
+.navbar .navbar-nav .nav-item .nav-link-disabled {
+    color: #CCCCCC !important;
+}
+
+.navbar .navbar-nav .nav-item .nav-link-disabled:hover {
+    color: #CCCCCC !important;
+    cursor: not-allowed;
 }
 
 .navbar .navbar-nav .nav-item .dropdown-menu {
