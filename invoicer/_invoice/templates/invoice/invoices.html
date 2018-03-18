@@ -22,6 +22,50 @@
             <span class="nav-link nav-link-disabled" disabled>Next</span>
             {% endif %}
         </li>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span><i class="fa fa-pencil fa-fw fa-nav" aria-hidden="true"></i> Modify</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="{{ url_for('invoice_page.update', invoice_number=invoice.number) }}"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i>&nbsp;Edit</a>
+
+                {% if (not invoice_obj.submitted_date) -%}
+                <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</a>
+                <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</a>
+                {% elif (config['DEBUG'] or session['user_debug']) %}
+                <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed in debug mode)</a>
+                <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed in debug mode)</a>
+                {% else -%}
+                <button class="dropdown-item" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
+                <button class="dropdown-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
+                {% endif %}
+                <div class="divider"></div>
+                <a class="dropdown-item bg-danger text-white" href="#">Delete Invoice</a>
+            </div>
+        </li>
+
+        {% if show_pdf_button -%}
+        <li class="nav-item">
+            <a class="nav-link" data-intro="Download the invoice as a PDF for offline-viewing"
+            {% if pdf_ok -%}
+            href="{{ url_for('invoice_page.to_pdf', invoice_number=invoice.number)}}" target="_blank">
+            {%- else -%}
+            href="#" disabled>
+            {%- endif -%}
+            Download PDF</a>
+        </li>
+        {%- endif -%}
+
+        {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
+        <li class="nav-item">
+            <span onclick="document.getElementById('submit-modal').style.display='block'" class="nav-link" data-intro="Various options for submitting the invoice">Submit Invoice</span>
+        </li>
+        {% endif -%}
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{url_for('invoice_page.create')}}">Add New Invoice</a>
+        </li>
     </ul>
 {% endblock %}
 
@@ -30,65 +74,6 @@
     <iframe class="embed-responsive-item" src="{{url_for('invoice_page.raw_invoice', invoice_number=invoice.number)}}" data-step='7' data-intro='This is the HTML representation of your invoice that will be submitted and/or converted to PDF (if available)'></iframe>
 </div>
 {% endblock %}
-
-{#}
-{% set current_page = 'invoices' %}
-{% set help_step = '6' %}
-{% from "_modals.html" import render_delete_modal %}
-{% extends "base.html" %}
-{% block body %}
-
-<form method="GET">
-    {{ form.hidden_tag() }}
-    <div class="w3-bar w3-theme-d2" data-step='6' data-intro='This is where you create/modify invoices'>
-        {%- if previous_id -%}
-        <a class="w3-bar-item w3-button" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=previous_id)}}">Previous</a>
-        {% else -%}
-        <button class="w3-bar-item w3-button" disabled>Previous</button>
-        {% endif %}
-
-        {%- if next_id -%}
-        <a class="w3-bar-item w3-button" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">Next</a>
-        {% else -%}
-        <button class="w3-bar-item w3-button" disabled>Next</button>
-        {% endif %}
-
-        <div class="w3-dropdown-hover">
-            <button class="w3-button" data-intro="Edit the invoice: Add/remove items, mark as submitted/paid, etc">Modify</button>
-            <div class="w3-dropdown-content w3-bar-block w3-card-4 list-group" id="invoice_edit_dropdown">
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.update', invoice_number=invoice.number) }}"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i>&nbsp;Edit</a>
-                {% if (not invoice_obj.submitted_date) -%}
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</a>
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</a>
-                {% elif (config['DEBUG'] or session['user_debug']) %}
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed in debug mode)</a>
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed in debug mode)</a>
-                {% else -%}
-                <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
-                <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
-                {% endif %}
-                <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="" data-submit-url="{{url_for('invoice_page.delete', invoice_number=invoice.number) }}">
-                <span onclick="show_delete_modal();" class="w3-bar-item w3-button w3-red"><i class="fa fa-trash fa-fw" aria-hidden="true"></i>&nbsp;Delete Invoice</span>
-            </div>
-        </div>
-
-        {% if show_pdf_button -%}
-        <a class="w3-bar-item w3-button"data-intro="Download the invoice as a PDF for offline-viewing"
-        {% if pdf_ok -%}
-        href="{{ url_for('invoice_page.to_pdf', invoice_number=invoice.number)}}" formtarget="_blank">
-        {%- else -%}
-        href="#" disabled>
-        {%- endif -%}
-        Download PDF</a>
-        {%- endif -%}
-
-        {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
-        <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button" data-intro="Various options for submitting the invoice">Submit Invoice</span>
-        {% endif -%}
-
-        <a class="w3-bar-item w3-button w3-right" href="{{url_for('invoice_page.create')}}">Add New Invoice</a>
-    </div>
-</form>
 
 <!-- Submit Modal -->
 <div id="submit-modal" class="w3-modal">
