@@ -48,3 +48,12 @@
     font-size: 20px !important;
     line-height: 30px !important;
 }
+
+.navbar .navbar-nav .nav-item .nav-link-disabled {
+    color: #CCCCCC !important;
+}
+
+.navbar .navbar-nav .nav-item .nav-link-disabled:hover {
+    color: #CCCCCC !important;
+    cursor: not-allowed;
+}

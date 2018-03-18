@@ -2065,15 +2065,6 @@ fieldset[disabled] .form-control {
     color: #1DC7EA;
 }
 
-.navbar .navbar-nav .nav-item .nav-link-disabled {
-    color: #CCCCCC !important;
-}
-
-.navbar .navbar-nav .nav-item .nav-link-disabled:hover {
-    color: #CCCCCC !important;
-    cursor: not-allowed;
-}
-
 .navbar .navbar-nav .nav-item .dropdown-menu {
     border-radius: 10px;
     margin-top: -5px;
