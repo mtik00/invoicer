@@ -42,3 +42,9 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Get font-awesome icons to be the same size as top sidebar div */
+.fa-nav {
+    font-size: 20px !important;
+    line-height: 30px !important;
+}

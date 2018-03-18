@@ -4,7 +4,6 @@
 {% from "_modals.html" import render_delete_modal %}
 
 {% block topleftnav %}
-<form method="GET">
 <ul class="nav navbar-nav mr-auto">
         <li class="nav-item">
             {%- if previous_id -%}
@@ -24,7 +23,6 @@
             {% endif %}
         </li>
     </ul>
-</form>
 {% endblock %}
 
 {% block content %}
