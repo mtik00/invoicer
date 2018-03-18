@@ -59,7 +59,8 @@
 
         {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
         <li class="nav-item">
-            <span onclick="document.getElementById('submit-modal').style.display='block'" class="nav-link" data-intro="Various options for submitting the invoice">Submit Invoice</span>
+            <!-- <span onclick="document.getElementById('submit-modal').style.display='block'" class="nav-link" data-intro="Various options for submitting the invoice">Submit Invoice</span> -->
+            <a class="nav-link" data-toggle="modal" data-target="#submit-modal" href="#">Submit Invoice</a>
         </li>
         {% endif -%}
 
@@ -73,41 +74,62 @@
 <div class="embed-responsive embed-responsive-1by1">
     <iframe class="embed-responsive-item" src="{{url_for('invoice_page.raw_invoice', invoice_number=invoice.number)}}" data-step='7' data-intro='This is the HTML representation of your invoice that will be submitted and/or converted to PDF (if available)'></iframe>
 </div>
-{% endblock %}
+
+<div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Modal body text goes here.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+</div
 
 <!-- Submit Modal -->
-<div id="submit-modal" class="w3-modal">
-    <div class="w3-modal-content">
-        <header class="w3-container w3-blue">
-            <span onclick="document.getElementById('submit-modal').style.display='none'"
-            class="w3-button w3-blue w3-xlarge w3-display-topright">&times;</span>
-            <h2>Submit Invoice</h2>
-        </header>
-
-        <div class="w3-container">
-            {% if to_emails -%}
-            <p>Email submissions will be sent to: {{to_emails}}</p>
-            {% else -%}
-            <p>This customer has no email address(es) associated with it</p>
-            {% endif -%}
-        </div>
-
-        <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}" method="POST">
-            <div class="w3-container w3-form">
-                {% if to_emails and invoice_obj.submitted_date -%}
-                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border w3-left-align" style="width: 75%"  name="email" value="Email only (invoice already marked as submitted)" /></p>
-                {% elif to_emails %}
-                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border w3-left-align" style="width: 75%"  name="email" value="Email and mark invoice as submitted" /></p>
-                {% endif %}
-
-                {% if not invoice_obj.submitted_date %}
-                <p><input type="submit" class="w3-button w3-white w3-border w3-left-align" style="width: 75%"  name="mark" value="Mark invoice as submitted (do not send email)" /></p>
-                {% endif %}
+<div id="submit-modal" class="modal fade modal-primary" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h2 class="modal-title text-white align-center">Submit Invoice</h2>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        </form>
 
-        <div class="w3-container w3-light-grey w3-padding">
-            <p><button id='submit-close-button' class="w3-button w3-right w3-white w3-border">Cancel</button></p>
+            <div class="modal-body">
+                {% if to_emails -%}
+                <p>Email submissions will be sent to: {{to_emails}}</p>
+                {% else -%}
+                <p>This customer has no email address(es) associated with it</p>
+                {% endif -%}
+
+                <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}" method="POST">
+                    <div class="w3-container w3-form">
+                        {% if to_emails and invoice_obj.submitted_date -%}
+                        <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email" value="Email only (invoice already marked as submitted)" /></p>
+                        {% elif to_emails %}
+                        <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email" value="Email and mark invoice as submitted" /></p>
+                        {% endif %}
+
+                        {% if not invoice_obj.submitted_date %}
+                        <p><input type="submit" class="btn button text-left" style="width: 100%;" name="mark" value="Mark invoice as submitted (do not send email)" /></p>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link btn-simple" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
@@ -158,4 +180,4 @@
 
     });
 </script>
-{% endblock%} #}
+{% endblock %}
