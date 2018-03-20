@@ -1,0 +1,112 @@
+{% set current_page = 'invoices' %}
+{% extends "lb/base.html" %}
+{% block extrahead %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock%}
+
+{% block content %}
+{% from "_formhelpers.html" import bs_render_field, bs_render_select, bs_render_checkbox %}
+
+{% if form.errors %}
+<ul>
+{% for error in form.errors.values() %}
+      <li>{{ error }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if invoice %}
+<form action="{{url_for('invoice_page.update', invoice_number=invoice.number)}}" method="POST">
+{% else %}
+<form action="{{url_for('invoice_page.create')}}" method="POST">
+{% endif%}
+    {{ form.hidden_tag() }}
+
+    <div class="row">
+        {% if invoice and invoice.submitted_date %}
+        <div class="col">
+            <div class="form-group">
+                <label for="customer">Bill To Address<br/><b>NOTE: You cannot change the customer once the invoice has been submitted</b></label>
+                <input class="form-control" value="{{invoice.customer.name1}}" disabled>
+                <input type="hidden" value="{{invoice.customer.id}}" name="customer"/>
+            </div>
+        </div>
+        {% else %}
+        {{ bs_render_select(form.customer, addr_choices) }}
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {{ bs_render_field(form.description, value='') }}
+    </div>
+
+    <div class="row">
+        {% if invoice and invoice.submitted_date %}
+        <div class="col col-md-5">
+            <div class="form-group">
+                <label for="terms">Terms (number of days)<br/><b>NOTE: You cannot change the terms once the invoice has been submitted</b></label>
+                <input class="form-control" id="terms" name="terms" type="text" value="{{invoice.terms}}" disabled>
+            </div>
+        </div>
+        {% elif invoice %}{{ bs_render_field(form.terms, cols=5) }}{% endif %}
+    </div>
+
+    <div class="row">
+        {% if invoice and invoice.submitted_date %}
+        <div class="col col-md-5">
+            <div class="form-group">
+                <label for="terms">Submitted Date<br/><b>NOTE: You cannot change the submitted date once the invoice has been submitted</b></label>
+                <input class="form-control" id="submitted_date" name="submitted_date" type="text" value="{{invoice.submitted_date.format('DD-MMM-YYYY').upper()}}" disabled>
+            </div>
+        </div>
+        {% else %}{{ bs_render_field(form.submitted_date, cols=5, id="datepicker1") }}{% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col col-md-5">
+            <div class="form-group">
+                <label>Paid Date</label>
+                <input class="form-control" id="datepicker2" name="paid_date" type="text" value="{{form.paid_date.data if form.paid_date.data else ''}}">
+            </div>
+        </div>
+        <div class="col col-md-5">
+            <div class="form-group">
+                <label>Payment Notes</label>
+                <input class="form-control" id="paid_date_notes" name="paid_date_notes" type="text" value="{{form.paid_date_notes.data if form.paid_date_notes.data else ''}}" placeholder="e.g. Check 123">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {{ bs_render_select(form.w3_theme, theme_choices, selected=selected_theme if invoice else '', cols=5) }}
+    </div>
+
+    {% if invoice -%}
+    <input type=submit value="Update" class="btn btn-info btn-fill">
+    <input type=submit value="Cancel" name="cancel" class="btn btn-fill pull-right text-light">
+    {% else -%}
+    <input type=submit value="Add" class="btn btn-info btn-fill">
+    {% endif %}
+
+  </p>
+</form>
+{% endblock %}
+
+{% block extrascripts %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+$( document ).ready(function() {
+  $( function() {
+    $( "#datepicker1" ).datepicker({
+      dateFormat: "dd-M-yy"
+    });
+    $( "#datepicker2" ).datepicker({
+      dateFormat: "dd-M-yy"
+    });
+  } );
+});
+
+</script>
+{% endblock %}

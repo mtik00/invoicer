@@ -5,7 +5,7 @@
     <title>Invoice {{invoice.number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-light-green.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-{{w3_theme}}.css">
     <style>
         .total{font-weight:bold;}
         .paid, .total_due{color: green;}
@@ -17,11 +17,11 @@
 <body>
     <div class="container-fluid">
         <div class="row pt-4 mt-4 ml-4 mr-4 w3-theme-d1">
-            <div class="col">
+            <div class="col text-white">
                 <h1>INVOICE</h1>
                 {% if invoice.description %}<br><p class="lead">{{invoice.description}}</b>{% endif %}
             </div>
-            <div class="col text-right">
+            <div class="col text-right text-white">
                     {{submit_address|safe}}
             </div>
         </div>
@@ -76,24 +76,6 @@
                             <td style="text-align:center !important;">{{item.quantity}}</td>
                             <td>{{ (item.unit_price * item.quantity) | currency}}</td>
                         </tr>{% endfor %}
-
-
-                            <td>04-MAR-2018: Website maintenance</td>
-                            <td>$75.00/hr</td>
-                            <td class="text-center">8</td>
-                            <td>$600.00</td>
-                        </tr><tr>
-                            <td>05-MAR-2018: Website maintenance</td>
-                            <td>$75.00/hr</td>
-                            <td class="text-center">8</td>
-                            <td>$600.00</td>
-                        </tr><tr>
-                            <td>06-MAR-2018: Website maintenance</td>
-                            <td>$75.00/hr</td>
-                            <td class="text-center">8</td>
-                            <td>$600.00</td>
-                        </tr>
-
                         <tr class="total">
                             <td></td>
                             <td></td>

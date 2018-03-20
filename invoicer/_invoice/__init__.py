@@ -160,11 +160,14 @@ def update(invoice_number):
     )
     form.customer.choices = addr_choices
     form.w3_theme.choices = theme_choices
+    selected_theme = ''
+    if invoice.w3_theme:
+        selected_theme = invoice.w3_theme.theme
 
     if request.method == 'GET':
-        # Set the default them only for `GET` or the value will never change.
+        # Set the default theme only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
-        form.w3_theme.process_data(invoice.w3_theme)
+        form.w3_theme.process_data(selected_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:
             flash('invoice updated canceled', 'warning')
@@ -190,7 +193,11 @@ def update(invoice_number):
             invoice.submitted_date = submitted_date
             invoice.paid_date = paid_date
             invoice.terms = terms
-            invoice.w3_theme = W3Theme.query.filter_by(theme=form.w3_theme.data).first()
+
+            if form.w3_theme.data:
+                invoice.w3_theme = W3Theme.query.filter_by(theme=form.w3_theme.data).first()
+            else:
+                invoice.w3_theme = None
 
             db.session.commit()
 
@@ -198,7 +205,10 @@ def update(invoice_number):
 
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/invoice_form.html', form=form, invoice=invoice)
+    return render_template(
+        'invoice/lb_invoice_form.html',
+        form=form, invoice=invoice, theme_choices=theme_choices,
+        addr_choices=addr_choices, selected_theme=selected_theme)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
@@ -231,7 +241,7 @@ def invoice_by_number(invoice_number):
     return render_template(
         'invoice/invoices.html',
         form=form,
-        invoice=invoice,
+        # invoice=invoice,
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice,
@@ -254,7 +264,10 @@ def create():
 
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
-    form.w3_theme.choices = [(x, x) for x in w3_color_themes]
+
+    theme_choices = [('', '')] + [(x, x) for x in w3_color_themes]
+    form.w3_theme.choices = theme_choices
+
     me = User.query.get(session['user_id']).profile
 
     if form.validate_on_submit():
@@ -283,7 +296,7 @@ def create():
                 terms=terms,
                 submitted_date=submitted_date,
                 paid_date=paid_date,
-                user=User.query.get(session['user_id'])
+                user=User.query.get(session['user_id']),
             )
         )
         db.session.commit()
@@ -291,7 +304,7 @@ def create():
         flash('invoice added', 'success')
         return redirect(url_for('invoice_page.last_invoice'))
 
-    return render_template('invoice/invoice_form.html', form=form)
+    return render_template('invoice/lb_invoice_form.html', form=form, theme_choices=theme_choices, addr_choices=addr_choices)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete', methods=['POST'])
@@ -475,8 +488,6 @@ def next_invoice_number(customer_id):
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
     ilike = '%s%%' % this_years_invoice_numbers
     numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).filter(Invoice.number.ilike(ilike)).all()]
-
-    # import pdb; pdb.set_trace()
 
     last = 0
     for number in numbers:

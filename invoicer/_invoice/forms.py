@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Optional
+from wtforms.compat import iteritems
 
 from ..models import W3Theme
 
@@ -12,7 +13,7 @@ class ItemForm(FlaskForm):
 
 
 class InvoiceForm(FlaskForm):
-    description = StringField(u'Description', validators=[DataRequired()])
+    description = StringField(u'Description Of Work', validators=[DataRequired()])
     customer = SelectField(u'Bill To Address', coerce=int)
     submitted_date = StringField(u'Submitted Date', id="datepicker1")
     paid_date = StringField(u'Paid Date', id="datepicker2")
