@@ -1,5 +1,6 @@
 import os
 import re
+import code
 import time
 import locale
 import zipfile
@@ -162,3 +163,11 @@ def import_json(path):
 def new_user(username, password):
     add_user(username=username, password=password)
     click.echo("User [%s] has been added to the database" % username)
+
+
+@app.cli.command('cli')
+def interactive():
+    """
+    Launch an interactive REPL
+    """
+    code.interact(local=dict(globals(), **locals()))
