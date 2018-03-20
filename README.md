@@ -93,7 +93,7 @@ like so:
 {% endblock %}
 
 {% block extrascripts %}
-{% include '_delete_modal.js' %}
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
 {% endblock %}
 ```
 

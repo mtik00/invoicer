@@ -41,6 +41,10 @@
                 <button class="dropdown-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
                 {% endif %}
                 <div class="divider"></div>
+                <form action="{{url_for('invoice_page.delete', invoice_number=invoice.number)}}" method="POST">
+                    {{form.hidden_tag() }}
+                    <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+                </form>
                 <a class="dropdown-item bg-danger text-white" data-toggle="modal" data-target="#delete-modal" href="#">Delete Invoice</a>
             </div>
         </li>
@@ -146,7 +150,8 @@
 {% endblock %}
 
 {% block extrascripts %}
-{% include '_delete_modal.js' %}
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
+
 <script>
     $( document ).ready(function() {
         // Handle the email submit button
