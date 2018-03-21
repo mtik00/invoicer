@@ -95,7 +95,7 @@ def delete_items(invoice_number):
         flash('Item(s) deleted from %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/delete_items_form.html', form=form, items=items, invoice=invoice)
+    return render_template('invoice/lb_delete_items_form.html', form=form, items=items, invoice=invoice)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/create', methods=["GET", "POST"])
