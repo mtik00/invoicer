@@ -15,6 +15,7 @@
 </ul>
 {% endif %}
 
+<div class="col-md-6">
 {% if invoice %}
 <form action="{{url_for('invoice_page.update', invoice_number=invoice.number)}}" method="POST">
 {% else %}
@@ -90,6 +91,7 @@
 
   </p>
 </form>
+</div>
 {% endblock %}
 
 {% block extrascripts %}

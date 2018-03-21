@@ -1,0 +1,79 @@
+{% set current_page = 'invoices' %}
+{% extends "lb/base.html" %}
+
+{% block content %}
+{% from "_formhelpers.html" import bs_render_field, bs_render_select, bs_render_checkbox %}
+
+<div class="col-md-7">
+    <form action="{{url_for('invoice_page.create_item', invoice_number=invoice.number)}}" method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            {{ bs_render_field(form.date, id="datepicker") }}
+        </div>
+
+        <div class="row">
+            {{ bs_render_field(form.description) }}
+        </div>
+
+        {# Splitting out Unit Price since it's more complicated #}
+        <div class="row">
+            <div class="col form-group">
+                <label for="unit_price">Billable Unit (optional)</label>
+                <select class="form-control" id="unit_price" name="unit_price">
+                    <option value=""></option>
+                    {% for unit_price in unit_price_objects -%}
+                    <option value="{{unit_price.id}}">{{unit_price.description}} ({{unit_price.unit_price|currency}}/{{unit_price.units}})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col form-group">
+                <label for="unit_pricex">Cost*</label>
+                <input class="form-control" id="unit_pricex" name="unit_pricex" required/>
+            </div>
+            <div class="col form-group">
+                <label for="unit_price_units">Units (optional)</label>
+                <input class="form-control" id="unit_price_units" name="unit_price_units" placeholder="e.g. hr, day, etc"/>
+            </div>
+        </div>
+
+        <div class="row">
+            {{ bs_render_field(form.quantity) }}
+        </div>
+
+        <input type=submit value="Add" class="btn btn-info btn-fill">
+        <input type=submit value="Cancel" name="cancel" class="btn btn-fill pull-right text-light" formnovalidate>
+    </form>
+</div>
+{% endblock %}
+
+{% block extrascripts %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    var $unit_price_data = {
+        '' : {'unit_price': '', 'units': ''},
+        {%- for x in unit_price_objects %}
+        '{{x.id}}': {'unit_price':'{{x.unit_price}}', 'units':'{{x.units}}'},{% endfor -%}
+    };
+
+    $( document ).ready(function() {
+        $( function() {
+            $( "#datepicker" ).datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        } );
+
+        $('#unit_price').on('change', function() {
+            var $up = $unit_price_data[$('#unit_price').val()];
+            $('#unit_pricex').val($up['unit_price']);
+            $('#unit_price_units').val($up['units']);
+        });
+    });
+
+</script>
+{% endblock %}

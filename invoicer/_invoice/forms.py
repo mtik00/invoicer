@@ -7,9 +7,9 @@ from ..models import W3Theme
 
 
 class ItemForm(FlaskForm):
-    date = StringField(u'Date (required)', validators=[DataRequired()], id="datepicker")
-    description = StringField(u'Description (required)', validators=[DataRequired()])
-    quantity = IntegerField(u'Quantity (required)', validators=[DataRequired()])
+    date = StringField(u'Date', validators=[DataRequired()], id="datepicker")
+    description = StringField(u'Description', validators=[DataRequired()])
+    quantity = IntegerField(u'Quantity', validators=[DataRequired()])
 
 
 class InvoiceForm(FlaskForm):

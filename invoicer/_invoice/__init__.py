@@ -135,7 +135,7 @@ def create_item(invoice_number):
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
     return render_template(
-        'invoice/item_form.html',
+        'invoice/lb_item_form.html',
         form=form,
         invoice=invoice,
         unit_price_objects=unit_prices,
