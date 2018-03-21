@@ -73,3 +73,15 @@
     </div>
 </div>
 {% endmacro %}
+
+{% macro bs_render_checkbox_switch(field, checked=False, id=None) %}
+<div class="col{%if cols%} col-md-{{cols}}{%endif%}">
+    <div class="form-group">
+        <span class="switch">
+            <input type="checkbox" class="switch" id="{{field.name}}" name="{{field.name}}" {% if checked %}checked{% endif %}>
+            <label for="{{field.name}}">{{field.label.text}}</label>
+        </span>
+        {% if field.errors %}<small id="{{id or field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
+    </div>
+</div>
+{% endmacro %}

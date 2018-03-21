@@ -1,8 +1,13 @@
 {% set current_page = 'settings' %}
 {% set help_step = '6' %}
 {% extends "lb/base.html" %}
+
+{% block extracss %}
+<link href="{{ url_for('static', filename='css/switch.css') }}" rel="stylesheet" />
+{% endblock %}
+
 {% block content %}
-{% from "_formhelpers.html" import bs_render_checkbox %}
+{% from "_formhelpers.html" import bs_render_checkbox_switch, bs_render_checkbox %}
 
 <div class="row">
     <div class="col-md-8">
@@ -15,7 +20,7 @@
                     {{ form.hidden_tag() }}
 
                     <div class="row">
-                        {{ bs_render_checkbox(form.debug_mode, settings.debug_mode) }}
+                        {{ bs_render_checkbox_switch(form.debug_mode, settings.debug_mode) }}
                     </div>
 
                     <input class="btn btn-info btn-fill" type=submit value="Update">
