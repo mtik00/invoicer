@@ -6,9 +6,11 @@ Tip 2: you can also add an image using data-image tag
 -->
     <div class="sidebar-wrapper">
         <div class="logo">
-            <span class="simple-text">
-                Invoicer
-            </span>
+            {% if config['DEBUG'] -%}
+            <span class="simple-text bg-danger">DEBUG MODE</span>
+            {% else -%}
+            <span class="simple-text">Invoicer</span>
+            {% endif %}
         </div>
         <ul class="nav">
             <li class="nav-item {%if current_page=='dashboard'%} active{%endif%}">
