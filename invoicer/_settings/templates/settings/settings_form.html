@@ -20,7 +20,7 @@
                     {{ form.hidden_tag() }}
 
                     <div class="row">
-                        {{ bs_render_checkbox_switch(form.debug_mode, settings.debug_mode) }}
+                        {{ bs_render_checkbox_switch(form.debug_mode, settings.debug_mode, class="rswitch") }}
                     </div>
 
                     <input class="btn btn-info btn-fill" type=submit value="Update">

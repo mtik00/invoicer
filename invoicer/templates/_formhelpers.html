@@ -74,10 +74,10 @@
 </div>
 {% endmacro %}
 
-{% macro bs_render_checkbox_switch(field, checked=False, id=None) %}
+{% macro bs_render_checkbox_switch(field, checked=False, id=None, class=None) %}
 <div class="col{%if cols%} col-md-{{cols}}{%endif%}">
     <div class="form-group">
-        <span class="switch">
+        <span class="switch{%if class%} {{class}}{%endif%}">
             <input type="checkbox" class="switch" id="{{field.name}}" name="{{field.name}}" {% if checked %}checked{% endif %}>
             <label for="{{field.name}}">{{field.label.text}}</label>
         </span>

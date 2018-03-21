@@ -54,6 +54,11 @@
 .switch input:checked + label::before {
   background-color: #08d;
 }
+
+.rswitch input:checked + label::before {
+  background-color: red;
+}
+
 .switch input:checked + label::after {
   margin-left: calc(2.375rem * .8);
 }
