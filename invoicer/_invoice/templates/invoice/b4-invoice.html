@@ -6,22 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-{{w3_theme}}.css">
-    <style>
-        .total{font-weight:bold;}
-        .paid, .total_due{color: green;}
-        .paid_overdue{color: orange;}
-        .overdue{color: red;}
+
+    <style media="print" type="text/css">
+        tr.w3-theme {
+            color:#000 !important;
+        }
     </style>
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row pt-4 mt-4 ml-4 mr-4 w3-theme-d1">
-            <div class="col text-white">
+            <div class="col">
                 <h1>INVOICE</h1>
                 {% if invoice.description %}<br><p class="lead">{{invoice.description}}</b>{% endif %}
             </div>
-            <div class="col text-right text-white">
+            <div class="col text-right">
                     {{submit_address|safe}}
             </div>
         </div>
@@ -58,11 +58,13 @@
         <div class="row mt-4">
             <div class="col ml-4 mr-4">
                 <table class="table table-striped">
-                    <thead class="w3-theme">
-                        <th>Item</th>
-                        <th>Unit Price</th>
-                        <th class="text-center">Quantity</th>
-                        <th>Total</th>
+                    <thead>
+                        <tr class="w3-theme">
+                            <th>Item</th>
+                            <th>Unit Price</th>
+                            <th class="text-center">Quantity</th>
+                            <th>Total</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in invoice.items -%}
