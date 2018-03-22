@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from cStringIO import StringIO
 
 import arrow
@@ -411,7 +412,9 @@ def submit_invoice(invoice_number):
 
     raw_text = text_invoice(invoice_number)
     html_text = raw_invoice(invoice_number)
-    html_body = Premailer(html_text, cssutils_logging_level='CRITICAL', keep_style_tags=False, remove_classes=True).transform()
+    tstart = time.time()
+    html_body = Premailer(html_text, cssutils_logging_level='CRITICAL').transform()
+    print "took: ", time.time() - tstart
     uhtml_body = html_body.encode('utf-8')
 
     # There's a bug in Premailer that puts all of Bootstrap4 in <head>.  The
