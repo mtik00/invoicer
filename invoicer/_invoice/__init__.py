@@ -409,6 +409,8 @@ def submit_invoice(invoice_number):
         db.session.commit()
 
     html_text = raw_invoice(invoice_number)
+    html_body = Premailer(html_text, cssutils_logging_level='CRITICAL', keep_style_tags=False, remove_classes=True).transform()
+    uhtml_body = html_body.encode('utf-8')
     raw_text = text_invoice(invoice_number)
 
     stream_attachments = []
@@ -431,6 +433,7 @@ def submit_invoice(invoice_number):
         stream_attachments = [(fname, pdf_fh)]
 
     try:
+
         email_to = get_address_emails(invoice.customer_id)
         sendmail(
             sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
@@ -438,7 +441,7 @@ def submit_invoice(invoice_number):
             cc=[current_app.config['EMAIL_USERNAME']],
             subject='Invoice %s from %s' % (invoice.number, User.query.get(session['user_id']).profile.full_name),
             server=current_app.config['EMAIL_SERVER'],
-            html_body=Premailer(html_text, cssutils_logging_level='CRITICAL').transform(),
+            html_body=uhtml_body,
             text_body=raw_text,
             username=current_app.config['EMAIL_USERNAME'],
             password=current_app.config['EMAIL_PASSWORD'],
