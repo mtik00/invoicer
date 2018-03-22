@@ -2,9 +2,10 @@ import os
 import re
 from cStringIO import StringIO
 
-import pdfkit
-from pdfkit.configuration import Configuration
 import arrow
+import pdfkit
+import htmlmin
+from pdfkit.configuration import Configuration
 from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
@@ -408,10 +409,19 @@ def submit_invoice(invoice_number):
         db.session.add(invoice)
         db.session.commit()
 
+    raw_text = text_invoice(invoice_number)
     html_text = raw_invoice(invoice_number)
     html_body = Premailer(html_text, cssutils_logging_level='CRITICAL', keep_style_tags=False, remove_classes=True).transform()
     uhtml_body = html_body.encode('utf-8')
-    raw_text = text_invoice(invoice_number)
+
+    # There's a bug in Premailer that puts all of Bootstrap4 in <head>.  The
+    # biggest issue is that Gmail will then truncate the message because it's
+    # too big.  WTF?  Anyway, here we remove all of the styles defined in head
+    # after the inline converstion of Premailer.
+    uhtml_body = re.sub('\<style.*?style\>', '', uhtml_body, flags=re.DOTALL)
+
+    # Minimize it a bit further
+    uhtml_body = htmlmin.minify(uhtml_body)
 
     stream_attachments = []
     pdf_fh = None
@@ -433,7 +443,6 @@ def submit_invoice(invoice_number):
         stream_attachments = [(fname, pdf_fh)]
 
     try:
-
         email_to = get_address_emails(invoice.customer_id)
         sendmail(
             sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
