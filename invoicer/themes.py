@@ -33,5 +33,21 @@ color_theme_data = {
     'blue-grey': {
         'banner': {'color': '#fff', 'background_color': '#57707d'},
         'table_header': {'color': '#fff', 'background_color': '#607d8b'},
-    }
+    },
+    'indigo': {
+        'banner': {'color': '#fff', 'background_color': '#3949a3'},
+        'table_header': {'color': '#fff', 'background_color': '#3f51b5'},
+    },
+    'teal': {
+        'banner': {'color': '#fff', 'background_color': '#008578'},
+        'table_header': {'color': '#fff', 'background_color': '#009688'},
+    },
+    'deep-orange': {
+        'banner': {'color': '#fff', 'background_color': '#ff4107'},
+        'table_header': {'color': '#fff', 'background_color': '#ff5722'},
+    },
+    'dark-grey': {
+        'banner': {'color': '#fff', 'background_color': '#575757'},
+        'table_header': {'color': '#fff', 'background_color': '#616161'},
+    },
 }
