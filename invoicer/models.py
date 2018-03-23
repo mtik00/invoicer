@@ -137,7 +137,7 @@ class Invoice(db.Model):
         if not self.submitted_date:
             return False
 
-        if (arrow.now() > self.due_date):
+        if (not self.paid_date) and (arrow.now() > self.due_date):
             return True
         elif self.paid_date and (self.paid_date.paid_date > self.due_date):
             return True
