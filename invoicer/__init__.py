@@ -7,14 +7,12 @@ import zipfile
 
 import click
 import arrow
-from flask import render_template, url_for, redirect, session
 from wtforms import Field
 
 from .app import create_app
 from .submitter import sendmail
 from .database import init_db, export as export_db, import_clean_json, add_user
-from .models import Invoice, Customer, User
-from .common import login_required
+from .models import Customer
 
 
 locale.setlocale(locale.LC_ALL, '')
