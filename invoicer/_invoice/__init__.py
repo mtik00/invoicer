@@ -1,6 +1,5 @@
 import os
 import re
-import time
 from cStringIO import StringIO
 
 import arrow
@@ -10,14 +9,14 @@ from pdfkit.configuration import Configuration
 from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
-from premailer import Premailer
 
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
-from ..common import login_required, color_theme_data
+from ..common import login_required
+from ..themes import color_theme_data
 from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 

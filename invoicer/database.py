@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import init, migrate
 
 from .password import hash_password
-from .common import bs4_color_themes, color_theme_data
+from .themes import bs4_color_themes, color_theme_data
 
 db = SQLAlchemy()
 
