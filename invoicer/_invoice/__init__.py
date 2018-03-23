@@ -17,7 +17,7 @@ from ..submitter import sendmail
 from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
-from ..common import login_required, w3_color_themes
+from ..common import login_required, color_theme_data
 from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 
@@ -160,7 +160,7 @@ def update(invoice_number):
 
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
     addr_choices = [(x.id, x.name1) for x in customers]
-    theme_choices = [(x, x) for x in w3_color_themes]
+    theme_choices = [(x, x) for x in color_theme_data.keys()]
 
     form = InvoiceForm(
         description=invoice.description,
@@ -226,7 +226,7 @@ def update(invoice_number):
 @login_required
 def invoice_by_number(invoice_number):
     form = EmptyForm(request.form)
-    invoices = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).all()  # user_invoices(session['user_id'])
+    invoices = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).all()
     invoice = next((x for x in invoices if x.number == invoice_number), None)
 
     if not invoice:
@@ -261,7 +261,8 @@ def invoice_by_number(invoice_number):
         can_submit=to_emails and invoice and can_submit(invoice.customer_id),
         pdf_ok=pdf_ok(),  # The binary exists
         show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
-        invoice_numbers=[x.number for x in invoices]
+        invoice_numbers=invoice_numbers,
+        simplified_invoice=simplified_invoice(invoice_number)
     )
 
 
@@ -278,7 +279,7 @@ def create():
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
 
-    theme_choices = [('', '')] + [(x, x) for x in w3_color_themes]
+    theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
     form.w3_theme.choices = theme_choices
 
     me = User.query.get(session['user_id']).profile
@@ -357,7 +358,7 @@ def to_pdf(invoice_number):
         flash('PDF configuration not supported', 'error')
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
-    text = raw_invoice(invoice_number)
+    text = bs4_invoice(invoice_number)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
         'print-media-type': None,
@@ -366,10 +367,14 @@ def to_pdf(invoice_number):
         'quiet': None
     }
 
-    return Response(
+    response = Response(
         pdfkit.from_string(text, False, options=options, configuration=config),
-        mimetype='application/pdf'
+        mimetype='application/pdf',
     )
+
+    response.headers['Content-Disposition'] = 'attachment; filename=invoice-%s.pdf' % invoice_number
+
+    return response
 
 
 def get_address_emails(customer_id):
@@ -422,23 +427,13 @@ def submit_invoice(invoice_number):
         db.session.commit()
 
     raw_text = text_invoice(invoice_number)
-    html_text = raw_invoice(invoice_number)
-    tstart = time.time()
-    html_body = Premailer(html_text, cssutils_logging_level='CRITICAL').transform()
-    uhtml_body = html_body.encode('utf-8')
-
-    # There's a bug in Premailer that puts all of Bootstrap4 in <head>.  The
-    # biggest issue is that Gmail will then truncate the message because it's
-    # too big.  WTF?  Anyway, here we remove all of the styles defined in head
-    # after the inline converstion of Premailer.
-    uhtml_body = re.sub('\<style.*?style\>', '', uhtml_body, flags=re.DOTALL)
-
-    # Minimize it a bit further
+    uhtml_body = simplified_invoice(invoice_number).encode('utf-8')
     uhtml_body = htmlmin.minify(uhtml_body)
 
     stream_attachments = []
     pdf_fh = None
     if pdf_ok():
+        bs4_body = bs4_invoice(invoice_number)
         fname = "invoice-%s.pdf" % invoice_number
         config = Configuration(current_app.config['WKHTMLTOPDF'])
         options = {
@@ -447,7 +442,7 @@ def submit_invoice(invoice_number):
             'no-outline': None,
             'quiet': None
         }
-        pdf_text = pdfkit.from_string(html_text, None, options=options, configuration=config)
+        pdf_text = pdfkit.from_string(bs4_body, None, options=options, configuration=config)
         pdf_fh = StringIO()
 
         pdf_fh.write(pdf_text)
@@ -536,11 +531,9 @@ def last_invoice():
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=last_number))
 
 
-@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/raw')
-@login_required
-def raw_invoice(invoice_number):
+def bs4_invoice(invoice_number):
     """
-    Displays a single invoice in HTML format
+    Returns an HTML invoice with full `<link>` and `<style>` tags.
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
@@ -557,6 +550,32 @@ def raw_invoice(invoice_number):
         terms=terms,
         overdue=invoice.overdue(),
         w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+    )
+
+
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/html')
+@login_required
+def simplified_invoice(invoice_number):
+    """
+    Displays a single invoice in HTML format with all <style> converted to
+    inline `style=""`.
+    """
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
+    customer_address = customer.format_address()
+    submit_address = format_my_address()
+
+    terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
+    w3_theme = invoice.get_theme() or current_app.config['W3_THEME']
+
+    return render_template(
+        'invoice/simplified_invoice.html',
+        invoice=invoice,
+        customer_address=customer_address,
+        submit_address=submit_address,
+        terms=terms,
+        overdue=invoice.overdue(),
+        theme=color_theme_data[w3_theme.theme]
     )
 
 

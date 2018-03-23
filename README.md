@@ -119,3 +119,21 @@ You may also check the value of `#delete_modal_target`, which gets set to
 ```python
 if ('delete' in request.form.get('delete_modal_target', '')
 ```
+
+# Invoices
+We have 3 types of invoices:
+*   Plain text.  These are submitted along with HTML when sending email.
+*   Full HTML with `<link>`, `<style>`, etc.  These are based on Bootstrap 4.
+*   `Premailer` converted Bootstrap 4.
+
+The full HTML version is only used to create the PDF when submitting an invoice
+through email.  The `Premailer`-converted invoice is what's displayed on the
+Invoice page, and the body of the submit email.
+
+The reason why we "pre processed" the invoice using `Premailer` is because that
+process takes tens of seconds.  By having it already converted, we speed
+everything up by quite a bit.
+
+The downside, of course, is that changes need to take place in both places.
+Suggestion: Do the changes in the full BS4 version, then store a Premailer
+version, then hack that to work.

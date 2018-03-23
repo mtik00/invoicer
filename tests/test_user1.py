@@ -34,7 +34,7 @@ def test_invoice1(client, user1):
     response = client.get(url)
     assert response.status_code == 200
 
-    url = url_for('invoice_page.raw_invoice', invoice_number='1010-2018-001')
+    url = url_for('invoice_page.simplified_invoice', invoice_number='1010-2018-001')
     response = client.get(url)
     assert response.status_code == 200
     assert re.search('Invoice Total:.*.6,400\.00', response.data, re.IGNORECASE)
