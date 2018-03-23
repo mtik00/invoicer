@@ -15,6 +15,7 @@ setup(
         'pdfkit==0.6.1',
         'premailer==3.1.1',
         'SQLAlchemy-Utils==0.32.21',
+        'yamicache==0.4.0',
     ],
     extras_require={
         'test': ['pytest-flask==0.10.0', 'flake8'],
