@@ -1,28 +1,160 @@
 {% set current_page = 'dashboard' %}
 {% extends "lb/base.html" %}
 
+{% block extracss %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.0/chartist.min.css">
+<style type="text/css">
+.received {
+    opacity: 0.2;
+    color: #326AB6;
+}
+.ct-series-b .ct-area {
+    fill: #326AB6;
+    fill-opacity: .2;
+}
+
+.invoiced {
+    opacity: 0.2;
+    color: #1BCC46;
+}
+.ct-series-a .ct-area {
+    fill: #1BCC46;
+    fill-opacity: .2;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col">
         <div class="card ">
             <div class="card-header ">
-                <h4 class="card-title">2017 Sales</h4>
-                <p class="card-category">All products including Taxes</p>
+                <h4 class="card-title">
+                    <span class="btn-link" onclick="javascript: previousYear();" id="leftClick"><i class="fa fa-angle-left" aria-hidden="true"></i></span>
+                     <span id="currentYear">2018</span> Summary
+                    <span class="btn-link" onclick="javascript: nextYear();" id="rightClick"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
+                </h4>
             </div>
             <div class="card-body ">
-                <div id="chartActivity" class="ct-chart"></div>
+                <div id="summaryChart" class="ct-chart"></div>
             </div>
             <div class="card-footer ">
                 <div class="legend">
-                    <i class="fa fa-circle text-info"></i> Tesla Model S
-                    <i class="fa fa-circle text-danger"></i> BMW 5 Series
-                </div>
-                <hr>
-                <div class="stats">
-                    <i class="fa fa-check"></i> Data information certified
+                    <i class="fa fa-circle invoiced"></i> Amount Invoiced
+                    <i class="fa fa-circle received"></i> Amount Received
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extrascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.0/chartist.min.js"></script>
+<script>
+    // Populate the chart when we don't have any data
+    var noData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        series: [[], []]
+    };
+
+    var firstYear = 9999;
+    var lastYear = 0;
+    var dataByYear = {{date_by_year|safe}};
+
+    var summaryChartOptions = {
+        lineSmooth: true,
+        low: 0,
+        axisX: {
+            labelOffset: {x: -20, y:0 }
+        },
+        lineSmooth: Chartist.Interpolation.simple({
+            divisor: 2
+        }),
+        showLine: false,
+        showPoint: false,
+        fullWidth: true,
+        showArea: true,
+    };
+
+    // Use the same options as above, but don't show the Y axis label
+    var summaryChartOptionsDisabled = $.extend({}, summaryChartOptions);
+    summaryChartOptionsDisabled['axisY'] = {showLabel: false};
+
+    var summaryChartResponsive = [
+        ['screen and (max-width: 640px)', {
+            axisX: {
+                labelInterpolationFnc: function(value) {
+                    return value[0];
+                }
+            }
+        }]
+    ];
+
+    var summaryChart = null;
+    var currentYear = (new Date()).getFullYear();
+
+    function previousYear() {
+        if ( currentYear > firstYear ) {
+            currentYear--;
+            updateSummaryChart(currentYear);
+        }
+    }
+
+    function nextYear() {
+        if ( currentYear < lastYear ) {
+            currentYear++;
+            updateSummaryChart(currentYear);
+        }
+    }
+
+    function updateYearNav() {
+        if ( currentYear <= firstYear) {
+            // Disable left nav
+            $('#leftClick').toggleClass('disabled', true);
+            $('#leftClick').css('cursor','default');
+        } else {
+            // Enable left nav
+            $('#leftClick').toggleClass('disabled', false);
+            $('#leftClick').css('cursor','pointer');
+        }
+
+        if ( currentYear >= lastYear ) {
+            // Disable right nav
+            $('#rightClick').toggleClass('disabled', true);
+            $('#rightClick').css('cursor','default');
+        } else {
+            // Enable right nav
+            $('#rightClick').toggleClass('disabled', false);
+            $('#rightClick').css('cursor','pointer');
+        }
+    }
+
+    // Update the chart with a year's data
+    function updateSummaryChart(showYear) {
+        $("#currentYear").text(showYear)
+        if (showYear in dataByYear) {
+            summaryChart.update(dataByYear[showYear], summaryChartOptions);
+        } else {
+            summaryChart.update(noData, summaryChartOptionsDisabled);
+        }
+        updateYearNav();
+    }
+
+    $(document).ready (function () {
+        for (var year in dataByYear) {
+            firstYear = (firstYear > parseFloat(year)) ? parseFloat(year) : firstYear;
+            lastYear = (lastYear < parseFloat(year)) ? parseFloat(year) : lastYear;
+        }
+
+        // Populate the summary chart with default data
+        if (currentYear in dataByYear) {
+            summaryChart = Chartist.Line('#summaryChart', dataByYear[currentYear], summaryChartOptions, summaryChartResponsive);
+        } else {
+            summaryChart = Chartist.Line('#summaryChart', noData, summaryChartOptionsDisabled, summaryChartResponsive);
+        }
+        updateYearNav();
+    });
+</script>
+
 {% endblock %}
