@@ -32,10 +32,7 @@ def paginate_index(page):
 def index():
     per_page = User.query.get(session['user_id']).profile.index_items_per_page
     invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
-
-    print 'Size of cache before:', sys.getsizeof(app_cache._data_store)
     invoice_stats = get_invoice_stats(session['user_id'])
-    print 'Size of cache after:', sys.getsizeof(app_cache._data_store)
 
     return render_template(
         'index/lb-index.html',

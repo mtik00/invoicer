@@ -8,4 +8,4 @@ htmlmin==0.1.12
 pdfkit==0.6.1
 premailer==3.1.1
 SQLAlchemy-Utils==0.32.21
-yamicache==0.4.0
+yamicache==0.5.0

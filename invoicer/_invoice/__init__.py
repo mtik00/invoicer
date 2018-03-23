@@ -18,10 +18,19 @@ from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
 from ..common import login_required, w3_color_themes
+from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 
 
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
+
+
+@app_cache.cached(timeout=30)
+def user_invoices(user_id):
+    '''
+    Return a list of all user invoices.
+    '''
+    return Invoice.query.filter_by(user_id=user_id).order_by(Invoice.id.desc()).all()
 
 
 def pdf_ok():
@@ -217,13 +226,15 @@ def update(invoice_number):
 @login_required
 def invoice_by_number(invoice_number):
     form = EmptyForm(request.form)
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoices = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).all()  # user_invoices(session['user_id'])
+    invoice = next((x for x in invoices if x.number == invoice_number), None)
+
     if not invoice:
         flash('Unknown invoice', 'error')
         return redirect(url_for('index_page.index'))
 
     # Figure out next/previous
-    invoice_numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).all()]
+    invoice_numbers = [x.number for x in invoices]
     if not invoice_numbers:
         current_pos = next_id = previous_id = 0
         to_emails = None
@@ -243,7 +254,6 @@ def invoice_by_number(invoice_number):
     return render_template(
         'invoice/invoices.html',
         form=form,
-        # invoice=invoice,
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice,
@@ -251,6 +261,7 @@ def invoice_by_number(invoice_number):
         can_submit=to_emails and invoice and can_submit(invoice.customer_id),
         pdf_ok=pdf_ok(),  # The binary exists
         show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
+        invoice_numbers=[x.number for x in invoices]
     )
 
 
@@ -414,7 +425,6 @@ def submit_invoice(invoice_number):
     html_text = raw_invoice(invoice_number)
     tstart = time.time()
     html_body = Premailer(html_text, cssutils_logging_level='CRITICAL').transform()
-    print "took: ", time.time() - tstart
     uhtml_body = html_body.encode('utf-8')
 
     # There's a bug in Premailer that puts all of Bootstrap4 in <head>.  The

@@ -8,18 +8,20 @@
         <li class="nav-item">
             {%- if previous_id -%}
             <a class="nav-link" title="Previous Invoice" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=previous_id)}}">
-                Previous
+                <i class="fa fa-nav fa-angle-left" aria-hidden="true"></i>
             </a>
             {% else -%}
-            <a class="nav-link nav-link-disabled" disabled>Previous</a>
+            <a class="nav-link nav-link-disabled" disabled><i class="fa fa-nav fa-angle-left disabled" aria-hidden="true"></i></a>
             {% endif %}
         </li>
 
         <li class="nav-item">
             {%- if next_id -%}
-            <a class="nav-link" title="Next Invoice" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">Next</a>
+            <a class="nav-link" title="Next Invoice" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">
+                <i class="fa fa-nav fa-angle-right" aria-hidden="true"></i>
+            </a>
             {% else -%}
-            <span class="nav-link nav-link-disabled" disabled>Next</span>
+            <span class="nav-link nav-link-disabled" disabled><i class="fa fa-nav fa-angle-right disabled" aria-hidden="true"></i></span>
             {% endif %}
         </li>
 
@@ -69,6 +71,14 @@
 
         <li class="nav-item">
             <a class="nav-link" href="{{url_for('invoice_page.create')}}">Add New Invoice</a>
+        </li>
+
+        <li class="nav-item">
+            <select class="form-control" id="nav-invoice-select">
+                {%- for number in invoice_numbers %}
+                <option value="{{ url_for('invoice_page.invoice_by_number', invoice_number=invoice_obj.number)}}"{%if number==invoice_obj.number%} selected{%endif%}>{{number}}</option>
+                {%- endfor %}
+            </select>
         </li>
     </ul>
 {% endblock %}
@@ -155,6 +165,11 @@
 
 <script>
     $( document ).ready(function() {
+        $( "#nav-invoice-select" ).change(function() {
+            location.replace($(this).val());
+            // alert( "Handler for .change() called with: " + $(this).val() );
+        });
+
         // Handle the email submit button
         $('#email_btn').on('click', function(event) {
             // Close the submit modal
