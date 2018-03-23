@@ -1,9 +1,12 @@
+import sys
 import json
-from flask import Blueprint, render_template, redirect, url_for, session
+
 import arrow
+from flask import Blueprint, render_template, redirect, url_for, session
 
 from ..common import login_required
 from ..models import User, Invoice
+from ..cache import app_cache
 
 
 index_page = Blueprint('index_page', __name__, template_folder='templates')
@@ -29,12 +32,15 @@ def paginate_index(page):
 def index():
     per_page = User.query.get(session['user_id']).profile.index_items_per_page
     invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
-    date_by_year = get_invoice_stats()
+
+    print 'Size of cache before:', sys.getsizeof(app_cache._data_store)
+    invoice_stats = get_invoice_stats(session['user_id'])
+    print 'Size of cache after:', sys.getsizeof(app_cache._data_store)
 
     return render_template(
         'index/lb-index.html',
         invoices=invoices,
-        date_by_year=json.dumps(date_by_year)
+        invoice_stats=json.dumps(invoice_stats)
     )
 
 
@@ -56,7 +62,7 @@ class InvoiceStats(object):
             return
 
         if month not in self.data[year]['paid']:
-            self.data[year]['paid'] = {month: total}
+            self.data[year]['paid'][month] = total
         else:
             self.data[year]['paid'][month] += total
 
@@ -64,6 +70,7 @@ class InvoiceStats(object):
         month = submit_date.month
         year = submit_date.year
 
+        # import pdb; pdb.set_trace()
         if year not in self.data:
             self.data[year] = {
                 'paid': {month: 0},
@@ -72,11 +79,11 @@ class InvoiceStats(object):
             return
 
         if month not in self.data[year]['submit']:
-            self.data[year]['submit'] = {month: total}
+            self.data[year]['submit'][month] = total
         else:
             self.data[year]['submit'][month] += total
 
-    def serialize(self):
+    def serialize_for_chartist(self):
         '''Return a dict suitable for use by chartist.js'''
         result = {}
 
@@ -87,51 +94,48 @@ class InvoiceStats(object):
                 'series': [[], []]
             }
 
-            # in_it = False
             for month in xrange(1, 13):
-                # if (not in_it) and ((month in series['submit']) or (month in series['paid'])):
-                #     in_it = True
-
-                # if not in_it:
-                #     continue
-
                 result[year]['labels'].append(arrow.get('2017-%02d-01' % month, 'YYYY-MM-DD').format('MMM'))
 
-                total = series['submit'].get(month, 0)
+                total = series['submit'].get(month, None)
                 result[year]['series'][0].append(total)
 
-                total = series['paid'].get(month, 0)
+                total = series['paid'].get(month, None)
                 result[year]['series'][1].append(total)
+
+            # Now that we have all of our data, we want to walk backwards through
+            # the list and set the first "None" after actual data to 0.  This makes
+            # the chart look better.
+            found = False
+            for index, _ in enumerate(result[year]['series'][0]):
+                if result[year]['series'][0][index]:
+                    found = True
+
+                if found and (result[year]['series'][0][index] is None):
+                    result[year]['series'][0][index] = 0
+                    break
+
+            found = False
+            for index, _ in enumerate(result[year]['series'][1]):
+                if result[year]['series'][1][index]:
+                    found = True
+
+                if found and (result[year]['series'][1][index] is None):
+                    result[year]['series'][1][index] = 0
+                    break
 
         return result
 
 
-def get_invoice_stats():
+@app_cache.cached(timeout=30)
+def get_invoice_stats(user_id):
     result = InvoiceStats()
 
-    for invoice in Invoice.query.filter_by(user=User.query.get(session['user_id'])).all():
+    for invoice in Invoice.query.filter_by(user=User.query.get(user_id)).all():
         if invoice.submitted_date:
             result.add_submit(invoice.submitted_date, invoice.total)
 
         if invoice.paid_date:
             result.add_paid(invoice.paid_date.paid_date, invoice.total)
 
-    return result.serialize()
-    import pdb; pdb.set_trace()
-
-    return {
-        '2018': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr'],
-            'series': [
-                [287, 385, 490, 492],
-                [67, 152, 143, 240],
-            ]
-        },
-        '2017': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            'series': [
-                [287, 385, 490, 492, 500, 550, 623, 676, 710, 799, 811, 900],
-                [67, 152, 143, 240, 275, 334, 455, 498, 554, 577, 654, 732],
-            ]
-        }
-    }
+    return result.serialize_for_chartist()
