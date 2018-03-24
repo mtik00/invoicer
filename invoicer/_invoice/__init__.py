@@ -9,6 +9,7 @@ from pdfkit.configuration import Configuration
 from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
+from sqlalchemy.orm import joinedload
 
 from ..forms import EmptyForm
 from ..submitter import sendmail
@@ -29,10 +30,13 @@ def user_invoices(user_id, order_by='desc'):
     '''
     Return a list of all user invoices.
     '''
+    # We need to do a joined load of paid_date or we'll get session errors
+    q = Invoice.query.options(joinedload(Invoice.paid_date)).filter_by(user_id=user_id)
+
     if order_by == 'desc':
-        return Invoice.query.filter_by(user_id=user_id).order_by(Invoice.id.desc()).all()
+        return q.order_by(Invoice.id.desc()).all()
     else:
-        return Invoice.query.filter_by(user_id=user_id).order_by(Invoice.id.asc()).all()
+        return q.order_by(Invoice.id.asc()).all()
 
 
 def pdf_ok():
