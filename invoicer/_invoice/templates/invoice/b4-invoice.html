@@ -5,18 +5,22 @@
     <title>Invoice {{invoice.number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-{{w3_theme}}.css">
 
     <style media="print" type="text/css">
-        tr.w3-theme {
-            color:#000 !important;
+        .table th {
+            color: {{theme.table_header.color}} !important;
+            background-color: {{theme.table_header.background_color}} !important; 
+        }
+        .banner {
+            color: {{theme.banner.color}} !important;
+            background-color: {{theme.banner.background_color}} !important; 
         }
     </style>
 </head>
 
 <body>
     <div class="container-fluid">
-        <div class="row pt-4 mt-4 ml-4 mr-4 w3-theme-d1">
+        <div class="row pt-4 mt-4 ml-4 mr-4 banner">
             <div class="col">
                 <h1>INVOICE</h1>
                 {% if invoice.description %}<br><p class="lead">{{invoice.description}}</b>{% endif %}
@@ -59,7 +63,7 @@
             <div class="col ml-4 mr-4">
                 <table class="table table-striped">
                     <thead>
-                        <tr class="w3-theme">
+                        <tr class="w3-theme" style="background-color: red !important;">
                             <th>Item</th>
                             <th>Unit Price</th>
                             <th class="text-center">Quantity</th>

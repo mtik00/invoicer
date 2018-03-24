@@ -378,7 +378,7 @@ def to_pdf(invoice_number):
         mimetype='application/pdf',
     )
 
-    response.headers['Content-Disposition'] = 'attachment; filename=invoice-%s.pdf' % invoice_number
+    # response.headers['Content-Disposition'] = 'attachment; filename=invoice-%s.pdf' % invoice_number
 
     return response
 
@@ -545,6 +545,7 @@ def bs4_invoice(invoice_number):
     customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address()
+    w3_theme = invoice.get_theme() or current_app.config['W3_THEME']
 
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
 
@@ -555,7 +556,8 @@ def bs4_invoice(invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+        # w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+        theme=color_theme_data[w3_theme]
     )
 
 
