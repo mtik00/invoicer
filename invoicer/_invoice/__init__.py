@@ -24,12 +24,15 @@ from .forms import InvoiceForm, ItemForm
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
 
 
-@app_cache.cached(timeout=30)
-def user_invoices(user_id):
+@app_cache.memoize(30)
+def user_invoices(user_id, order_by='desc'):
     '''
     Return a list of all user invoices.
     '''
-    return Invoice.query.filter_by(user_id=user_id).order_by(Invoice.id.desc()).all()
+    if order_by == 'desc':
+        return Invoice.query.filter_by(user_id=user_id).order_by(Invoice.id.desc()).all()
+    else:
+        return Invoice.query.filter_by(user_id=user_id).order_by(Invoice.id.asc()).all()
 
 
 def pdf_ok():
@@ -79,7 +82,7 @@ def format_my_address(html=True):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_number):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = user_invoices(session['user_id'])  # Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     items = Item.query.filter(Item.invoice_id == invoice.id)
     form = EmptyForm()
 
@@ -225,7 +228,7 @@ def update(invoice_number):
 @login_required
 def invoice_by_number(invoice_number):
     form = EmptyForm(request.form)
-    invoices = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).all()
+    invoices = user_invoices(session['user_id'])
     invoice = next((x for x in invoices if x.number == invoice_number), None)
 
     if not invoice:
@@ -476,11 +479,11 @@ def submit_invoice(invoice_number):
 
 
 def get_invoice_ids():
-    return [x.id for x in Invoice.query.filter_by(user_id=session['user_id']).all()]
+    return [x.id for x in user_invoices(session['user_id'])]
 
 
 def last_invoice_id():
-    invoice = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).first()
+    invoice = next((x for x in user_invoices(session['user_id'])), None)
 
     if invoice:
         return invoice.id
@@ -489,7 +492,7 @@ def last_invoice_id():
 
 
 def last_invoice_number():
-    invoice = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).first()
+    invoice = next((x for x in user_invoices(session['user_id'])), None)
     if invoice:
         return invoice.number
 
@@ -574,7 +577,7 @@ def simplified_invoice(invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        theme=color_theme_data[w3_theme.theme]
+        theme=color_theme_data[w3_theme]
     )
 
 

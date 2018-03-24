@@ -6,6 +6,7 @@ from werkzeug.routing import BaseConverter
 from flask_migrate import Migrate
 
 from .database import db
+from .cache import app_cache
 
 from ._index import index_page
 from ._profile import profile_page
@@ -75,5 +76,6 @@ def create_app():
     db.init_app(app)
     app.db = db
     Migrate(app, db)
+    app_cache.init_app(app)
 
     return app

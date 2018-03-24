@@ -149,15 +149,15 @@ class Invoice(db.Model):
         Returns the appropriate theme for presenting the invoice.
         """
         if self.w3_theme:
-            return self.w3_theme
+            return self.w3_theme.theme
 
         customer = Customer.query.get(self.customer_id)
         if customer.w3_theme:
-            return customer.w3_theme
+            return customer.w3_theme.theme
 
         profile = User.query.get(self.user_id).profile
         if profile.w3_theme_invoice:
-            return profile.w3_theme_invoice
+            return profile.w3_theme_invoice.theme
 
         return None
 

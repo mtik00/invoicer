@@ -1,3 +1,3 @@
-from yamicache import Cache
+from flask_cache import Cache
 
-app_cache = Cache(hashing=True, default_timeout=60)
+app_cache = Cache(config={'CACHE_TYPE': 'simple'})
