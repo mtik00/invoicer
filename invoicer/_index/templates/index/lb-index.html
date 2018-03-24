@@ -48,6 +48,60 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card strpied-tabled-with-hover">
+            <div class="card-header ">
+                <h4 class="card-title">Unpaid Invoices</h4>
+                <p class="card-category">Any invoice that has been submitted, but has not been paid</p>
+            </div>
+            <div class="card-body table-full-width table-responsive">
+                <table class="table table-hover table-striped">
+                    <tr>
+                        <thead>
+                            <th>Number</th>
+                            <th>Customer</th>
+                            <th>Submitted Date</th>
+                            <th>Total</th>
+                        </thead>
+                    </tr>
+                    {% for invoice in unpaid_invoices %}<tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';" class="pointer">
+                        <td>{{invoice.number}}</td>
+                        <td>{{invoice.customer.name1}}</td>
+                        <td>{{invoice.submitted_date.format('YYYY-MMM-DD').upper()}}</td>
+                        <td>{{invoice.total|currency}}</td>
+                    </tr>{% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card strpied-tabled-with-hover">
+            <div class="card-header ">
+                <h4 class="card-title">Unsubmitted Invoices</h4>
+                <p class="card-category">Any invoice that has not yet been submitted</p>
+            </div>
+            <div class="card-body table-full-width table-responsive">
+                <table class="table table-hover table-striped">
+                    <tr>
+                        <thead>
+                            <th>Number</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                        </thead>
+                    </tr>
+                    {% for invoice in unsubmitted_invoices %}<tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';" class="pointer">
+                        <td>{{invoice.number}}</td>
+                        <td>{{invoice.customer.name1}}</td>
+                        <td>{{invoice.total|currency}}</td>
+                    </tr>{% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extrascripts %}

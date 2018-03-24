@@ -1,6 +1,7 @@
 import json
 
 import arrow
+from sqlalchemy.orm import joinedload
 from flask import Blueprint, render_template, redirect, url_for, session
 
 from ..common import login_required
@@ -29,14 +30,17 @@ def paginate_index(page):
 @index_page.route('/')
 @login_required
 def index():
-    per_page = User.query.get(session['user_id']).profile.index_items_per_page
-    invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
-    invoice_stats = get_invoice_stats(session['user_id'])
+    uid = session['user_id']
+    per_page = User.query.get(uid).profile.index_items_per_page
+    invoices = Invoice.query.filter_by(user=User.query.get(uid)).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
+    invoice_stats = get_invoice_stats(uid)
 
     return render_template(
         'index/lb-index.html',
         invoices=invoices,
-        invoice_stats=json.dumps(invoice_stats)
+        invoice_stats=json.dumps(invoice_stats),
+        unpaid_invoices=get_unpaid_invoices(uid),
+        unsubmitted_invoices=get_unsubmitted_invoices(uid)
     )
 
 
@@ -102,7 +106,7 @@ class InvoiceStats(object):
         return result
 
 
-@app_cache.memoize(timeout=30)
+@app_cache.memoize(timeout=300)
 def get_invoice_stats(user_id):
     result = InvoiceStats()
 
@@ -114,3 +118,31 @@ def get_invoice_stats(user_id):
             result.add_paid(invoice.paid_date.paid_date, invoice.total)
 
     return result.serialize_for_chartist()
+
+
+@app_cache.memoize(timeout=300)
+def get_unpaid_invoices(user_id):
+    '''
+    Returns a list of {'number', 'submitted_date', 'total'}
+    '''
+    result = []
+
+    for invoice in Invoice.query.options(joinedload(Invoice.customer)).filter_by(user_id=user_id).all():
+        if invoice.submitted_date and (not invoice.paid_date):
+            result.append(invoice)
+
+    return result
+
+
+@app_cache.memoize(timeout=300)
+def get_unsubmitted_invoices(user_id):
+    '''
+    Returns a list of {'number', 'submitted_date', 'total'}
+    '''
+    result = []
+
+    for invoice in Invoice.query.options(joinedload(Invoice.customer)).filter_by(user_id=user_id).all():
+        if not invoice.submitted_date:
+            result.append(invoice)
+
+    return result

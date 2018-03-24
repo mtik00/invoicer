@@ -109,6 +109,9 @@ def delete_items(invoice_number):
         Invoice.query.filter(Invoice.id == invoice.id).update({'total': item_total})
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('Item(s) deleted from %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
@@ -147,6 +150,9 @@ def create_item(invoice_number):
         invoice.items.append(item)
         db.session.add_all([invoice, item])
         db.session.commit()
+
+        # Clear the app cache so everything updates
+        app_cache.clear()
 
         flash('item added to invoice %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
@@ -217,6 +223,9 @@ def update(invoice_number):
                 invoice.w3_theme = None
 
             db.session.commit()
+
+            # Clear the app cache so everything updates
+            app_cache.clear()
 
             flash('invoice updated', 'success')
 
@@ -321,6 +330,9 @@ def create():
         )
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('invoice added', 'success')
         return redirect(url_for('invoice_page.last_invoice'))
 
@@ -350,6 +362,10 @@ def delete(invoice_number):
             db.session.delete(item)
 
         db.session.commit()
+
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('Invoice %s has been deleted' % invoice_number, 'warning')
         return redirect(url_for('invoice_page.last_invoice'))
     else:
@@ -364,7 +380,7 @@ def to_pdf(invoice_number):
         flash('PDF configuration not supported', 'error')
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
-    text = bs4_invoice(invoice_number)
+    text = bs4_invoice(session['user_id'], invoice_number)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
         'print-media-type': None,
@@ -409,6 +425,9 @@ def mark_invoice_submitted(invoice_number):
         db.session.add(invoice)
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('Invoice has been marked as submitted; due on %s' % invoice.due_date.format('DD-MMM-YYYY'), 'success')
     else:
         flash('Invoice has already been marked as submitted<br>Download the PDF and email manually if needed', 'error')
@@ -432,6 +451,9 @@ def submit_invoice(invoice_number):
         db.session.add(invoice)
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
     raw_text = text_invoice(invoice_number)
     uhtml_body = simplified_invoice(invoice_number).encode('utf-8')
     uhtml_body = htmlmin.minify(uhtml_body)
@@ -439,7 +461,7 @@ def submit_invoice(invoice_number):
     stream_attachments = []
     pdf_fh = None
     if pdf_ok():
-        bs4_body = bs4_invoice(invoice_number)
+        bs4_body = bs4_invoice(session['user_id'], invoice_number)
         fname = "invoice-%s.pdf" % invoice_number
         config = Configuration(current_app.config['WKHTMLTOPDF'])
         options = {
@@ -472,6 +494,7 @@ def submit_invoice(invoice_number):
             encode_body=True,
             stream_attachments=stream_attachments,
         )
+
         flash('invoice was submitted to ' + ', '.join(email_to), 'success')
     except Exception as e:
         flash('Error while trying to email the invoice: %s' % e, 'error')
@@ -503,6 +526,7 @@ def last_invoice_number():
     return 0
 
 
+@app_cache.memoize()
 def next_invoice_number(customer_id):
     """
     Returns the next available invoice number in the format:
@@ -537,17 +561,18 @@ def last_invoice():
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=last_number))
 
 
-def bs4_invoice(invoice_number):
+@app_cache.memoize()
+def bs4_invoice(user_id, invoice_number):
     """
     Returns an HTML invoice with full `<link>` and `<style>` tags.
     """
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=user_id).first_or_404()
+    customer = Customer.query.filter_by(user_id=user_id, id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address()
     w3_theme = invoice.get_theme() or current_app.config['W3_THEME']
 
-    terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
+    terms = invoice.terms or customer.terms or User.query.get(user_id).profile.terms
 
     return render_template(
         'invoice/b4-invoice.html',
