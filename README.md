@@ -137,3 +137,7 @@ everything up by quite a bit.
 The downside, of course, is that changes need to take place in both places.
 Suggestion: Do the changes in the full BS4 version, then store a Premailer
 version, then hack that to work.
+
+The upside is that the invoice the users sees on `/invoice` is the exact same
+HTML that goes into the body of the email.  If something's not right, the user
+should notice right away.
