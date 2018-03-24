@@ -93,37 +93,16 @@ class InvoiceStats(object):
             for month in xrange(1, 13):
                 result[year]['labels'].append(arrow.get('2017-%02d-01' % month, 'YYYY-MM-DD').format('MMM'))
 
-                total = series['submit'].get(month, None)
+                total = series['submit'].get(month, 0)
                 result[year]['series'][0].append(total)
 
-                total = series['paid'].get(month, None)
+                total = series['paid'].get(month, 0)
                 result[year]['series'][1].append(total)
-
-            # Now that we have all of our data, we want to walk backwards through
-            # the list and set the first "None" after actual data to 0.  This makes
-            # the chart look better.
-            found = False
-            for index, _ in enumerate(result[year]['series'][0]):
-                if result[year]['series'][0][index]:
-                    found = True
-
-                if found and (result[year]['series'][0][index] is None):
-                    result[year]['series'][0][index] = 0
-                    break
-
-            found = False
-            for index, _ in enumerate(result[year]['series'][1]):
-                if result[year]['series'][1][index]:
-                    found = True
-
-                if found and (result[year]['series'][1][index] is None):
-                    result[year]['series'][1][index] = 0
-                    break
 
         return result
 
 
-@app_cache.cached(timeout=30)
+@app_cache.memoize(timeout=30)
 def get_invoice_stats(user_id):
     result = InvoiceStats()
 
