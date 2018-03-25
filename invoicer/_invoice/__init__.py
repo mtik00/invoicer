@@ -31,7 +31,7 @@ def user_invoices(user_id, order_by='desc'):
     Return a list of all user invoices.
     '''
     # We need to do a joined load of paid_date or we'll get session errors
-    q = Invoice.query.options(joinedload(Invoice.paid_date)).filter_by(user_id=user_id)
+    q = Invoice.query.options(joinedload(Invoice.paid_date)).options(joinedload(Invoice.customer)).filter_by(user_id=user_id)
 
     if order_by == 'desc':
         return q.order_by(Invoice.id.desc()).all()
@@ -277,7 +277,8 @@ def invoice_by_number(invoice_number):
         pdf_ok=pdf_ok(),  # The binary exists
         show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
         invoice_numbers=invoice_numbers,
-        simplified_invoice=simplified_invoice(invoice_number)
+        simplified_invoice=simplified_invoice(invoice_number),
+        invoices=user_invoices(session['user_id'])
     )
 
 

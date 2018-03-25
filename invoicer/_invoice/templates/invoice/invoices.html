@@ -3,6 +3,13 @@
 {% extends "lb/base.html" %}
 {% from "_modals.html" import render_delete_modal %}
 
+{% block extracss %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<style>
+.display-middle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%)}
+</style>
+{% endblock %}
+
 {% block topleftnav %}
 <ul class="nav navbar-nav mr-auto">
     <li class="nav-item">
@@ -84,9 +91,9 @@
 </ul>
 <ul class="nav navbar-nav ml-auto">
     <li class="nav-item">
-        <select class="form-control d-none d-lg-block" id="nav-invoice-select">
-            {%- for number in invoice_numbers %}
-            <option value="{{ url_for('invoice_page.invoice_by_number', invoice_number=number)}}"{%if number==invoice_obj.number%} selected{%endif%}>{{number}}</option>
+        <select class="selectpicker d-none d-lg-block" id="nav-invoice-select">
+            {%- for invoice in invoices %}
+            <option value="{{ url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}"{%if invoice.number==invoice_obj.number%} selected{%endif%}>{{invoice.number}} ({{invoice.customer.name1}})</option>
             {%- endfor %}
         </select>
     </li>
@@ -97,26 +104,6 @@
 <div class="card">
 {{simplified_invoice|safe}}
 </div>
-
-<div class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Modal title</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <p>Modal body text goes here.</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Save changes</button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-        </div>
-    </div>
-</div
 
 <!-- Submit Modal -->
 <div id="submit-modal" class="modal fade modal-primary" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -164,20 +151,18 @@
 </div>
 {% endblock %}
 
-{% block extracss %}
-<style>
-.display-middle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%)}
-</style>
-{% endblock %}
-
 {% block extrascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 <script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
 
 <script>
     $( document ).ready(function() {
-        $( "#nav-invoice-select" ).change(function() {
+        $('.selectpicker').select2({
+            width: 300,
+        });
+          
+        $( ".selectpicker" ).change(function() {
             location.replace($(this).val());
-            // alert( "Handler for .change() called with: " + $(this).val() );
         });
 
         // Handle the email submit button
