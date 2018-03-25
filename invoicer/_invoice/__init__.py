@@ -69,6 +69,9 @@ def format_my_address(html=True):
     address = User.query.get(session['user_id']).profile
     join_with = '<br>' if html else '\n'
 
+    if not address.full_name:
+        return ''
+
     result = join_with.join([
         address.full_name,
         address.street,
