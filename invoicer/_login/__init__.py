@@ -56,4 +56,4 @@ def logout():
     session.pop('logged_in', None)
     session.pop('user_id', None)
     flash('You were logged out', 'success')
-    return redirect(url_for('index_page.dashboard'))
+    return redirect(url_for('.login'))
