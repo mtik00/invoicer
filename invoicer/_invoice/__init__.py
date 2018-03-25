@@ -450,7 +450,7 @@ def submit_invoice(invoice_number):
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
     # customers of overdue conditions.
-    if not invoice.submitted_date:
+    if ('email_only' not in request.form) and (not invoice.submitted_date):
         invoice.submitted_date = arrow.now()
         db.session.add(invoice)
         db.session.commit()

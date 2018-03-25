@@ -126,9 +126,10 @@
                 <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice_obj.number)}}" method="POST">
                     <div class="w3-container w3-form">
                         {% if to_emails and invoice_obj.submitted_date -%}
-                        <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email" value="Email only (invoice already marked as submitted)" /></p>
+                        <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email_only" value="Email only (invoice already marked as submitted)" /></p>
                         {% elif to_emails %}
                         <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email" value="Email and mark invoice as submitted" /></p>
+                        <p><input type="submit" id="email_btn2" class="btn button text-left" style="width: 100%;" name="email_only" value="Email only" /></p>
                         {% endif %}
 
                         {% if not invoice_obj.submitted_date %}
@@ -166,7 +167,7 @@
         });
 
         // Handle the email submit button
-        $('#email_btn').on('click', function(event) {
+        $('#email_btn,#email_btn2').on('click', function(event) {
             // Close the submit modal
             $('#submit-modal').css({ 'display': "none" });
 
