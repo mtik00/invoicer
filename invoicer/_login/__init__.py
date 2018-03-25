@@ -44,6 +44,8 @@ def login():
                     return redirect(request.form['next'])
 
                 return redirect(url_for('index_page.index'))
+    elif form.errors:
+        flash(', '.join(form.errors), 'error')
 
     return render_template('login/login.html', form=form)
 
