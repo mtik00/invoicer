@@ -56,6 +56,7 @@
                 <p class="card-category">Any invoice that has been submitted, but has not been paid</p>
             </div>
             <div class="card-body table-full-width table-responsive">
+                {% if unpaid_invoices -%}
                 <table class="table table-hover table-striped">
                     <tr>
                         <thead>
@@ -72,6 +73,7 @@
                         <td>{{invoice.total|currency}}</td>
                     </tr>{% endfor %}
                 </table>
+                {% else %}<span class="col">Congradulations!  You have no outstanding invoices.</span>{% endif %}
             </div>
         </div>
     </div>
@@ -84,6 +86,7 @@
                 <p class="card-category">Any invoice that has not yet been submitted</p>
             </div>
             <div class="card-body table-full-width table-responsive">
+                {% if unsubmitted_invoices -%}
                 <table class="table table-hover table-striped">
                     <tr>
                         <thead>
@@ -98,6 +101,7 @@
                         <td>{{invoice.total|currency}}</td>
                     </tr>{% endfor %}
                 </table>
+                {% else %}<span class="col">You have no invoices waiting to be submitted.</span>{% endif %}
             </div>
         </div>
     </div>

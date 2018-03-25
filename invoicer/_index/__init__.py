@@ -25,7 +25,7 @@ def dashboard():
     invoice_stats = get_invoice_stats(uid)
 
     return render_template(
-        'index/lb-index.html',
+        'index/index.html',
         invoices=invoices,
         invoice_stats=json.dumps(invoice_stats),
         unpaid_invoices=get_unpaid_invoices(uid),
