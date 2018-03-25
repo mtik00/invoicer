@@ -1,30 +1,33 @@
 {% set current_page = 'customers' %}
 {% set help_step = '6' %}
 {% extends "base.html" %}
-{% block body %}
 
-<div class="w3-container no-left-padding">
-    <a href="{{url_for('customers_page.create')}}" class="w3-btn w3-theme-action">New customer</a>
+{% block topleftnav %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
+        <a class="nav-link" title="New Customer" href="{{url_for('customers_page.create')}}">
+            New Customer
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="card-deck">
+{% for customer in customers -%}
+    <div class="card ">
+        <div class="card-header ">
+            <h4 class="card-title"><a href="{{url_for('customers_page.detail', number=customer.number)}}">{{customer.name1}}</a></h4>
+            <p class="card-category">Number: {{customer.number}}; # invoices: {{customer.invoices|length}}</p>
+        </div>
+        <div class="card-body ">
+            {{customer.format_address(include_email=False)|safe}}<br><hr>
+            {{customer.format_email(', ')|safe}}
+        </div>
+        <div class="card-footer ">
+        </div>
+    </div>
+    {% endfor%}
 </div>
-
-<div class="w3-col m8">
-    <table class="w3-table w3-striped w3-hoverable" data-intro="Listing of all customers.  Clicking on a row will take you the customer's detail page." data-step='6'>
-        <tr>
-            <th>Number</th><th>Address</th><th>Email(s)</th><th># Invoices</th>
-        </tr>
-        {% for customer in customers -%}
-        <tr
-            onclick="window.location='{{url_for('customers_page.detail', number=customer.number)}}';"
-            class="pointer"
-        >
-            <td>{{customer.number}}</td>
-            <td>{{customer.format_address(include_email=False)|safe}}</td>
-            <td>{{customer.format_email()|safe}}</td>
-            <td>{{customer.invoices|length}}</td>
-        </tr>
-        {% endfor%}
-    </table>
-</div>
-
 
 {% endblock %}
