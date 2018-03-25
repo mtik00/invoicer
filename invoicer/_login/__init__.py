@@ -43,7 +43,7 @@ def login():
                 if 'next' in request.form:
                     return redirect(request.form['next'])
 
-                return redirect(url_for('index_page.index'))
+                return redirect(url_for('index_page.dashboard'))
     elif form.errors:
         flash(', '.join(form.errors), 'error')
 
@@ -56,4 +56,4 @@ def logout():
     session.pop('logged_in', None)
     session.pop('user_id', None)
     flash('You were logged out', 'success')
-    return redirect(url_for('index_page.index'))
+    return redirect(url_for('index_page.dashboard'))

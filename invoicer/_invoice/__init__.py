@@ -246,7 +246,7 @@ def invoice_by_number(invoice_number):
 
     if not invoice:
         flash('Unknown invoice', 'error')
-        return redirect(url_for('index_page.index'))
+        return redirect(url_for('index_page.dashboard'))
 
     # Figure out next/previous
     invoice_numbers = [x.number for x in invoices]

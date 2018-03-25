@@ -2,37 +2,26 @@ import json
 
 import arrow
 from sqlalchemy.orm import joinedload
-from flask import Blueprint, render_template, redirect, url_for, session
+from flask import Blueprint, render_template, session, redirect, url_for
 
 from ..common import login_required
-from ..models import User, Invoice
+from ..models import Invoice
 from ..cache import app_cache
 
 
 index_page = Blueprint('index_page', __name__, template_folder='templates')
 
 
-@index_page.route('/p<int:page>')
-@login_required
-def paginate_index(page):
-    per_page = User.query.get(session['user_id']).profile.index_items_per_page
-    try:
-        invoices = Invoice.query.filter_by(user=User.query.get(session['user_id'])).order_by(Invoice.id.desc()).paginate(page=page, per_page=per_page)
-    except Exception:
-        return redirect(url_for('.index'))
-
-    return render_template(
-        'index.html',
-        invoices=invoices
-    )
-
-
 @index_page.route('/')
-@login_required
 def index():
+    return redirect(url_for('.dashboard'))
+
+
+@index_page.route('/dashboard')
+@login_required
+def dashboard():
     uid = session['user_id']
-    per_page = User.query.get(uid).profile.index_items_per_page
-    invoices = Invoice.query.filter_by(user=User.query.get(uid)).order_by(Invoice.id.desc()).paginate(page=1, per_page=per_page)
+    invoices = get_user_invoices(uid)
     invoice_stats = get_invoice_stats(uid)
 
     return render_template(
@@ -107,10 +96,20 @@ class InvoiceStats(object):
 
 
 @app_cache.memoize(timeout=300)
+def get_user_invoices(user_id):
+    q = Invoice.query
+    q = q.options(joinedload(Invoice.customer))
+    q = q.options(joinedload(Invoice.paid_date))
+    q = q.filter_by(user_id=user_id)
+    q = q.order_by(Invoice.id.desc())
+    return q.all()
+
+
+@app_cache.memoize(timeout=300)
 def get_invoice_stats(user_id):
     result = InvoiceStats()
 
-    for invoice in Invoice.query.filter_by(user=User.query.get(user_id)).all():
+    for invoice in get_user_invoices(user_id):
         if invoice.submitted_date:
             result.add_submit(invoice.submitted_date, invoice.total)
 
@@ -127,7 +126,7 @@ def get_unpaid_invoices(user_id):
     '''
     result = []
 
-    for invoice in Invoice.query.options(joinedload(Invoice.customer)).filter_by(user_id=user_id).all():
+    for invoice in get_user_invoices(user_id):
         if invoice.submitted_date and (not invoice.paid_date):
             result.append(invoice)
 
@@ -141,7 +140,7 @@ def get_unsubmitted_invoices(user_id):
     '''
     result = []
 
-    for invoice in Invoice.query.options(joinedload(Invoice.customer)).filter_by(user_id=user_id).all():
+    for invoice in get_user_invoices(user_id):
         if not invoice.submitted_date:
             result.append(invoice)
 

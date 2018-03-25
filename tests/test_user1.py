@@ -20,7 +20,7 @@ def test_index(client, user1):
     """
     We should have 4 invoices on the index page
     """
-    response = client.get(url_for('index_page.index'))
+    response = client.get(url_for('index_page.dashboard'))
     assert response.status_code == 200
     assert response.data.count('<td>1010-2018') == 3
     assert response.data.count('<td>1020-2018') == 1
