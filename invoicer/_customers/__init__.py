@@ -108,13 +108,16 @@ def detail(number):
             continue
 
         year = invoice.submitted_date.format('YYYY')
-
         if year not in summary:
-            summary[year] = {'submitted': 0, 'paid': 0, 'year': year}
+            summary[year] = {'year': year, 'submitted': 0, 'paid': 0}
 
         summary[year]['submitted'] += invoice.total
 
         if invoice.paid_date:
+            year = invoice.paid_date.paid_date.format('YYYY')
+            if year not in summary:
+                summary[year] = {'year': year, 'submitted': 0, 'paid': 0}
+
             summary[year]['paid'] += invoice.total
 
     # Reformat the dict into a sorted list
