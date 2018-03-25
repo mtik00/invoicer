@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
+
 from ..common import login_required
 from ..models import Profile, User, W3Theme, BS4Theme
 from ..database import db
+from ..themes import color_theme_data, bs4_color_themes
 from .forms import ProfileForm
 
 profile_page = Blueprint('profile_page', __name__, template_folder='templates')
@@ -20,10 +22,10 @@ def edit():
     user = User.query.get(session['user_id'])
     form = ProfileForm(request.form, obj=user.profile)
 
-    bs4_theme_choices = [(x.theme, x.theme) for x in BS4Theme.query.all()]
+    bs4_theme_choices = [(x, x) for x in bs4_color_themes]
     form.bs4_theme.choices = bs4_theme_choices
 
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
+    theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
     form.w3_theme_invoice.choices = theme_choices
 
     default_user_theme = current_app.config['BS4_THEME']
@@ -59,4 +61,6 @@ def edit():
             flash('profile updated', 'success')
         return redirect(url_for('profile_page.index'))
 
-    return render_template('profile/profile_form.html', form=form, profile=user.profile, theme_choices=theme_choices, bs4_theme_choices=bs4_theme_choices)
+    return render_template(
+        'profile/profile_form.html', form=form, profile=user.profile,
+        theme_choices=theme_choices, bs4_theme_choices=bs4_theme_choices)
