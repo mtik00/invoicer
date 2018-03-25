@@ -175,7 +175,7 @@ def update(invoice_number):
 
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
     addr_choices = [(x.id, x.name1) for x in customers]
-    theme_choices = [(x, x) for x in color_theme_data.keys()]
+    theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
 
     form = InvoiceForm(
         description=invoice.description,
