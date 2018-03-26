@@ -688,6 +688,7 @@ def simplified_invoice(invoice_number, show_item_edit=False):
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
     w3_theme = invoice.get_theme() or current_app.config['W3_THEME']
 
+    # import pdb; pdb.set_trace()
     return render_template(
         'invoice/simplified_invoice.html',
         invoice=invoice,

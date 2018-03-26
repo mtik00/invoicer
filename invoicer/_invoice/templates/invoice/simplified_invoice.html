@@ -1,27 +1,27 @@
-
-<html style="-ms-overflow-style:scrollbar; -ms-text-size-adjust:100%; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%; font-family:sans-serif; line-height:1.15"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+{% if show_item_edit %}
+<style>
+    .hover:hover {
+        background-color: #ffff99;
+        cursor: pointer;
+        }
+</style>
+{% else %}
+<html style="-ms-overflow-style:scrollbar; -ms-text-size-adjust:100%; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%; font-family:sans-serif; line-height:1.15">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Invoice {{invoice.number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {# if we're on the main site, we can add styles that shouldn't translate to the exported HTML #}
-    {% if show_item_edit %}
-    <style>
-        .hover:hover {
-            background-color: #ffff99;
-            cursor: pointer;
-            }
-    </style>
-    {% endif %}
 </head>
 
 <body style="background-color:#fff; color:#212529; font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:1rem; font-weight:400; line-height:1.5; margin:0; text-align:left" bgcolor="#ffffff" align="left">
+{% endif %}
     <div style="margin-left:auto; margin-right:auto; padding-left:15px; padding-right:15px; width:100%" width="100%">
         <div style="-ms-flex-wrap:wrap; display:flex; flex-wrap:wrap; margin-left:1.5rem; margin-right:1.5rem; margin-top:1.5rem; padding-top:1.5rem; background-color:{{theme.banner.background_color}}; color:{{theme.banner.color}}" bgcolor="#57707d">
             <div style="min-height:1px; padding-left:15px; padding-right:15px; position:relative; width:100%; -ms-flex-positive:1; -ms-flex-preferred-size:0; -webkit-box-flex:1; flex-basis:0; flex-grow:1; max-width:100%" width="100%">
                 <h1 style="margin-bottom:0.5rem; margin-top:0; color:inherit; font-family:inherit; font-weight:500; line-height:1.2; font-size:2.5rem">INVOICE</h1>
                 {% if invoice.description %}<br><p style="margin-bottom:1rem; margin-top:0; font-size:1.25rem; font-weight:300">{{invoice.description}}</b>{% endif %}
             </p>
-</div>
+            </div>
             <div style="min-height:1px; padding-left:15px; padding-right:15px; position:relative; width:100%; -ms-flex-positive:1; -ms-flex-preferred-size:0; -webkit-box-flex:1; flex-basis:0; flex-grow:1; max-width:100%; text-align:right" width="100%" align="right">
                     {{submit_address|safe}}
             </div>
@@ -99,5 +99,6 @@
         </div>
     </div>
 
-
+{% if not show_item_edit %}
 </body></html>
+{% endif %}
