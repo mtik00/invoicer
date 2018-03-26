@@ -60,13 +60,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extrascripts %}
-<script>
-    $(document).ready(function() {
-        $("#pdf_checkbox").click(function() {
-        $("#enable_pdf").prop("checked", !$("#enable_pdf").prop("checked"));
-        });
-    });
-</script>
-{% endblock %}
