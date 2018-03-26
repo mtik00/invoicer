@@ -6,7 +6,7 @@ Tip 2: you can also add an image using data-image tag
 -->
     <div class="sidebar-wrapper">
         <div class="logo">
-            {% if config['DEBUG'] -%}
+            {% if session['user_debug'] or config['DEBUG'] -%}
             <span class="simple-text bg-danger">DEBUG MODE</span>
             {% else -%}
             <span class="simple-text">Invoicer</span>
