@@ -3,9 +3,15 @@
 
     <title>Invoice {{invoice.number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-
-
+    {# if we're on the main site, we can add styles that shouldn't translate to the exported HTML #}
+    {% if show_item_edit %}
+    <style>
+        .hover:hover {
+            background-color: #ffff99;
+            cursor: pointer;
+            }
+    </style>
+    {% endif %}
 </head>
 
 <body style="background-color:#fff; color:#212529; font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:1rem; font-weight:400; line-height:1.5; margin:0; text-align:left" bgcolor="#ffffff" align="left">
@@ -63,7 +69,7 @@
                     </thead>
                     <tbody>
                         {% for item in invoice.items -%}
-                        <tr>
+                        <tr{%if show_item_edit%} onclick="window.location='{{url_for('invoice_page.update_item', invoice_number=invoice.number, item_id=item.id)}}';" class="hover"{%endif%}>
                             {% if item.date -%}
                             <td style="border-top:1px solid #dee2e6; padding:0.75rem; vertical-align:top" valign="top">{{item.date.format('DD-MMM-YYYY')|upper}}: {{item.description}}</td>
                             {% else %}

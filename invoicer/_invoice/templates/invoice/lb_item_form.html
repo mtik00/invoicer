@@ -3,10 +3,23 @@
 
 {% block content %}
 {% from "_formhelpers.html" import bs_render_field, bs_render_select, bs_render_checkbox %}
+{% from "_modals.html" import render_delete_modal %}
 
 <div class="col-md-7">
+    {% if item %}
+    <form action="{{url_for('invoice_page.update_item', invoice_number=invoice.number, item_id=item.id)}}" method="POST">
+    {% else %}
     <form action="{{url_for('invoice_page.create_item', invoice_number=invoice.number)}}" method="POST">
+    {% endif %}
         {{ form.hidden_tag() }}
+
+        {% if invoice.submitted_date %}
+        <div class="row">
+            <div class="col form-group">
+                <span>NOTE: This invoice has been marked as submitted.  You may only change the date and description.</span>
+            </div>
+        </div>
+        {% endif %}
 
         <div class="row">
             {{ bs_render_field(form.date, id="datepicker") }}
@@ -20,7 +33,7 @@
         <div class="row">
             <div class="col form-group">
                 <label for="unit_price">Billable Unit (optional)</label>
-                <select class="form-control" id="unit_price" name="unit_price">
+                <select class="form-control" id="unit_price" name="unit_price"{%if invoice.submitted_date%} readonly disabled{%endif%}>
                     <option value=""></option>
                     {% for unit_price in unit_price_objects -%}
                     <option value="{{unit_price.id}}">{{unit_price.description}} ({{unit_price.unit_price|currency}}/{{unit_price.units}})</option>
@@ -32,28 +45,38 @@
         <div class="row">
             <div class="col form-group">
                 <label for="unit_pricex">Cost*</label>
-                <input class="form-control" id="unit_pricex" name="unit_pricex" required/>
+                <input class="form-control" id="unit_pricex" name="unit_pricex" required {%if item%} value="{{item.unit_price}}"{%endif%}{%if invoice.submitted_date%} readonly{%endif%}/>
             </div>
             <div class="col form-group">
                 <label for="unit_price_units">Units (optional)</label>
-                <input class="form-control" id="unit_price_units" name="unit_price_units" placeholder="e.g. hr, day, etc"/>
+                <input class="form-control" id="unit_price_units" name="unit_price_units" placeholder="e.g. hr, day, etc"{%if item%} value="{{item.units}}"{%endif%}{%if invoice.submitted_date%} readonly{%endif%}/>
             </div>
         </div>
 
         <div class="row">
-            {{ bs_render_field(form.quantity) }}
+            {{ bs_render_field(form.quantity, readonly=invoice.submitted_date) }}
         </div>
 
-        <input type=submit value="Add" class="btn btn-info btn-fill">
+
+        <input type=submit value="{%if item%}Update{%else%}Add{%endif%}" class="btn btn-info btn-fill">
         <input type=submit value="Cancel" name="cancel" class="btn btn-fill pull-right text-light" formnovalidate>
+        {% if item %}
+        <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+        <!-- <span onclick="show_delete_modal();" class="btn btn-danger btn-fill pull-right">Delete</span> -->
+        <a class="btn btn-danger btn-fill pull-right{%if invoice.submitted_date%} disabled{%endif%}" data-toggle="modal" data-target="#delete-modal" href="#"{%if invoice.submitted_date%} disabled{%endif%}>Delete</a>
+        {% endif %}
     </form>
 </div>
+
+{{ render_delete_modal() }}
+
 {% endblock %}
 
 {% block extrascripts %}
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
 <script>
     var $unit_price_data = {
         '' : {'unit_price': '', 'units': ''},

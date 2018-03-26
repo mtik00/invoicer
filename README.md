@@ -83,10 +83,11 @@ Each of these addresses will be put on the `to` line of the email.
 To use the application's delete confirmation modal, you must create your form
 like so:  
 ```
+{% from "_modals.html" import render_delete_modal %}
+
 <form...action="{{url_for(...)}}" method="POST">
     <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
-
-    <span onclick="show_delete_modal();" class="w3-btn w3-red">Delete My Things</span>
+    <a class="btn btn-danger btn-fill" data-toggle="modal" data-target="#delete-modal" href="#">Delete</a>
 </form>
 
 {{ render_delete_modal() }}

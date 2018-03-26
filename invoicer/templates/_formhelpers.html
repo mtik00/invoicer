@@ -36,12 +36,12 @@
   </div>
 {%- endmacro %}
 
-{% macro bs_render_field(field, value=None, placeholder=None, cols=None, help=None, id=None) %}
+{% macro bs_render_field(field, value=None, placeholder=None, cols=None, help=None, id=None, class=None, readonly=False) %}
 <div class="col{%if cols%} col-md-{{cols}}{%endif%}">
     {% if help %}<div data-intro='{{help}}'>{% endif %}
     <div class="form-group">
         <label class="{%if field.errors%}text-danger{%endif%}">{{field.label.text}}{%if 'required' in field.flags%}*{%endif%}</label>
-        <input type="text" name="{{field.name}}" id="{{id or field.name}}" class="form-control {%if field.errors%}border border-danger{% elif 'required' in field.flags%}border border-secondary{%endif%}" placeholder="{% if placeholder%}{{placeholder}}{%else%}{{field.label.text}}{%endif%}" value="{%if value%}{{value}}{%elif field.data%}{{field.data}}{% endif %}" {%if 'required' in field.flags%}required{%endif%}>
+        <input type="text" name="{{field.name}}" id="{{id or field.name}}" class="form-control {%if field.errors%}border border-danger{% elif 'required' in field.flags%}border border-secondary{%endif%}{%if class%} {{class}}{%endif%}" placeholder="{% if placeholder%}{{placeholder}}{%else%}{{field.label.text}}{%endif%}" value="{%if value%}{{value}}{%elif field.data%}{{field.data}}{% endif %}" {%if 'required' in field.flags%}required{%endif%}{%if readonly%} readonly{%endif%}>
         {% if field.errors %}<small id="{{field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
     </div>
     {% if help %}</div>{% endif %}

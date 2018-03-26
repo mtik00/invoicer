@@ -168,6 +168,83 @@ def create_item(invoice_number):
     )
 
 
+@app_cache.memoize()
+def get_user_unit_prices(user_id):
+    return UnitPrice.query.filter_by(user_id=user_id).all()
+
+
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/item/<item_id>/update', methods=["GET", "POST"])
+@login_required
+def update_item(invoice_number, item_id):
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    item = Item.query.filter_by(invoice_id=invoice.id, id=item_id).first_or_404()
+    unit_prices = get_user_unit_prices(session['user_id'])
+
+    form = ItemForm(
+        date=item.date.format('DD-MMM-YYYY').upper(),
+        description=item.description,
+        quantity=item.quantity
+    )
+
+    if (request.method == 'POST') and ('cancel' in request.form):
+        flash('Action canceled', 'warning')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+    if form.validate_on_submit():
+        # Only let the user modify the date and description if the invoice has
+        # been submitted.
+        if request.form.get('validate_delete', '').lower() == 'delete':
+            if invoice.submitted_date:
+                flash('You cannot delete an item from a submitted invoice', 'error')
+                return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+            db.session.delete(item)
+            invoice.total = sum([x.unit_price * x.quantity for x in invoice.items])
+            db.session.add(invoice)
+            db.session.commit()
+            flash('Invoice item has been deleted', 'warning')
+            return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+        units = request.form['unit_price_units']
+        unit_price = request.form['unit_pricex']
+
+        item.date = arrow.get(form.date.data, 'DD-MMM-YYYY')
+        item.description = form.description.data
+
+        if not invoice.submitted_date:
+            item.quantity = int(form.quantity.data)
+            item.units = units
+            if unit_price:
+                item.unit_price = float(unit_price)
+
+            db.session.add(item)
+            invoice.total = sum([x.unit_price * x.quantity for x in invoice.items])
+            db.session.add(invoice)
+        elif (
+            (str(item.unit_price) != unit_price) or
+            (item.units != units) or
+            (item.quantity != form.quantity.data)
+        ):
+            flash('Only item date and description are allowed to be modified on submitted invoices', 'warning')
+
+        db.session.add(item)
+        db.session.commit()
+
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
+        flash('item modified', 'success')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+    return render_template(
+        'invoice/lb_item_form.html',
+        form=form,
+        invoice=invoice,
+        item=item,
+        unit_price_objects=unit_prices,
+    )
+
+
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/update', methods=["GET", "POST"])
 @login_required
 def update(invoice_number):
@@ -280,8 +357,8 @@ def invoice_by_number(invoice_number):
         pdf_ok=pdf_ok(),  # The binary exists
         show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
         invoice_numbers=invoice_numbers,
-        simplified_invoice=simplified_invoice(invoice_number),
-        invoices=user_invoices(session['user_id'])
+        simplified_invoice=simplified_invoice(invoice_number, show_item_edit=True),
+        invoices=user_invoices(session['user_id']),
     )
 
 
@@ -592,7 +669,7 @@ def bs4_invoice(user_id, invoice_number):
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/html')
 @login_required
-def simplified_invoice(invoice_number):
+def simplified_invoice(invoice_number, show_item_edit=False):
     """
     Displays a single invoice in HTML format with all <style> converted to
     inline `style=""`.
@@ -612,7 +689,8 @@ def simplified_invoice(invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        theme=color_theme_data[w3_theme]
+        theme=color_theme_data[w3_theme],
+        show_item_edit=show_item_edit
     )
 
 
