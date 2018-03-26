@@ -89,7 +89,13 @@ def format_my_address(html=True):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_number):
-    invoice = user_invoices(session['user_id'])  # Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoices = user_invoices(session['user_id'])
+    invoice = next((x for x in invoices if x.number == invoice_number), None)
+
+    if not invoice:
+        flash('Unknown invoice', 'error')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
     items = Item.query.filter(Item.invoice_id == invoice.id)
     form = EmptyForm()
 
