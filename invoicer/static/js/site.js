@@ -135,17 +135,19 @@ demo = {
         });
     },
 
-    showNotification: function(text='Testing!', color='info', from='top', align='center', icon_class="nc-icon nc-app") {
+    showNotification: function(text='Testing!', color='info', from='top', align='center', icon_class="nc-icon nc-app", delay=5000) {
         $.notify({
             icon: icon_class,
             message: text
         }, {
-            type: type[color],
-            timer: 8000,
+            type: color,
+            delay: delay,
+            timer: 1000,
             placement: {
                 from: from,
                 align: align
-            }
+            },
+            showProgressbar: true
         });
     }
 
