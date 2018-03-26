@@ -44,11 +44,11 @@
             <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice_obj.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</a>
             <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice_obj.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</a>
             {% elif (config['DEBUG'] or session['user_debug']) %}
-            <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice_obj.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed in debug mode)</a>
-            <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice_obj.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed in debug mode)</a>
+            <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice_obj.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed because of debug mode)</a>
+            <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice_obj.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed because of debug mode)</a>
             {% else -%}
-            <button class="dropdown-item" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
-            <button class="dropdown-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
+            <button class="dropdown-item disabled" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
+            <button class="dropdown-item disabled" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
             {% endif %}
             <div class="divider"></div>
             <form action="{{url_for('invoice_page.delete', invoice_number=invoice_obj.number)}}" method="POST">
@@ -162,7 +162,7 @@
         $('.selectpicker').select2({
             width: 300,
         });
-          
+
         $( ".selectpicker" ).change(function() {
             location.replace($(this).val());
         });
