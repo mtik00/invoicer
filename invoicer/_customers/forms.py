@@ -26,4 +26,4 @@ class CustomerForm(FlaskForm):
 
             field.populate_obj(obj, name)
 
-        obj.invoice_theme = InvoiceTheme.query.filter_by(theme=self.invoice_theme.data).first()
+        obj.invoice_theme = InvoiceTheme.query.filter_by(name=self.invoice_theme.data).first()

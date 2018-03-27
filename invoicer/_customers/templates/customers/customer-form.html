@@ -58,7 +58,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            {% if customer %}{% set theme = customer.invoice_theme.theme %}{% else %}{% set theme = '' %}{% endif %}
+                            {% if customer %}{% set theme = customer.invoice_theme.name %}{% else %}{% set theme = '' %}{% endif %}
                             {{ bs_render_select(form.invoice_theme, theme_choices, selected=theme, cols=4, help='You can select a theme that is associated with the customer.  The default invoice theme will be set
                             to this theme, instead of your profile theme.  Also note that you can modify the invoice theme manually.') }}
                         </div>

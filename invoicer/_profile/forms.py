@@ -30,5 +30,5 @@ class ProfileForm(FlaskForm):
 
             field.populate_obj(obj, name)
 
-        obj.bs4_theme = BS4Theme.query.filter_by(theme=self.bs4_theme.data).first()
-        obj.invoice_theme = InvoiceTheme.query.filter_by(theme=self.invoice_theme.data).first()
+        obj.bs4_theme = BS4Theme.query.filter_by(name=self.bs4_theme.data).first()
+        obj.invoice_theme = InvoiceTheme.query.filter_by(name=self.invoice_theme.data).first()

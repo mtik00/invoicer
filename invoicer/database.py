@@ -20,8 +20,10 @@ def init_db(sample_data=False, apply_migrations=False):
     db.drop_all()
     db.create_all()
 
-    db.session.add_all([models.InvoiceTheme(theme=x) for x in sorted(color_theme_data.keys()) if x])
-    db.session.add_all([models.BS4Theme(theme=x) for x in sorted(bs4_color_themes) if x])
+    db.session.add_all([models.BS4Theme(name=x) for x in sorted(bs4_color_themes) if x])
+
+    for name, data in color_theme_data.items():
+        db.session.add(models.InvoiceTheme(name=name, **data))
 
     if apply_migrations:
         try:
@@ -39,7 +41,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            bs4_theme=models.BS4Theme.query.filter_by(theme='black').first(),
+            bs4_theme=models.BS4Theme.query.filter_by(name='black').first(),
         )
 
         user = models.User(
@@ -198,7 +200,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='John Doe', email='j.doe@____.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            bs4_theme=models.BS4Theme.query.filter_by(theme='orange').first(),
+            bs4_theme=models.BS4Theme.query.filter_by(name='orange').first(),
         )
 
         user2 = models.User(

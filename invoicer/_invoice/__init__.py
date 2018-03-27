@@ -271,7 +271,7 @@ def update(invoice_number):
     form.invoice_theme.choices = theme_choices
     selected_theme = ''
     if invoice.invoice_theme:
-        selected_theme = invoice.invoice_theme.theme
+        selected_theme = invoice.invoice_theme.name
 
     if request.method == 'GET':
         # Set the default theme only for `GET` or the value will never change.
@@ -304,7 +304,7 @@ def update(invoice_number):
             invoice.terms = terms
 
             if form.invoice_theme.data:
-                invoice.invoice_theme = InvoiceTheme.query.filter_by(theme=form.invoice_theme.data).first()
+                invoice.invoice_theme = InvoiceTheme.query.filter_by(name=form.invoice_theme.data).first()
             else:
                 invoice.invoice_theme = None
 

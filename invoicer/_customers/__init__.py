@@ -38,7 +38,7 @@ def update(customer_id):
     customer = get_customer(customer_id)
     form = CustomerForm(request.form, obj=customer)
 
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in InvoiceTheme.query.all()]
+    theme_choices = [('', '')] + [(x.name, x.name) for x in InvoiceTheme.query.all()]
     form.invoice_theme.choices = theme_choices
 
     if form.validate_on_submit():
@@ -69,7 +69,7 @@ def update(customer_id):
 @login_required
 def create():
     form = CustomerForm(request.form, number=get_next_customer_number())
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in InvoiceTheme.query.all()]
+    theme_choices = [('', '')] + [(x.name, x.name) for x in InvoiceTheme.query.all()]
     form.invoice_theme.choices = theme_choices
 
     if form.validate_on_submit():

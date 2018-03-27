@@ -23,31 +23,31 @@ bs4_color_themes = [
 # `banner` is `w3-theme-d1`, and `table_header` is `w3-theme`
 color_theme_data = {
     'red': {
-        'banner': {'color': '#fff', 'background_color': '#f32617'},
-        'table_header': {'color': '#fff', 'background_color': '#f44336'},
+        'banner_color': '#fff', 'banner_background_color': '#f32617',
+        'table_header_color': '#fff', 'table_header_background_color': '#f44336',
     },
     'khaki': {
-        'banner': {'color': '#fff', 'background_color': '#ecdf6c'},
-        'table_header': {'color': '#000', 'background_color': '#f0e68c'},
+        'banner_color': '#fff', 'banner_background_color': '#ecdf6c',
+        'table_header_color': '#000', 'table_header_background_color': '#f0e68c',
     },
     'blue-grey': {
-        'banner': {'color': '#fff', 'background_color': '#57707d'},
-        'table_header': {'color': '#fff', 'background_color': '#607d8b'},
+        'banner_color': '#fff', 'banner_background_color': '#57707d',
+        'table_header_color': '#fff', 'table_header_background_color': '#607d8b',
     },
     'indigo': {
-        'banner': {'color': '#fff', 'background_color': '#3949a3'},
-        'table_header': {'color': '#fff', 'background_color': '#3f51b5'},
+        'banner_color': '#fff', 'banner_background_color': '#3949a3',
+        'table_header_color': '#fff', 'table_header_background_color': '#3f51b5',
     },
     'teal': {
-        'banner': {'color': '#fff', 'background_color': '#008578'},
-        'table_header': {'color': '#fff', 'background_color': '#009688'},
+        'banner_color': '#fff', 'banner_background_color': '#008578',
+        'table_header_color': '#fff', 'table_header_background_color': '#009688',
     },
     'deep-orange': {
-        'banner': {'color': '#fff', 'background_color': '#ff4107'},
-        'table_header': {'color': '#fff', 'background_color': '#ff5722'},
+        'banner_color': '#fff', 'banner_background_color': '#ff4107',
+        'table_header_color': '#fff', 'table_header_background_color': '#ff5722',
     },
     'dark-grey': {
-        'banner': {'color': '#fff', 'background_color': '#575757'},
-        'table_header': {'color': '#fff', 'background_color': '#616161'},
+        'banner_color': '#fff', 'banner_background_color': '#575757',
+        'table_header_color': '#fff', 'table_header_background_color': '#616161',
     },
 }

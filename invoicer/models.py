@@ -4,6 +4,7 @@ from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
 
 from .database import db
+from .cache import app_cache
 
 
 class Profile(db.Model):
@@ -149,15 +150,15 @@ class Invoice(db.Model):
         Returns the appropriate theme for presenting the invoice.
         """
         if self.invoice_theme:
-            return self.invoice_theme.theme
+            return self.invoice_theme.name
 
         customer = Customer.query.get(self.customer_id)
         if customer.invoice_theme:
-            return customer.invoice_theme.theme
+            return customer.invoice_theme.name
 
         profile = User.query.get(self.user_id).profile
         if profile.invoice_theme:
-            return profile.invoice_theme.theme
+            return profile.invoice_theme.name
 
         return None
 
@@ -235,15 +236,6 @@ class User(db.Model):
         return '<User %r>' % (self.username)
 
 
-class InvoiceTheme(db.Model):
-    __tablename__ = 'invoice_themes'
-    id = db.Column(db.Integer, primary_key=True)
-    theme = db.Column(db.String(50))
-
-    def __str__(self):
-        return self.theme
-
-
 class ApplicationSettings(db.Model):
     __tablename__ = 'application_settings'
     id = db.Column(db.Integer, primary_key=True)
@@ -253,7 +245,20 @@ class ApplicationSettings(db.Model):
 class BS4Theme(db.Model):
     __tablename__ = 'bs4_themes'
     id = db.Column(db.Integer, primary_key=True)
-    theme = db.Column(db.String(50))
+    name = db.Column(db.String(50))
 
     def __str__(self):
-        return self.theme
+        return self.name
+
+
+class InvoiceTheme(db.Model):
+    __tablename__ = 'invoice_themes'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    banner_color = db.Column(db.String(8))
+    banner_background_color = db.Column(db.String(8))
+    table_header_color = db.Column(db.String(8))
+    table_header_background_color = db.Column(db.String(8))
+
+    def __str__(self):
+        return self.name

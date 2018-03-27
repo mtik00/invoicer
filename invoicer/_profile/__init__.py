@@ -30,11 +30,11 @@ def edit():
 
     default_user_theme = current_app.config['BS4_THEME']
     if user.profile and user.profile.bs4_theme:
-        default_user_theme = user.profile.bs4_theme.theme
+        default_user_theme = user.profile.bs4_theme.name
 
     default_invoice_theme = ''
     if user.profile and user.profile.invoice_theme:
-        default_invoice_theme = user.profile.invoice_theme.theme
+        default_invoice_theme = user.profile.invoice_theme.name
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
