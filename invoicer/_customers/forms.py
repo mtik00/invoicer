@@ -17,13 +17,13 @@ class CustomerForm(FlaskForm):
     email = StringField('Email')
     terms = IntegerField('Terms', validators=[Optional()])
     number = IntegerField('Number*', validators=[DataRequired()])
-    w3_theme = SelectField('Default Invoice Theme')
+    invoice_theme = SelectField('Default Invoice Theme')
 
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
-            if name == 'w3_theme':
+            if name == 'invoice_theme':
                 continue
 
             field.populate_obj(obj, name)
 
-        obj.w3_theme = InvoiceTheme.query.filter_by(theme=self.w3_theme.data).first()
+        obj.invoice_theme = InvoiceTheme.query.filter_by(theme=self.invoice_theme.data).first()

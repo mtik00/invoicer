@@ -19,13 +19,13 @@ class InvoiceForm(FlaskForm):
     paid_date = StringField(u'Paid Date', id="datepicker2")
     paid_date_notes = StringField(u'Notes', validators=[Optional()])
     terms = IntegerField(u'Terms (number of days)')
-    w3_theme = SelectField('Theme')
+    invoice_theme = SelectField('Theme')
 
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
-            if name == 'w3_theme':
+            if name == 'invoice_theme':
                 continue
 
             field.populate_obj(obj, name)
 
-        obj.w3_theme = InvoiceTheme.query.filter_by(theme=self.w3_theme.data).first()
+        obj.invoice_theme = InvoiceTheme.query.filter_by(theme=self.invoice_theme.data).first()

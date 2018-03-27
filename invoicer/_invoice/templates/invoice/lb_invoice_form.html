@@ -79,7 +79,7 @@
     </div>
 
     <div class="row">
-        {{ bs_render_select(form.w3_theme, theme_choices, selected=selected_theme if invoice else '', cols=5) }}
+        {{ bs_render_select(form.invoice_theme, theme_choices, selected=selected_theme if invoice else '', cols=5) }}
     </div>
 
     {% if invoice -%}

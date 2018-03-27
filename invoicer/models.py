@@ -23,8 +23,8 @@ class Profile(db.Model):
     bs4_theme_id = db.Column(db.Integer, db.ForeignKey('bs4_themes.id'))
     bs4_theme = relationship("BS4Theme", foreign_keys=bs4_theme_id)
 
-    w3_theme_invoice_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme_invoice = relationship("InvoiceTheme", foreign_keys=w3_theme_invoice_id)
+    invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
+    invoice_theme = relationship("InvoiceTheme", foreign_keys=invoice_theme_id)
 
     enable_pdf = db.Column(db.Boolean, default=True)
 
@@ -50,8 +50,8 @@ class Customer(db.Model):
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
 
-    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("InvoiceTheme")
+    invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
+    invoice_theme = relationship("InvoiceTheme")
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = relationship("User", back_populates="customers")
@@ -113,8 +113,8 @@ class Invoice(db.Model):
     items = relationship("Item", back_populates="invoice")
     terms = db.Column(db.Integer)
 
-    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("InvoiceTheme")
+    invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
+    invoice_theme = relationship("InvoiceTheme")
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
@@ -148,16 +148,16 @@ class Invoice(db.Model):
         """
         Returns the appropriate theme for presenting the invoice.
         """
-        if self.w3_theme:
-            return self.w3_theme.theme
+        if self.invoice_theme:
+            return self.invoice_theme.theme
 
         customer = Customer.query.get(self.customer_id)
-        if customer.w3_theme:
-            return customer.w3_theme.theme
+        if customer.invoice_theme:
+            return customer.invoice_theme.theme
 
         profile = User.query.get(self.user_id).profile
-        if profile.w3_theme_invoice:
-            return profile.w3_theme_invoice.theme
+        if profile.invoice_theme:
+            return profile.invoice_theme.theme
 
         return None
 
@@ -236,7 +236,7 @@ class User(db.Model):
 
 
 class InvoiceTheme(db.Model):
-    __tablename__ = 'w3_themes'
+    __tablename__ = 'invoice_themes'
     id = db.Column(db.Integer, primary_key=True)
     theme = db.Column(db.String(50))
 

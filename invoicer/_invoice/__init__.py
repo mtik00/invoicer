@@ -268,15 +268,15 @@ def update(invoice_number):
         terms=invoice.terms,
     )
     form.customer.choices = addr_choices
-    form.w3_theme.choices = theme_choices
+    form.invoice_theme.choices = theme_choices
     selected_theme = ''
-    if invoice.w3_theme:
-        selected_theme = invoice.w3_theme.theme
+    if invoice.invoice_theme:
+        selected_theme = invoice.invoice_theme.theme
 
     if request.method == 'GET':
         # Set the default theme only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
-        form.w3_theme.process_data(selected_theme)
+        form.invoice_theme.process_data(selected_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:
             flash('invoice updated canceled', 'warning')
@@ -303,10 +303,10 @@ def update(invoice_number):
             invoice.paid_date = paid_date
             invoice.terms = terms
 
-            if form.w3_theme.data:
-                invoice.w3_theme = InvoiceTheme.query.filter_by(theme=form.w3_theme.data).first()
+            if form.invoice_theme.data:
+                invoice.invoice_theme = InvoiceTheme.query.filter_by(theme=form.invoice_theme.data).first()
             else:
-                invoice.w3_theme = None
+                invoice.invoice_theme = None
 
             db.session.commit()
 
@@ -382,7 +382,7 @@ def create():
     form.customer.choices = addr_choices
 
     theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
-    form.w3_theme.choices = theme_choices
+    form.invoice_theme.choices = theme_choices
 
     me = User.query.get(session['user_id']).profile
 
@@ -657,7 +657,7 @@ def bs4_invoice(user_id, invoice_number):
     customer = Customer.query.filter_by(user_id=user_id, id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address()
-    w3_theme = invoice.get_theme() or current_app.config['W3_THEME']
+    invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
     terms = invoice.terms or customer.terms or User.query.get(user_id).profile.terms
 
@@ -668,8 +668,7 @@ def bs4_invoice(user_id, invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        # w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
-        theme=color_theme_data[w3_theme]
+        theme=color_theme_data[invoice_theme]
     )
 
 
@@ -686,7 +685,7 @@ def simplified_invoice(invoice_number, show_item_edit=False):
     submit_address = format_my_address()
 
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
-    w3_theme = invoice.get_theme() or current_app.config['W3_THEME']
+    invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
     # import pdb; pdb.set_trace()
     return render_template(
@@ -696,7 +695,7 @@ def simplified_invoice(invoice_number, show_item_edit=False):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        theme=color_theme_data[w3_theme],
+        theme=color_theme_data[invoice_theme],
         show_item_edit=show_item_edit
     )
 
@@ -721,5 +720,5 @@ def text_invoice(invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+        invoice_theme=invoice.get_theme() or current_app.config['INVOICE_THEME']
     )

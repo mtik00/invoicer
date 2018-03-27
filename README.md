@@ -59,7 +59,7 @@ two categories:
 *   Site theme: Controlled by the user profile
 *   Invoice themes:  
     order of precedence: invoice theme, customer theme, invoice theme in profile,
-    the site theme in the user profile, and finally `app.config['W3_THEME']`.
+    the site theme in the user profile, and finally `app.config['INVOICE_THEME']`.
 
 # Customer Emails
 You have a case (like I do) where an invoice should be sent to multiple people.

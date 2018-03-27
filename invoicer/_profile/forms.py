@@ -15,7 +15,7 @@ class ProfileForm(FlaskForm):
     zip = StringField('Zipcode')
     terms = IntegerField('Terms (NET number of days)')
     bs4_theme = SelectField('Site Theme')
-    w3_theme_invoice = SelectField('Invoice Theme')
+    invoice_theme = SelectField('Invoice Theme')
 
     starting_customer_number = IntegerField('Starting customer number')
     customer_increment = IntegerField('Number between customer numbers')
@@ -25,10 +25,10 @@ class ProfileForm(FlaskForm):
 
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
-            if name in ['bs4_theme', 'w3_theme_invoice']:
+            if name in ['bs4_theme', 'invoice_theme']:
                 continue
 
             field.populate_obj(obj, name)
 
         obj.bs4_theme = BS4Theme.query.filter_by(theme=self.bs4_theme.data).first()
-        obj.w3_theme_invoice = InvoiceTheme.query.filter_by(theme=self.w3_theme_invoice.data).first()
+        obj.invoice_theme = InvoiceTheme.query.filter_by(theme=self.invoice_theme.data).first()

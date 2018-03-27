@@ -26,20 +26,20 @@ def edit():
     form.bs4_theme.choices = bs4_theme_choices
 
     theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
-    form.w3_theme_invoice.choices = theme_choices
+    form.invoice_theme.choices = theme_choices
 
     default_user_theme = current_app.config['BS4_THEME']
     if user.profile and user.profile.bs4_theme:
         default_user_theme = user.profile.bs4_theme.theme
 
     default_invoice_theme = ''
-    if user.profile and user.profile.w3_theme_invoice:
-        default_invoice_theme = user.profile.w3_theme_invoice.theme
+    if user.profile and user.profile.invoice_theme:
+        default_invoice_theme = user.profile.invoice_theme.theme
 
     if request.method == 'GET':
         # Set the default them only for `GET` or the value will never change.
         form.bs4_theme.process_data(default_user_theme)
-        form.w3_theme_invoice.process_data(default_invoice_theme)
+        form.invoice_theme.process_data(default_invoice_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:
             flash('profile updated canceled', 'warning')
@@ -52,8 +52,8 @@ def edit():
             db.session.add(user)
             db.session.commit()
 
-            if user.profile.w3_theme_invoice:
-                current_app.config['W3_THEME'] = user.profile.w3_theme_invoice
+            if user.profile.invoice_theme:
+                current_app.config['INVOICE_THEME'] = user.profile.invoice_theme
 
             if user.profile.bs4_theme:
                 current_app.config['BS4_THEME'] = user.profile.bs4_theme
