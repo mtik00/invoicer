@@ -250,8 +250,8 @@ def init_db(sample_data=False, apply_migrations=False):
 
         user2 = models.User(
             username='user2',
-            hashed_password=hash_password('default'),
-            profile=profile,
+            hashed_password=hash_password('user2'),
+            profile=profile2,
             application_settings=models.ApplicationSettings(
                 debug_mode=False,
             ),
