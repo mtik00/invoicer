@@ -3,7 +3,7 @@ from wtforms import StringField, SelectField, IntegerField, BooleanField
 from wtforms.validators import DataRequired
 from wtforms.compat import iteritems
 
-from ..models import W3Theme, BS4Theme
+from ..models import InvoiceTheme, BS4Theme
 
 
 class ProfileForm(FlaskForm):
@@ -31,4 +31,4 @@ class ProfileForm(FlaskForm):
             field.populate_obj(obj, name)
 
         obj.bs4_theme = BS4Theme.query.filter_by(theme=self.bs4_theme.data).first()
-        obj.w3_theme_invoice = W3Theme.query.filter_by(theme=self.w3_theme_invoice.data).first()
+        obj.w3_theme_invoice = InvoiceTheme.query.filter_by(theme=self.w3_theme_invoice.data).first()

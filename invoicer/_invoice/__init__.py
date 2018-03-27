@@ -15,7 +15,7 @@ from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
 from ..models import (
-    Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
+    Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, InvoiceTheme)
 from ..common import login_required
 from ..themes import color_theme_data
 from ..cache import app_cache
@@ -304,7 +304,7 @@ def update(invoice_number):
             invoice.terms = terms
 
             if form.w3_theme.data:
-                invoice.w3_theme = W3Theme.query.filter_by(theme=form.w3_theme.data).first()
+                invoice.w3_theme = InvoiceTheme.query.filter_by(theme=form.w3_theme.data).first()
             else:
                 invoice.w3_theme = None
 

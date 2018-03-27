@@ -20,7 +20,7 @@ def init_db(sample_data=False, apply_migrations=False):
     db.drop_all()
     db.create_all()
 
-    db.session.add_all([models.W3Theme(theme=x) for x in sorted(color_theme_data.keys()) if x])
+    db.session.add_all([models.InvoiceTheme(theme=x) for x in sorted(color_theme_data.keys()) if x])
     db.session.add_all([models.BS4Theme(theme=x) for x in sorted(bs4_color_themes) if x])
 
     if apply_migrations:

@@ -24,7 +24,7 @@ class Profile(db.Model):
     bs4_theme = relationship("BS4Theme", foreign_keys=bs4_theme_id)
 
     w3_theme_invoice_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme_invoice = relationship("W3Theme", foreign_keys=w3_theme_invoice_id)
+    w3_theme_invoice = relationship("InvoiceTheme", foreign_keys=w3_theme_invoice_id)
 
     enable_pdf = db.Column(db.Boolean, default=True)
 
@@ -51,7 +51,7 @@ class Customer(db.Model):
     items = relationship("Item", back_populates="customer")
 
     w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("W3Theme")
+    w3_theme = relationship("InvoiceTheme")
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = relationship("User", back_populates="customers")
@@ -114,7 +114,7 @@ class Invoice(db.Model):
     terms = db.Column(db.Integer)
 
     w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("W3Theme")
+    w3_theme = relationship("InvoiceTheme")
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
@@ -235,7 +235,7 @@ class User(db.Model):
         return '<User %r>' % (self.username)
 
 
-class W3Theme(db.Model):
+class InvoiceTheme(db.Model):
     __tablename__ = 'w3_themes'
     id = db.Column(db.Integer, primary_key=True)
     theme = db.Column(db.String(50))

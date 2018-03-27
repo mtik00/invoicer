@@ -3,7 +3,7 @@ from wtforms import StringField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Optional
 from wtforms.compat import iteritems
 
-from ..models import W3Theme
+from ..models import InvoiceTheme
 
 
 class ItemForm(FlaskForm):
@@ -28,4 +28,4 @@ class InvoiceForm(FlaskForm):
 
             field.populate_obj(obj, name)
 
-        obj.w3_theme = W3Theme.query.filter_by(theme=self.w3_theme.data).first()
+        obj.w3_theme = InvoiceTheme.query.filter_by(theme=self.w3_theme.data).first()

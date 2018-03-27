@@ -2,7 +2,7 @@ from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
     session)
 from ..common import login_required, form_is_deleting
-from ..models import Customer, Invoice, User, W3Theme
+from ..models import Customer, Invoice, User, InvoiceTheme
 from ..database import db
 from .forms import CustomerForm
 
@@ -38,7 +38,7 @@ def update(customer_id):
     customer = get_customer(customer_id)
     form = CustomerForm(request.form, obj=customer)
 
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
+    theme_choices = [('', '')] + [(x.theme, x.theme) for x in InvoiceTheme.query.all()]
     form.w3_theme.choices = theme_choices
 
     if form.validate_on_submit():
@@ -69,7 +69,7 @@ def update(customer_id):
 @login_required
 def create():
     form = CustomerForm(request.form, number=get_next_customer_number())
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
+    theme_choices = [('', '')] + [(x.theme, x.theme) for x in InvoiceTheme.query.all()]
     form.w3_theme.choices = theme_choices
 
     if form.validate_on_submit():

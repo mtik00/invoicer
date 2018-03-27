@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 
 from ..common import login_required
-from ..models import Profile, User, W3Theme, BS4Theme
+from ..models import Profile, User, InvoiceTheme, BS4Theme
 from ..database import db
 from ..themes import color_theme_data, bs4_color_themes
 from .forms import ProfileForm
