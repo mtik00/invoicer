@@ -17,12 +17,28 @@ from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, InvoiceTheme)
 from ..common import login_required
-from ..database import color_theme_data
 from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 
 
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
+
+
+@app_cache.cached(key_prefix='invoice_themes')
+def get_color_theme_data():
+    '''
+    Convert the invoice theme data into something a bit more usable.
+    '''
+    result = {}
+    for theme in InvoiceTheme.query.all():
+        result[theme.name] = {
+            'banner_color': theme.banner_color,
+            'banner_background_color': theme.banner_background_color,
+            'table_header_color': theme.table_header_color,
+            'table_header_background_color': theme.table_header_background_color
+        }
+
+    return result
 
 
 @app_cache.memoize(30)
@@ -258,7 +274,7 @@ def update(invoice_number):
 
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
     addr_choices = [(x.id, x.name1) for x in customers]
-    theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
+    theme_choices = [('', '')] + [(x, x) for x in get_color_theme_data().keys()]
 
     form = InvoiceForm(
         description=invoice.description,
@@ -381,7 +397,7 @@ def create():
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
 
-    theme_choices = [('', '')] + [(x, x) for x in color_theme_data.keys()]
+    theme_choices = [('', '')] + [(x, x) for x in get_color_theme_data().keys()]
     form.invoice_theme.choices = theme_choices
 
     me = User.query.get(session['user_id']).profile
@@ -668,7 +684,7 @@ def bs4_invoice(user_id, invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        theme=color_theme_data[invoice_theme]
+        theme=get_color_theme_data()[invoice_theme.name]
     )
 
 
@@ -687,7 +703,6 @@ def simplified_invoice(invoice_number, show_item_edit=False):
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
     invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
-    # import pdb; pdb.set_trace()
     return render_template(
         'invoice/simplified_invoice.html',
         invoice=invoice,
@@ -695,7 +710,7 @@ def simplified_invoice(invoice_number, show_item_edit=False):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        theme=color_theme_data[invoice_theme],
+        theme=get_color_theme_data()[invoice_theme],
         show_item_edit=show_item_edit
     )
 
