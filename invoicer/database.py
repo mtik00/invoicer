@@ -6,9 +6,47 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import init, migrate
 
 from .password import hash_password
-from .themes import bs4_color_themes, color_theme_data
 
 db = SQLAlchemy()
+
+# Default theme data ##########################################################
+bs4_color_themes = [
+    'black', 'blue', 'azure', 'green', 'orange', 'red', 'purple'
+]
+
+# See here https://www.w3schools.com/w3css/w3css_color_themes.asp
+# `banner` is `w3-theme-d1`, and `table_header` is `w3-theme`
+color_theme_data = {
+    'red': {
+        'banner_color': '#fff', 'banner_background_color': '#f32617',
+        'table_header_color': '#fff', 'table_header_background_color': '#f44336',
+    },
+    'khaki': {
+        'banner_color': '#fff', 'banner_background_color': '#ecdf6c',
+        'table_header_color': '#000', 'table_header_background_color': '#f0e68c',
+    },
+    'blue-grey': {
+        'banner_color': '#fff', 'banner_background_color': '#57707d',
+        'table_header_color': '#fff', 'table_header_background_color': '#607d8b',
+    },
+    'indigo': {
+        'banner_color': '#fff', 'banner_background_color': '#3949a3',
+        'table_header_color': '#fff', 'table_header_background_color': '#3f51b5',
+    },
+    'teal': {
+        'banner_color': '#fff', 'banner_background_color': '#008578',
+        'table_header_color': '#fff', 'table_header_background_color': '#009688',
+    },
+    'deep-orange': {
+        'banner_color': '#fff', 'banner_background_color': '#ff4107',
+        'table_header_color': '#fff', 'table_header_background_color': '#ff5722',
+    },
+    'dark-grey': {
+        'banner_color': '#fff', 'banner_background_color': '#575757',
+        'table_header_color': '#fff', 'table_header_background_color': '#616161',
+    },
+}
+###############################################################################
 
 
 def init_db(sample_data=False, apply_migrations=False):

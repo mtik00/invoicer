@@ -17,7 +17,7 @@ from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, InvoiceTheme)
 from ..common import login_required
-from ..themes import color_theme_data
+from ..database import color_theme_data
 from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 

@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from ..common import login_required
 from ..models import Profile, User, InvoiceTheme, BS4Theme
 from ..database import db
-from ..themes import color_theme_data, bs4_color_themes
+from ..database import color_theme_data, bs4_color_themes
 from .forms import ProfileForm
 
 profile_page = Blueprint('profile_page', __name__, template_folder='templates')
