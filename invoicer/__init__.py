@@ -87,8 +87,15 @@ def remove_older_backups(days=30):
 
 
 @app.cli.command('initdb')
-def initdb_command():
+@click.argument('force', default='n')
+def initdb_command(force):
     """Initializes the database."""
+    if force.lower().startswith('y'):
+        init_db(True, apply_migrations=True)
+        click.echo('Sample data added to database.')
+        click.echo('Initialized the database.')
+        return
+
     click.echo("WARNING: Continue will delete all data in the databse")
     if not click.confirm('Do you want to continue?'):
         raise click.Abort()

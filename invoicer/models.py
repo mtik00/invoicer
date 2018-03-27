@@ -4,7 +4,6 @@ from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
 
 from .database import db
-from .cache import app_cache
 
 
 class Profile(db.Model):
@@ -245,7 +244,7 @@ class ApplicationSettings(db.Model):
 class BS4Theme(db.Model):
     __tablename__ = 'bs4_themes'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(50), unique=True)
 
     def __str__(self):
         return self.name
@@ -254,7 +253,7 @@ class BS4Theme(db.Model):
 class InvoiceTheme(db.Model):
     __tablename__ = 'invoice_themes'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(50), unique=True)
     banner_color = db.Column(db.String(8))
     banner_background_color = db.Column(db.String(8))
     table_header_color = db.Column(db.String(8))
