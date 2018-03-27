@@ -20,8 +20,8 @@ class Profile(db.Model):
     customer_increment = db.Column(db.Integer, default=10)
     index_items_per_page = db.Column(db.Integer, default=10)
 
-    bs4_theme_id = db.Column(db.Integer, db.ForeignKey('bs4_themes.id'))
-    bs4_theme = relationship("BS4Theme", foreign_keys=bs4_theme_id)
+    site_theme_id = db.Column(db.Integer, db.ForeignKey('site_themes.id'))
+    site_theme = relationship("SiteTheme", foreign_keys=site_theme_id)
 
     invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
     invoice_theme = relationship("InvoiceTheme", foreign_keys=invoice_theme_id)
@@ -241,10 +241,12 @@ class ApplicationSettings(db.Model):
     debug_mode = db.Column(db.Boolean)
 
 
-class BS4Theme(db.Model):
-    __tablename__ = 'bs4_themes'
+class SiteTheme(db.Model):
+    __tablename__ = 'site_themes'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
+    top = db.Column(db.String(8))
+    bottom = db.Column(db.String(8))
 
     def __str__(self):
         return self.name

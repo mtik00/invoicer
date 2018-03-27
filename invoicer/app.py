@@ -43,7 +43,9 @@ def create_app():
         # Replace this with the short name (e.g. w3-theme-cyan --> 'cyan')
         INVOICE_THEME='blue-grey',
 
-        BS4_THEME='black',
+        SITE_THEME='black',
+        SITE_THEME_TOP='#777777',
+        SITE_THEME_BOTTOM='#777777',
 
         # You must add this to your configuration to enable PDF functionality
         WKHTMLTOPDF=None,

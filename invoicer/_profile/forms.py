@@ -3,7 +3,7 @@ from wtforms import StringField, SelectField, IntegerField, BooleanField
 from wtforms.validators import DataRequired
 from wtforms.compat import iteritems
 
-from ..models import InvoiceTheme, BS4Theme
+from ..models import InvoiceTheme, SiteTheme
 
 
 class ProfileForm(FlaskForm):
@@ -14,7 +14,7 @@ class ProfileForm(FlaskForm):
     state = StringField('State')
     zip = StringField('Zipcode')
     terms = IntegerField('Terms (NET number of days)')
-    bs4_theme = SelectField('Site Theme')
+    site_theme = SelectField('Site Theme')
     invoice_theme = SelectField('Invoice Theme')
 
     starting_customer_number = IntegerField('Starting customer number')
@@ -25,10 +25,10 @@ class ProfileForm(FlaskForm):
 
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
-            if name in ['bs4_theme', 'invoice_theme']:
+            if name in ['site_theme', 'invoice_theme']:
                 continue
 
             field.populate_obj(obj, name)
 
-        obj.bs4_theme = BS4Theme.query.filter_by(name=self.bs4_theme.data).first()
+        obj.site_theme = SiteTheme.query.filter_by(name=self.site_theme.data).first()
         obj.invoice_theme = InvoiceTheme.query.filter_by(name=self.invoice_theme.data).first()

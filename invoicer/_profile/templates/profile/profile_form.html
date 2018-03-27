@@ -38,7 +38,7 @@
 
                     <div class="row">
                         {{ bs_render_field(form.terms) }}
-                        {{ bs_render_select(form.bs4_theme, bs4_theme_choices, selected=profile.bs4_theme.name) }}
+                        {{ bs_render_select(form.site_theme, site_theme_choices, selected=profile.site_theme.name) }}
                         {{ bs_render_select(form.invoice_theme, theme_choices, selected=profile.invoice_theme.name) }}
                     </div>
 

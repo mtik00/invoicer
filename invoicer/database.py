@@ -10,9 +10,15 @@ from .password import hash_password
 db = SQLAlchemy()
 
 # Default theme data ##########################################################
-bs4_color_themes = [
-    'black', 'blue', 'azure', 'green', 'orange', 'red', 'purple'
-]
+site_themes = {
+    'black': {'top': '#777777', 'bottom': '#777777'},
+    'blue': {'top': '#1F77D0', 'bottom': '#533CE1'},
+    'azure': {'top': '#1DC7EA', 'bottom': '#4091FF'},
+    'green': {'top': '#87CB16', 'bottom': '#6DC030'},
+    'orange': {'top': '#FFA534', 'bottom': '#FF5221'},
+    'red': {'top': '#FB404B', 'bottom': '#BB0502'},
+    'purple': {'top': '#9368E9', 'bottom': '#943BEA'},
+}
 
 # See here https://www.w3schools.com/w3css/w3css_color_themes.asp
 # `banner` is `w3-theme-d1`, and `table_header` is `w3-theme`
@@ -58,7 +64,8 @@ def init_db(sample_data=False, apply_migrations=False):
     db.drop_all()
     db.create_all()
 
-    db.session.add_all([models.BS4Theme(name=x) for x in sorted(bs4_color_themes) if x])
+    for name, data in site_themes.items():
+        db.session.add(models.SiteTheme(name=name, **data))
 
     for name, data in color_theme_data.items():
         db.session.add(models.InvoiceTheme(name=name, **data))
@@ -79,7 +86,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            bs4_theme=models.BS4Theme.query.filter_by(name='black').first(),
+            site_theme=models.SiteTheme.query.filter_by(name='black').first(),
         )
 
         user = models.User(
@@ -238,7 +245,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='John Doe', email='j.doe@____.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            bs4_theme=models.BS4Theme.query.filter_by(name='orange').first(),
+            site_theme=models.SiteTheme.query.filter_by(name='orange').first(),
         )
 
         user2 = models.User(

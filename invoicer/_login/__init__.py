@@ -36,7 +36,9 @@ def login():
                 session['logged_in'] = True
                 session['user_id'] = user.id
                 session['user_debug'] = user.application_settings.debug_mode
-                current_app.config['BS4_THEME'] = user.profile.bs4_theme
+                session['site_theme'] = user.profile.site_theme.name
+                session['site_theme_top'] = user.profile.site_theme.top
+                session['site_theme_bottom'] = user.profile.site_theme.bottom
 
                 flash('You were logged in', 'success')
 

@@ -14,6 +14,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/site.css') }}">
     <link href="{{ url_for('static', filename='css/light-bootstrap-dashboard.css') }}" rel="stylesheet" />
+    {% with %}
+        {% set top = session['site_theme_top'] or '#777777' %}
+        {% set bottom = session['site_theme_bottom'] or '#777777' %}
+        <style type="text/css">
+        {% include 'site_theme.css' %}
+        </style>
+    {% endwith %}
     {% block extracss %}{% endblock %}
 </head>
 
