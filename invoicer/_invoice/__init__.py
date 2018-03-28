@@ -368,6 +368,11 @@ def invoice_by_number(invoice_number):
         else:
             previous_id = invoice_numbers[current_pos - 1]
 
+    allow_editing = (
+        session['user_debug'] or current_app.config['DEBUG'] or
+        (not invoice.submitted_date)
+    )
+
     return render_template(
         'invoice/invoices.html',
         form=form,
@@ -379,7 +384,7 @@ def invoice_by_number(invoice_number):
         pdf_ok=pdf_ok(),  # The binary exists
         show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
         invoice_numbers=invoice_numbers,
-        simplified_invoice=simplified_invoice(invoice_number, show_item_edit=True),
+        simplified_invoice=simplified_invoice(invoice_number, show_item_edit=allow_editing, embedded=True),
         invoices=user_invoices(session['user_id']),
     )
 
@@ -690,7 +695,7 @@ def bs4_invoice(user_id, invoice_number):
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/html')
 @login_required
-def simplified_invoice(invoice_number, show_item_edit=False):
+def simplified_invoice(invoice_number, show_item_edit=False, embedded=False):
     """
     Displays a single invoice in HTML format with all <style> converted to
     inline `style=""`.
@@ -711,7 +716,8 @@ def simplified_invoice(invoice_number, show_item_edit=False):
         terms=terms,
         overdue=invoice.overdue(),
         theme=get_color_theme_data()[invoice_theme],
-        show_item_edit=show_item_edit
+        show_item_edit=show_item_edit,
+        embedded=embedded
     )
 
 
