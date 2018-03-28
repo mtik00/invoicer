@@ -1,0 +1,271 @@
+{% set current_page = 'dashboard' %}
+{% extends "base.html" %}
+
+{% block extracss %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.0/chartist.min.css">
+
+<style type="text/css">
+.received {
+    opacity: 0.2;
+    color: #326AB6;
+}
+.ct-series-b .ct-area {
+    fill: #326AB6;
+    fill-opacity: .2;
+}
+
+.invoiced {
+    opacity: 0.2;
+    color: #1BCC46;
+}
+.ct-series-a .ct-area {
+    fill: #1BCC46;
+    fill-opacity: .2;
+}
+.invoice_number {
+    width: 20%;
+}
+.customer {
+    width: 20%;
+}
+.description {
+    width: 25%;
+}
+.date {
+    width: 10%;
+}
+.overdue {
+    color: red;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <div class="card ">
+            <div class="card-header ">
+                <h4 class="card-title">
+                    <span class="btn-link" onclick="javascript: previousYear();" id="leftClick"><i class="fa fa-angle-left" aria-hidden="true"></i></span>
+                     <span id="currentYear">2018</span> Summary
+                    <span class="btn-link" onclick="javascript: nextYear();" id="rightClick"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
+                </h4>
+            </div>
+            <div class="card-body ">
+                <div id="summaryChart" class="ct-chart"></div>
+            </div>
+            <div class="card-footer ">
+                <div class="legend">
+                    <i class="fa fa-circle invoiced"></i> Amount Invoiced (<span id="total_invoiced">0</span>)<br>
+                    <i class="fa fa-circle received"></i> Amount Received (<span id="total_received">0</span>)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card strpied-tabled-with-hover">
+            <div class="card-header ">
+                <h4 class="card-title">Unpaid Invoices</h4>
+                <p class="card-category">Any invoice that has been submitted, but has not been paid</p>
+            </div>
+            <div class="card-body table-full-width table-responsive">
+                {% if unpaid_invoices -%}
+                <table class="table table-hover table-striped">
+                    <tr>
+                        <thead>
+                            <th class="invoice_number">Number</th>
+                            <th class="customer">Customer</th>
+                            <th class="description">Description</th>
+                            <th class="date">Submitted Date</th>
+                            <th class="date">Due Date</th>
+                            <th>Total</th>
+                        </thead>
+                    </tr>
+                    {% for invoice in unpaid_invoices %}<tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';" class="pointer">
+                        <td>{{invoice.number}}</td>
+                        <td>{{invoice.customer.name1}}</td>
+                        <td>{{invoice.description}}</td>
+                        <td>{{invoice.submitted_date.format('YYYY-MMM-DD').upper()}}</td>
+                        <td {%if invoice.overdue()%} class="overdue"{%endif%}>{{invoice.due_date.format('YYYY-MMM-DD').upper()}}</td>
+                        <td>{{invoice.total|currency}}</td>
+                    </tr>{% endfor %}
+                </table>
+                {% else %}<span class="col">Congradulations!  You have no outstanding invoices.</span>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card strpied-tabled-with-hover">
+            <div class="card-header ">
+                <h4 class="card-title">Unsubmitted Invoices</h4>
+                <p class="card-category">Any invoice that has not yet been submitted</p>
+            </div>
+            <div class="card-body table-full-width table-responsive">
+                {% if unsubmitted_invoices -%}
+                <table class="table table-hover table-striped">
+                    <tr>
+                        <thead>
+                            <th class="invoice_number">Number</th>
+                            <th class="customer">Customer</th>
+                            <th class="description">Description</th>
+                            <th>Total</th>
+                        </thead>
+                    </tr>
+                    {% for invoice in unsubmitted_invoices %}<tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';" class="pointer">
+                        <td>{{invoice.number}}</td>
+                        <td>{{invoice.customer.name1}}</td>
+                        <td>{{invoice.description}}</td>
+                        <td>{{invoice.total|currency}}</td>
+                    </tr>{% endfor %}
+                </table>
+                {% else %}<span class="col">You have no invoices waiting to be submitted.</span>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.0/chartist.min.js"></script>
+<script>
+    // Populate the chart when we don't have any data
+    var noData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        series: [[], []]
+    };
+
+    var firstYear = 9999;
+    var lastYear = 0;
+    var invoiceStats = {{invoice_stats|safe}};
+
+    var summaryChartOptions = {
+        lineSmooth: true,
+        low: 0,
+        axisX: {
+            labelOffset: {x: -20, y:0 }
+        },
+        lineSmooth: Chartist.Interpolation.simple({
+            divisor: 2
+        }),
+        plugins: [],
+        chartPadding: {
+            top: 15,
+            right: 15,
+            bottom: 5,
+            left: 30
+        },
+        showLine: false,
+        showPoint: false,
+        fullWidth: true,
+        showArea: true,
+    };
+
+    // Use the same options as above, but don't show the Y axis label
+    var summaryChartOptionsDisabled = $.extend({}, summaryChartOptions);
+    summaryChartOptionsDisabled['axisY'] = {showLabel: false};
+
+    var summaryChartResponsive = [
+        ['screen and (max-width: 640px)', {
+            axisX: {
+                labelInterpolationFnc: function(value) {
+                    return value[0];
+                }
+            }
+        }]
+    ];
+
+    var summaryChart = null;
+    var currentYear = (new Date()).getFullYear();
+
+    function previousYear() {
+        if ( currentYear > firstYear ) {
+            currentYear--;
+            updateSummaryChart(currentYear);
+        }
+    }
+
+    function nextYear() {
+        if ( currentYear < lastYear ) {
+            currentYear++;
+            updateSummaryChart(currentYear);
+        }
+    }
+
+    function updateYearNav() {
+        if ( currentYear <= firstYear) {
+            // Disable left nav
+            $('#leftClick').toggleClass('disabled', true);
+            $('#leftClick').css('cursor','default');
+        } else {
+            // Enable left nav
+            $('#leftClick').toggleClass('disabled', false);
+            $('#leftClick').css('cursor','pointer');
+        }
+
+        if ( currentYear >= lastYear ) {
+            // Disable right nav
+            $('#rightClick').toggleClass('disabled', true);
+            $('#rightClick').css('cursor','default');
+        } else {
+            // Enable right nav
+            $('#rightClick').toggleClass('disabled', false);
+            $('#rightClick').css('cursor','pointer');
+        }
+    }
+
+    // Update the totals in the legend with the sum of all invoices in the
+    // displayed year.
+    function updateTotals(showYear) {
+        var total_invoiced = (showYear in invoiceStats) ? invoiceStats[showYear]['series'][0].reduce((a, b) => a + b, 0) : 0;
+        var total_received = (showYear in invoiceStats) ? invoiceStats[showYear]['series'][1].reduce((a, b) => a + b, 0) : 0;
+        $("#total_invoiced").text('$' + commaSeparatedNumber(total_invoiced.toFixed(2)));
+        $("#total_received").text('$' + commaSeparatedNumber(total_received.toFixed(2)));
+    }
+
+    // Update the chart with a year's data
+    function updateSummaryChart(showYear) {
+        $("#currentYear").text(showYear)
+        if (showYear in invoiceStats) {
+            summaryChart.update(invoiceStats[showYear], summaryChartOptions);
+        } else {
+            summaryChart.update(noData, summaryChartOptionsDisabled);
+        }
+        updateYearNav();
+        updateTotals(showYear);
+    }
+
+    function commaSeparatedNumber(val){
+        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+    function drawThousands() {
+        $('.ct-vertical').each(function(){
+            var ab = $(this).html();
+            $(this).html(commaSeparatedNumber('$' + ab.replace(/\$/g, "")));
+        });
+    }
+
+    $(document).ready (function () {
+        for (var year in invoiceStats) {
+            firstYear = (firstYear > parseFloat(year)) ? parseFloat(year) : firstYear;
+            lastYear = (lastYear < parseFloat(year)) ? parseFloat(year) : lastYear;
+        }
+
+        // Populate the summary chart with default data
+        updateTotals(currentYear);
+        if (currentYear in invoiceStats) {
+            summaryChart = Chartist.Line('#summaryChart', invoiceStats[currentYear], summaryChartOptions, summaryChartResponsive);
+        } else {
+            summaryChart = Chartist.Line('#summaryChart', noData, summaryChartOptionsDisabled, summaryChartResponsive);
+        }
+        summaryChart.on("draw", drawThousands);
+
+        updateYearNav();
+    });
+</script>
+
+{% endblock %}

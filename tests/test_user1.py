@@ -20,7 +20,7 @@ def test_index(client, user1):
     """
     We should have 4 invoices on the index page
     """
-    response = client.get(url_for('index_page.index'))
+    response = client.get(url_for('index_page.dashboard'))
     assert response.status_code == 200
     assert response.data.count('<td>1010-2018') == 3
     assert response.data.count('<td>1020-2018') == 1
@@ -34,7 +34,7 @@ def test_invoice1(client, user1):
     response = client.get(url)
     assert response.status_code == 200
 
-    url = url_for('invoice_page.raw_invoice', invoice_number='1010-2018-001')
+    url = url_for('invoice_page.simplified_invoice', invoice_number='1010-2018-001')
     response = client.get(url)
     assert response.status_code == 200
     assert re.search('Invoice Total:.*.6,400\.00', response.data, re.IGNORECASE)

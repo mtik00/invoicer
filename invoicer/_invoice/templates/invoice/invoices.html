@@ -1,123 +1,181 @@
 {% set current_page = 'invoices' %}
 {% set help_step = '6' %}
-{% from "_modals.html" import render_delete_modal %}
+{% set subtitle = 'Invoice ' + invoice_obj.number %}
 {% extends "base.html" %}
-{% block body %}
+{% from "_modals.html" import render_delete_modal %}
 
-<form method="GET">
-    {{ form.hidden_tag() }}
-    <div class="w3-bar w3-theme-d2" data-step='6' data-intro='This is where you create/modify invoices'>
+{% block extracss %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<style>
+.display-middle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%)}
+</style>
+{% endblock %}
+
+{% block topleftnav %}
+<ul class="nav navbar-nav mr-auto">
+    <li class="nav-item">
         {%- if previous_id -%}
-        <a class="w3-bar-item w3-button" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=previous_id)}}">Previous</a>
+        <a class="nav-link" title="Previous Invoice" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=previous_id)}}">
+            <span class="d-none d-md-block d-xl-none">&nbsp;</span><i class="fa fa-nav fa-angle-left" aria-hidden="true"></i>
+        </a>
         {% else -%}
-        <button class="w3-bar-item w3-button" disabled>Previous</button>
+        <a class="nav-link nav-link-disabled" disabled><span class="d-none d-md-block d-xl-none">&nbsp;</span><i class="fa fa-nav fa-angle-left disabled" aria-hidden="true"></i></a>
         {% endif %}
+    </li>
 
+    <li class="nav-item">
         {%- if next_id -%}
-        <a class="w3-bar-item w3-button" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">Next</a>
+        <a class="nav-link" title="Next Invoice" href="{{ url_for('invoice_page.invoice_by_number', invoice_number=next_id)}}">
+            <span class="d-none d-md-block d-xl-none">&nbsp;</span><i class="fa fa-nav fa-angle-right" aria-hidden="true"></i>
+        </a>
         {% else -%}
-        <button class="w3-bar-item w3-button" disabled>Next</button>
+        <span class="nav-link nav-link-disabled" disabled><span class="d-none d-md-block d-xl-none">&nbsp;</span><i class="fa fa-nav fa-angle-right disabled" aria-hidden="true"></i></span>
         {% endif %}
+    </li>
 
-        <div class="w3-dropdown-hover">
-            <button class="w3-button" data-intro="Edit the invoice: Add/remove items, mark as submitted/paid, etc">Modify</button>
-            <div class="w3-dropdown-content w3-bar-block w3-card-4 list-group" id="invoice_edit_dropdown">
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.update', invoice_number=invoice.number) }}"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i>&nbsp;Edit</a>
-                {% if (not invoice_obj.submitted_date) -%}
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</a>
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</a>
-                {% elif (config['DEBUG'] or session['user_debug']) %}
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed in debug mode)</a>
-                <a class="w3-bar-item w3-button list-group-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed in debug mode)</a>
-                {% else -%}
-                <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
-                <button class="w3-bar-item w3-button list-group-item" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
-                {% endif %}
-                <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="" data-submit-url="{{url_for('invoice_page.delete', invoice_number=invoice.number) }}">
-                <span onclick="show_delete_modal();" class="w3-bar-item w3-button w3-red"><i class="fa fa-trash fa-fw" aria-hidden="true"></i>&nbsp;Delete Invoice</span>
-            </div>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span><i class="fa fa-pencil fa-fw fa-nav" aria-hidden="true"></i> Modify</span>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('invoice_page.update', invoice_number=invoice_obj.number) }}"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i>&nbsp;Edit</a>
+
+            {% if (not invoice_obj.submitted_date) -%}
+            <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice_obj.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</a>
+            <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice_obj.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</a>
+            {% elif (config['DEBUG'] or session['user_debug']) %}
+            <a class="dropdown-item" href="{{ url_for('invoice_page.create_item', invoice_number=invoice_obj.number) }}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item (only allowed because of debug mode)</a>
+            <a class="dropdown-item" href="{{ url_for('invoice_page.delete_items', invoice_number=invoice_obj.number) }}"><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items (only allowed because of debug mode)</a>
+            {% else -%}
+            <button class="dropdown-item disabled" formaction="#" disabled><i class="fa fa-plus fa-fw" aria-hidden="true"></i>&nbsp;Add Item</button>
+            <button class="dropdown-item disabled" formaction="#" disabled><i class="fa fa-minus fa-fw" aria-hidden="true"></i>&nbsp;Delete Items</button>
+            {% endif %}
+            <div class="divider"></div>
+            <form action="{{url_for('invoice_page.delete', invoice_number=invoice_obj.number)}}" method="POST">
+                {{form.hidden_tag() }}
+                <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+            </form>
+            <a class="dropdown-item bg-danger text-white" data-toggle="modal" data-target="#delete-modal" href="#">Delete Invoice</a>
         </div>
+    </li>
 
-        {% if show_pdf_button -%}
-        <a class="w3-bar-item w3-button"data-intro="Download the invoice as a PDF for offline-viewing"
-        {% if pdf_ok -%}
-        href="{{ url_for('invoice_page.to_pdf', invoice_number=invoice.number)}}" formtarget="_blank">
-        {%- else -%}
-        href="#" disabled>
-        {%- endif -%}
-        Download PDF</a>
-        {%- endif -%}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="exportDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Export
+        </a>
+        <div class="dropdown-menu" aria-labelledby="exportDropdownMenuLink">
+            {% if show_pdf_button -%}
+                <a class="dropdown-item" data-intro="Download the invoice as a PDF for offline-viewing"
+                {% if pdf_ok -%}
+                href="{{ url_for('invoice_page.to_pdf', invoice_number=invoice_obj.number)}}" target="_blank">
+                {%- else -%}
+                href="#" disabled>
+                {%- endif -%}
+                Download PDF</a>
+            {%- endif -%}
+            <a class="dropdown-item" data-intro="Save an HTML version of the invoice"
+                href="{{ url_for('invoice_page.simplified_invoice', invoice_number=invoice_obj.number)}}" target="_blank">
+                Download HTML
+            </a>
+        </div>
+    </li>
 
-        {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
-        <span onclick="document.getElementById('submit-modal').style.display='block'" class="w3-bar-item w3-button" data-intro="Various options for submitting the invoice">Submit Invoice</span>
-        {% endif -%}
-        
-        <a class="w3-bar-item w3-button w3-right" href="{{url_for('invoice_page.create')}}">Add New Invoice</a>
-    </div>
-</form>
+    {% if can_submit and ((not invoice_obj.paid_date) or config['DEBUG'] or session['user_debug']) %}
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="modal" data-target="#submit-modal" href="#">Submit Invoice</a>
+    </li>
+    {% endif -%}
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{url_for('invoice_page.create')}}">Add New Invoice</a>
+    </li>
+</ul>
+<ul class="nav navbar-nav ml-auto">
+    <li class="nav-item">
+        <select class="selectpicker d-none d-lg-block" id="nav-invoice-select">
+            {%- for invoice in invoices %}
+            <option value="{{ url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}"{%if invoice.number==invoice_obj.number%} selected{%endif%}>{{invoice.number}} ({{invoice.customer.name1}})</option>
+            {%- endfor %}
+        </select>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+{{simplified_invoice|safe}}
+</div>
 
 <!-- Submit Modal -->
-<div id="submit-modal" class="w3-modal">
-    <div class="w3-modal-content">
-        <header class="w3-container w3-blue"> 
-            <span onclick="document.getElementById('submit-modal').style.display='none'" 
-            class="w3-button w3-blue w3-xlarge w3-display-topright">&times;</span>
-            <h2>Submit Invoice</h2>
-        </header>
-
-        <div class="w3-container">
-            {% if to_emails -%}
-            <p>Email submissions will be sent to: {{to_emails}}</p>
-            {% else -%}
-            <p>This customer has no email address(es) associated with it</p>
-            {% endif -%}
-        </div>
-
-        <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice.number)}}" method="POST">
-            <div class="w3-container w3-form">
-                {% if to_emails and invoice_obj.submitted_date -%}
-                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border w3-left-align" style="width: 75%"  name="email" value="Email only (invoice already marked as submitted)" /></p>
-                {% elif to_emails %}
-                <p><input type="submit" id="email_btn" class="w3-button w3-white w3-border w3-left-align" style="width: 75%"  name="email" value="Email and mark invoice as submitted" /></p>
-                {% endif %}
-
-                {% if not invoice_obj.submitted_date %}
-                <p><input type="submit" class="w3-button w3-white w3-border w3-left-align" style="width: 75%"  name="mark" value="Mark invoice as submitted (do not send email)" /></p>
-                {% endif %}
+<div id="submit-modal" class="modal fade modal-primary" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h2 class="modal-title text-white align-center">Submit Invoice</h2>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        </form>
 
-        <div class="w3-container w3-light-grey w3-padding">
-            <p><button id='submit-close-button' class="w3-button w3-right w3-white w3-border">Cancel</button></p>
+            <div class="modal-body">
+                {% if to_emails -%}
+                <p>Email submissions will be sent to: {{to_emails}}</p>
+                {% else -%}
+                <p>This customer has no email address(es) associated with it</p>
+                {% endif -%}
+
+                <form action="{{url_for('invoice_page.submit_invoice', invoice_number=invoice_obj.number)}}" method="POST">
+                    <div class="w3-container w3-form">
+                        {% if to_emails and invoice_obj.submitted_date -%}
+                        <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email_only" value="Email only (invoice already marked as submitted)" /></p>
+                        {% elif to_emails %}
+                        <p><input type="submit" id="email_btn" class="btn button text-left" style="width: 100%;" name="email" value="Email and mark invoice as submitted" /></p>
+                        <p><input type="submit" id="email_btn2" class="btn button text-left" style="width: 100%;" name="email_only" value="Email only" /></p>
+                        {% endif %}
+
+                        {% if not invoice_obj.submitted_date %}
+                        <p><input type="submit" class="btn button text-left" style="width: 100%;" name="mark" value="Mark invoice as submitted (do not send email)" /></p>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link btn-simple" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
 
 {{ render_delete_modal() }}
 
-<div id="email-modal" class="w3-modal">
-    <div class="loader w3-display-middle"></div>
+<div id="email-modal" class="modal">
+    <div class="loader display-middle"></div>
 </div>
-
-<div class="fluidMedia">
-    <iframe src="{{url_for('invoice_page.raw_invoice', invoice_number=invoice.number)}}" frameborder="1" data-step='7' data-intro='This is the HTML representation of your invoice that will be submitted and/or converted to PDF (if available)'></iframe>
-</div>
-
 {% endblock %}
 
 {% block extrascripts %}
-{% include '_delete_modal.js' %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
+
 <script>
     $( document ).ready(function() {
+        $('.selectpicker').select2({
+            width: 300,
+        });
+
+        $( ".selectpicker" ).change(function() {
+            location.replace($(this).val());
+        });
+
         // Handle the email submit button
-        $('#email_btn').on('click', function(event) {
+        $('#email_btn,#email_btn2').on('click', function(event) {
             // Close the submit modal
             $('#submit-modal').css({ 'display': "none" });
 
             // Show the loading modal
             $('#email-modal').css({ 'display': "block" });
         });
-        
+
         // Close the submit modal if the button is clicked
         $( "#submit-close-button" ).click(function() {
             $('#submit-modal').css({ 'display': "none" });
@@ -139,4 +197,4 @@
 
     });
 </script>
-{% endblock%}
+{% endblock %}

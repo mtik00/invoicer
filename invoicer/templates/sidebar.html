@@ -1,0 +1,42 @@
+<div class="sidebar" data-image="{{ url_for('static', filename='img/sidebar.jpg') }}">
+    <!--
+Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
+
+Tip 2: you can also add an image using data-image tag
+-->
+    <div class="sidebar-wrapper">
+        <div class="logo">
+            {% if session['user_debug'] or config['DEBUG'] -%}
+            <span class="simple-text bg-danger">DEBUG MODE</span>
+            {% else -%}
+            <span class="simple-text">Invoicer</span>
+            {% endif %}
+        </div>
+        <ul class="nav">
+            <li class="nav-item {%if current_page=='dashboard'%} active{%endif%}">
+                <a class="nav-link" href="{{url_for('index_page.dashboard')}}">
+                    <i class="nc-icon nc-chart-pie-35"></i>
+                    <p>Dashboard</p>
+                </a>
+            </li>
+            <li class="nav-item {%if current_page=='invoices'%} active{%endif%}">
+                <a class="nav-link" href="{{url_for('invoice_page.last_invoice')}}">
+                    <i class="nc-icon nc-bullet-list-67"></i>
+                    <p>Invoices</p>
+                </a>
+            </li>
+            <li class="nav-item {%if current_page=='customers'%} active{%endif%}">
+                <a class="nav-link" href="{{url_for('customers_page.index')}}">
+                    <i class="nc-icon nc-single-02"></i>
+                    <p>Customers</p>
+                </a>
+            </li>
+            <li class="nav-item {%if current_page=='units'%} active{%endif%}">
+                <a class="nav-link" href="{{url_for('unit_page.index')}}">
+                    <i class="nc-icon nc-watch-time"></i>
+                    <p>Billable Units</p>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

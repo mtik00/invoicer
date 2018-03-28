@@ -20,11 +20,11 @@ class Profile(db.Model):
     customer_increment = db.Column(db.Integer, default=10)
     index_items_per_page = db.Column(db.Integer, default=10)
 
-    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("W3Theme", foreign_keys=w3_theme_id)
+    site_theme_id = db.Column(db.Integer, db.ForeignKey('site_themes.id'))
+    site_theme = relationship("SiteTheme", foreign_keys=site_theme_id)
 
-    w3_theme_invoice_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme_invoice = relationship("W3Theme", foreign_keys=w3_theme_invoice_id)
+    invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
+    invoice_theme = relationship("InvoiceTheme", foreign_keys=invoice_theme_id)
 
     enable_pdf = db.Column(db.Boolean, default=True)
 
@@ -50,8 +50,8 @@ class Customer(db.Model):
     invoices = relationship("Invoice", back_populates="customer")
     items = relationship("Item", back_populates="customer")
 
-    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("W3Theme")
+    invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
+    invoice_theme = relationship("InvoiceTheme")
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = relationship("User", back_populates="customers")
@@ -71,8 +71,7 @@ class Customer(db.Model):
 
         return join_with.join(lines)
 
-    def format_email(self, html=True):
-        join_with = '<br>' if html else '\n'
+    def format_email(self, join_with='<br>'):
         email = self.email
 
         if '|' in email:
@@ -114,8 +113,8 @@ class Invoice(db.Model):
     items = relationship("Item", back_populates="invoice")
     terms = db.Column(db.Integer)
 
-    w3_theme_id = db.Column(db.Integer, db.ForeignKey('w3_themes.id'))
-    w3_theme = relationship("W3Theme")
+    invoice_theme_id = db.Column(db.Integer, db.ForeignKey('invoice_themes.id'))
+    invoice_theme = relationship("InvoiceTheme")
 
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     customer = relationship("Customer", back_populates="invoices")
@@ -138,7 +137,7 @@ class Invoice(db.Model):
         if not self.submitted_date:
             return False
 
-        if (arrow.now() > self.due_date):
+        if (not self.paid_date) and (arrow.now() > self.due_date):
             return True
         elif self.paid_date and (self.paid_date.paid_date > self.due_date):
             return True
@@ -149,19 +148,16 @@ class Invoice(db.Model):
         """
         Returns the appropriate theme for presenting the invoice.
         """
-        if self.w3_theme:
-            return self.w3_theme
+        if self.invoice_theme:
+            return self.invoice_theme.name
 
         customer = Customer.query.get(self.customer_id)
-        if customer.w3_theme:
-            return customer.w3_theme
+        if customer.invoice_theme:
+            return customer.invoice_theme.name
 
         profile = User.query.get(self.user_id).profile
-        if profile.w3_theme_invoice:
-            return profile.w3_theme_invoice
-
-        if profile.w3_theme:
-            return profile.w3_theme
+        if profile.invoice_theme:
+            return profile.invoice_theme.name
 
         return None
 
@@ -239,16 +235,31 @@ class User(db.Model):
         return '<User %r>' % (self.username)
 
 
-class W3Theme(db.Model):
-    __tablename__ = 'w3_themes'
-    id = db.Column(db.Integer, primary_key=True)
-    theme = db.Column(db.String(50))
-
-    def __str__(self):
-        return self.theme
-
-
 class ApplicationSettings(db.Model):
     __tablename__ = 'application_settings'
     id = db.Column(db.Integer, primary_key=True)
     debug_mode = db.Column(db.Boolean)
+
+
+class SiteTheme(db.Model):
+    __tablename__ = 'site_themes'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    top = db.Column(db.String(8))
+    bottom = db.Column(db.String(8))
+
+    def __str__(self):
+        return self.name
+
+
+class InvoiceTheme(db.Model):
+    __tablename__ = 'invoice_themes'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    banner_color = db.Column(db.String(8))
+    banner_background_color = db.Column(db.String(8))
+    table_header_color = db.Column(db.String(8))
+    table_header_background_color = db.Column(db.String(8))
+
+    def __str__(self):
+        return self.name

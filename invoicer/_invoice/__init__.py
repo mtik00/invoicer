@@ -2,24 +2,57 @@ import os
 import re
 from cStringIO import StringIO
 
-import pdfkit
-from pdfkit.configuration import Configuration
 import arrow
+import pdfkit
+import htmlmin
+from pdfkit.configuration import Configuration
 from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
-from premailer import Premailer
+from sqlalchemy.orm import joinedload
 
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
 from ..models import (
-    Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, W3Theme)
-from ..common import login_required, color_themes
+    Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, InvoiceTheme)
+from ..common import login_required
+from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 
 
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
+
+
+@app_cache.cached(key_prefix='invoice_themes')
+def get_color_theme_data():
+    '''
+    Convert the invoice theme data into something a bit more usable.
+    '''
+    result = {}
+    for theme in InvoiceTheme.query.all():
+        result[theme.name] = {
+            'banner_color': theme.banner_color,
+            'banner_background_color': theme.banner_background_color,
+            'table_header_color': theme.table_header_color,
+            'table_header_background_color': theme.table_header_background_color
+        }
+
+    return result
+
+
+@app_cache.memoize(30)
+def user_invoices(user_id, order_by='desc'):
+    '''
+    Return a list of all user invoices.
+    '''
+    # We need to do a joined load of paid_date or we'll get session errors
+    q = Invoice.query.options(joinedload(Invoice.paid_date)).options(joinedload(Invoice.customer)).filter_by(user_id=user_id)
+
+    if order_by == 'desc':
+        return q.order_by(Invoice.id.desc()).all()
+    else:
+        return q.order_by(Invoice.id.asc()).all()
 
 
 def pdf_ok():
@@ -52,6 +85,9 @@ def format_my_address(html=True):
     address = User.query.get(session['user_id']).profile
     join_with = '<br>' if html else '\n'
 
+    if not address.full_name:
+        return ''
+
     result = join_with.join([
         address.full_name,
         address.street,
@@ -69,7 +105,13 @@ def format_my_address(html=True):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_number):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoices = user_invoices(session['user_id'])
+    invoice = next((x for x in invoices if x.number == invoice_number), None)
+
+    if not invoice:
+        flash('Unknown invoice', 'error')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
     items = Item.query.filter(Item.invoice_id == invoice.id)
     form = EmptyForm()
 
@@ -92,10 +134,13 @@ def delete_items(invoice_number):
         Invoice.query.filter(Invoice.id == invoice.id).update({'total': item_total})
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('Item(s) deleted from %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/delete_items_form.html', form=form, items=items, invoice=invoice)
+    return render_template('invoice/lb_delete_items_form.html', form=form, items=items, invoice=invoice)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/create', methods=["GET", "POST"])
@@ -131,13 +176,93 @@ def create_item(invoice_number):
         db.session.add_all([invoice, item])
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('item added to invoice %s' % invoice.number, 'success')
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
     return render_template(
-        'invoice/item_form.html',
+        'invoice/lb_item_form.html',
         form=form,
         invoice=invoice,
+        unit_price_objects=unit_prices,
+    )
+
+
+@app_cache.memoize()
+def get_user_unit_prices(user_id):
+    return UnitPrice.query.filter_by(user_id=user_id).all()
+
+
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/item/<item_id>/update', methods=["GET", "POST"])
+@login_required
+def update_item(invoice_number, item_id):
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    item = Item.query.filter_by(invoice_id=invoice.id, id=item_id).first_or_404()
+    unit_prices = get_user_unit_prices(session['user_id'])
+
+    form = ItemForm(
+        date=item.date.format('DD-MMM-YYYY').upper(),
+        description=item.description,
+        quantity=item.quantity
+    )
+
+    if (request.method == 'POST') and ('cancel' in request.form):
+        flash('Action canceled', 'warning')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+    if form.validate_on_submit():
+        # Only let the user modify the date and description if the invoice has
+        # been submitted.
+        if request.form.get('validate_delete', '').lower() == 'delete':
+            if invoice.submitted_date:
+                flash('You cannot delete an item from a submitted invoice', 'error')
+                return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+            db.session.delete(item)
+            invoice.total = sum([x.unit_price * x.quantity for x in invoice.items])
+            db.session.add(invoice)
+            db.session.commit()
+            flash('Invoice item has been deleted', 'warning')
+            return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+        units = request.form['unit_price_units']
+        unit_price = request.form['unit_pricex']
+
+        item.date = arrow.get(form.date.data, 'DD-MMM-YYYY')
+        item.description = form.description.data
+
+        if not invoice.submitted_date:
+            item.quantity = int(form.quantity.data)
+            item.units = units
+            if unit_price:
+                item.unit_price = float(unit_price)
+
+            db.session.add(item)
+            invoice.total = sum([x.unit_price * x.quantity for x in invoice.items])
+            db.session.add(invoice)
+        elif (
+            (str(item.unit_price) != unit_price) or
+            (item.units != units) or
+            (item.quantity != form.quantity.data)
+        ):
+            flash('Only item date and description are allowed to be modified on submitted invoices', 'warning')
+
+        db.session.add(item)
+        db.session.commit()
+
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
+        flash('item modified', 'success')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
+
+    return render_template(
+        'invoice/lb_item_form.html',
+        form=form,
+        invoice=invoice,
+        item=item,
         unit_price_objects=unit_prices,
     )
 
@@ -149,7 +274,7 @@ def update(invoice_number):
 
     customers = Customer.query.filter_by(user_id=session['user_id']).all()
     addr_choices = [(x.id, x.name1) for x in customers]
-    theme_choices = [(x, x) for x in color_themes]
+    theme_choices = [('', '')] + [(x, x) for x in get_color_theme_data().keys()]
 
     form = InvoiceForm(
         description=invoice.description,
@@ -159,12 +284,15 @@ def update(invoice_number):
         terms=invoice.terms,
     )
     form.customer.choices = addr_choices
-    form.w3_theme.choices = theme_choices
+    form.invoice_theme.choices = theme_choices
+    selected_theme = ''
+    if invoice.invoice_theme:
+        selected_theme = invoice.invoice_theme.name
 
     if request.method == 'GET':
-        # Set the default them only for `GET` or the value will never change.
+        # Set the default theme only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
-        form.w3_theme.process_data(invoice.w3_theme)
+        form.invoice_theme.process_data(selected_theme)
     elif form.validate_on_submit():
         if 'cancel' in request.form:
             flash('invoice updated canceled', 'warning')
@@ -190,28 +318,40 @@ def update(invoice_number):
             invoice.submitted_date = submitted_date
             invoice.paid_date = paid_date
             invoice.terms = terms
-            invoice.w3_theme = W3Theme.query.filter_by(theme=form.w3_theme.data).first()
+
+            if form.invoice_theme.data:
+                invoice.invoice_theme = InvoiceTheme.query.filter_by(name=form.invoice_theme.data).first()
+            else:
+                invoice.invoice_theme = None
 
             db.session.commit()
+
+            # Clear the app cache so everything updates
+            app_cache.clear()
 
             flash('invoice updated', 'success')
 
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 
-    return render_template('invoice/invoice_form.html', form=form, invoice=invoice)
+    return render_template(
+        'invoice/lb_invoice_form.html',
+        form=form, invoice=invoice, theme_choices=theme_choices,
+        addr_choices=addr_choices, selected_theme=selected_theme)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>')
 @login_required
 def invoice_by_number(invoice_number):
     form = EmptyForm(request.form)
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoices = user_invoices(session['user_id'])
+    invoice = next((x for x in invoices if x.number == invoice_number), None)
+
     if not invoice:
         flash('Unknown invoice', 'error')
-        return redirect(url_for('index_page.index'))
+        return redirect(url_for('index_page.dashboard'))
 
     # Figure out next/previous
-    invoice_numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).all()]
+    invoice_numbers = [x.number for x in invoices]
     if not invoice_numbers:
         current_pos = next_id = previous_id = 0
         to_emails = None
@@ -228,10 +368,14 @@ def invoice_by_number(invoice_number):
         else:
             previous_id = invoice_numbers[current_pos - 1]
 
+    allow_editing = (
+        session['user_debug'] or current_app.config['DEBUG'] or
+        (not invoice.submitted_date)
+    )
+
     return render_template(
         'invoice/invoices.html',
         form=form,
-        invoice=invoice,
         next_id=next_id,
         previous_id=previous_id,
         invoice_obj=invoice,
@@ -239,6 +383,9 @@ def invoice_by_number(invoice_number):
         can_submit=to_emails and invoice and can_submit(invoice.customer_id),
         pdf_ok=pdf_ok(),  # The binary exists
         show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
+        invoice_numbers=invoice_numbers,
+        simplified_invoice=simplified_invoice(invoice_number, show_item_edit=allow_editing, embedded=True),
+        invoices=user_invoices(session['user_id']),
     )
 
 
@@ -254,7 +401,10 @@ def create():
 
     addr_choices = [(x.id, x.name1) for x in customers]
     form.customer.choices = addr_choices
-    form.w3_theme.choices = [(x, x) for x in color_themes]
+
+    theme_choices = [('', '')] + [(x, x) for x in get_color_theme_data().keys()]
+    form.invoice_theme.choices = theme_choices
+
     me = User.query.get(session['user_id']).profile
 
     if form.validate_on_submit():
@@ -283,15 +433,18 @@ def create():
                 terms=terms,
                 submitted_date=submitted_date,
                 paid_date=paid_date,
-                user=User.query.get(session['user_id'])
+                user=User.query.get(session['user_id']),
             )
         )
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('invoice added', 'success')
         return redirect(url_for('invoice_page.last_invoice'))
 
-    return render_template('invoice/invoice_form.html', form=form)
+    return render_template('invoice/lb_invoice_form.html', form=form, theme_choices=theme_choices, addr_choices=addr_choices)
 
 
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete', methods=['POST'])
@@ -317,6 +470,10 @@ def delete(invoice_number):
             db.session.delete(item)
 
         db.session.commit()
+
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('Invoice %s has been deleted' % invoice_number, 'warning')
         return redirect(url_for('invoice_page.last_invoice'))
     else:
@@ -331,7 +488,7 @@ def to_pdf(invoice_number):
         flash('PDF configuration not supported', 'error')
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
-    text = raw_invoice(invoice_number)
+    text = bs4_invoice(session['user_id'], invoice_number)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
         'print-media-type': None,
@@ -340,10 +497,14 @@ def to_pdf(invoice_number):
         'quiet': None
     }
 
-    return Response(
+    response = Response(
         pdfkit.from_string(text, False, options=options, configuration=config),
-        mimetype='application/pdf'
+        mimetype='application/pdf',
     )
+
+    # response.headers['Content-Disposition'] = 'attachment; filename=invoice-%s.pdf' % invoice_number
+
+    return response
 
 
 def get_address_emails(customer_id):
@@ -372,6 +533,9 @@ def mark_invoice_submitted(invoice_number):
         db.session.add(invoice)
         db.session.commit()
 
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
         flash('Invoice has been marked as submitted; due on %s' % invoice.due_date.format('DD-MMM-YYYY'), 'success')
     else:
         flash('Invoice has already been marked as submitted<br>Download the PDF and email manually if needed', 'error')
@@ -390,17 +554,22 @@ def submit_invoice(invoice_number):
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
     # customers of overdue conditions.
-    if not invoice.submitted_date:
+    if ('email_only' not in request.form) and (not invoice.submitted_date):
         invoice.submitted_date = arrow.now()
         db.session.add(invoice)
         db.session.commit()
 
-    html_text = raw_invoice(invoice_number)
+        # Clear the app cache so everything updates
+        app_cache.clear()
+
     raw_text = text_invoice(invoice_number)
+    uhtml_body = simplified_invoice(invoice_number).encode('utf-8')
+    uhtml_body = htmlmin.minify(uhtml_body)
 
     stream_attachments = []
     pdf_fh = None
     if pdf_ok():
+        bs4_body = bs4_invoice(session['user_id'], invoice_number)
         fname = "invoice-%s.pdf" % invoice_number
         config = Configuration(current_app.config['WKHTMLTOPDF'])
         options = {
@@ -409,7 +578,7 @@ def submit_invoice(invoice_number):
             'no-outline': None,
             'quiet': None
         }
-        pdf_text = pdfkit.from_string(html_text, None, options=options, configuration=config)
+        pdf_text = pdfkit.from_string(bs4_body, None, options=options, configuration=config)
         pdf_fh = StringIO()
 
         pdf_fh.write(pdf_text)
@@ -425,7 +594,7 @@ def submit_invoice(invoice_number):
             cc=[current_app.config['EMAIL_USERNAME']],
             subject='Invoice %s from %s' % (invoice.number, User.query.get(session['user_id']).profile.full_name),
             server=current_app.config['EMAIL_SERVER'],
-            html_body=Premailer(html_text, cssutils_logging_level='CRITICAL').transform(),
+            html_body=uhtml_body,
             text_body=raw_text,
             username=current_app.config['EMAIL_USERNAME'],
             password=current_app.config['EMAIL_PASSWORD'],
@@ -433,6 +602,7 @@ def submit_invoice(invoice_number):
             encode_body=True,
             stream_attachments=stream_attachments,
         )
+
         flash('invoice was submitted to ' + ', '.join(email_to), 'success')
     except Exception as e:
         flash('Error while trying to email the invoice: %s' % e, 'error')
@@ -444,11 +614,11 @@ def submit_invoice(invoice_number):
 
 
 def get_invoice_ids():
-    return [x.id for x in Invoice.query.filter_by(user_id=session['user_id']).all()]
+    return [x.id for x in user_invoices(session['user_id'])]
 
 
 def last_invoice_id():
-    invoice = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).first()
+    invoice = next((x for x in user_invoices(session['user_id'])), None)
 
     if invoice:
         return invoice.id
@@ -457,13 +627,14 @@ def last_invoice_id():
 
 
 def last_invoice_number():
-    invoice = Invoice.query.filter_by(user_id=session['user_id']).order_by(Invoice.id.desc()).first()
+    invoice = next((x for x in user_invoices(session['user_id'])), None)
     if invoice:
         return invoice.number
 
     return 0
 
 
+@app_cache.memoize()
 def next_invoice_number(customer_id):
     """
     Returns the next available invoice number in the format:
@@ -475,8 +646,6 @@ def next_invoice_number(customer_id):
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
     ilike = '%s%%' % this_years_invoice_numbers
     numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).filter(Invoice.number.ilike(ilike)).all()]
-
-    # import pdb; pdb.set_trace()
 
     last = 0
     for number in numbers:
@@ -500,11 +669,36 @@ def last_invoice():
     return redirect(url_for('invoice_page.invoice_by_number', invoice_number=last_number))
 
 
-@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/raw')
-@login_required
-def raw_invoice(invoice_number):
+@app_cache.memoize()
+def bs4_invoice(user_id, invoice_number):
     """
-    Displays a single invoice in HTML format
+    Returns an HTML invoice with full `<link>` and `<style>` tags.
+    """
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=user_id).first_or_404()
+    customer = Customer.query.filter_by(user_id=user_id, id=invoice.customer_id).first_or_404()
+    customer_address = customer.format_address()
+    submit_address = format_my_address()
+    invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
+
+    terms = invoice.terms or customer.terms or User.query.get(user_id).profile.terms
+
+    return render_template(
+        'invoice/b4-invoice.html',
+        invoice=invoice,
+        customer_address=customer_address,
+        submit_address=submit_address,
+        terms=terms,
+        overdue=invoice.overdue(),
+        theme=get_color_theme_data()[invoice_theme.name]
+    )
+
+
+@invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/html')
+@login_required
+def simplified_invoice(invoice_number, show_item_edit=False, embedded=False):
+    """
+    Displays a single invoice in HTML format with all <style> converted to
+    inline `style=""`.
     """
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
     customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
@@ -512,15 +706,18 @@ def raw_invoice(invoice_number):
     submit_address = format_my_address()
 
     terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
+    invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
     return render_template(
-        'invoice/w3-invoice.html',
+        'invoice/simplified_invoice.html',
         invoice=invoice,
         customer_address=customer_address,
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+        theme=get_color_theme_data()[invoice_theme],
+        show_item_edit=show_item_edit,
+        embedded=embedded
     )
 
 
@@ -544,5 +741,5 @@ def text_invoice(invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        w3_theme=invoice.get_theme() or current_app.config['W3_THEME']
+        invoice_theme=invoice.get_theme() or current_app.config['INVOICE_THEME']
     )

@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice {{invoice.number}}{{' from ' + config.get('NAME', '') if config.get('NAME') else ''}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <style media="print" type="text/css">
+        .table th {
+            color: {{theme.table_header.color}} !important;
+            background-color: {{theme.table_header.background_color}} !important; 
+        }
+        .banner {
+            color: {{theme.banner.color}} !important;
+            background-color: {{theme.banner.background_color}} !important; 
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row pt-4 mt-4 ml-4 mr-4 banner">
+            <div class="col">
+                <h1>INVOICE</h1>
+                {% if invoice.description %}<br><p class="lead">{{invoice.description}}</b>{% endif %}
+            </div>
+            <div class="col text-right">
+                    {{submit_address|safe}}
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col ml-4">
+                <strong>BILL TO:</strong><br>
+                {{customer_address|safe}}
+            </div>
+            <div class="col">
+                <strong>Invoice Number:</strong><br><h1>{{invoice.number}}</h1>
+            </div>
+            <div class="col mr-4 text-right">
+                Submitted Date: {% if invoice.submitted_date %}{{invoice.submitted_date.format('DD-MMM-YYYY')|upper}}{% else %}&nbsp;{% endif %}<br>
+                Due Date: {% if invoice.due_date %}{{invoice.due_date.format('DD-MMM-YYYY')|upper}}{% else %}&nbsp;{% endif %}<br>
+                {% if invoice.paid_date %}
+                    {% if overdue %}
+                        <span class="paid_overdue">
+                    {% else %}
+                        <span class="paid">
+                    {% endif %}
+                    Paid Date: {{invoice.paid_date.paid_date.format('DD-MMM-YYYY')|upper}}</span>
+                    {%- if invoice.paid_date.description %}<br>{{invoice.paid_date.description}}{% endif %}
+                {% elif overdue %}
+                <h3 class="overdue">OVERDUE</h3>
+                {% endif %}
+
+                <div>
+                    <br>Invoice Total:<br><span class="h1 total_due">{{invoice.total|currency}}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col ml-4 mr-4">
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="w3-theme" style="background-color: red !important;">
+                            <th>Item</th>
+                            <th>Unit Price</th>
+                            <th class="text-center">Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in invoice.items -%}
+                        <tr>
+                            {% if item.date -%}
+                            <td>{{item.date.format('DD-MMM-YYYY')|upper}}: {{item.description}}</td>
+                            {% else %}
+                            <td>{{item.description}}</td>
+                            {% endif %}
+                            <td>{{item.unit_price|currency}}{% if item.units %}/{{item.units}}{% endif %}</td>
+                            <td style="text-align:center !important;">{{item.quantity}}</td>
+                            <td>{{ (item.unit_price * item.quantity) | currency}}</td>
+                        </tr>{% endfor %}
+                        <tr class="total">
+                            <td></td>
+                            <td></td>
+                            <td class="text-right">Total:</td>
+                            <td>{{invoice.total | currency}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col ml-4 mr-4">
+                <strong>Terms</strong>: NET 45 days<br>
+                <strong>Please include invoice number on submission</strong>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,9 +1,9 @@
 from flask import (
-    Blueprint, render_template, request, flash, redirect, url_for, current_app,
-    session)
+    Blueprint, render_template, request, flash, redirect, url_for, session,
+    abort)
 
 from .forms import LoginForm
-from ..common import login_required
+from ..common import login_required, is_safe_url
 from ..password import verify_password
 from ..models import User
 
@@ -36,12 +36,20 @@ def login():
                 session['logged_in'] = True
                 session['user_id'] = user.id
                 session['user_debug'] = user.application_settings.debug_mode
+                session['site_theme'] = user.profile.site_theme.name
+                session['site_theme_top'] = user.profile.site_theme.top
+                session['site_theme_bottom'] = user.profile.site_theme.bottom
+
                 flash('You were logged in', 'success')
 
-                if 'next' in request.form:
-                    return redirect(request.form['next'])
+                # import pdb; pdb.set_trace()
+                next_url = request.form.get('next')
+                if not is_safe_url(next_url):
+                    return abort(400)
 
-                return redirect(url_for('index_page.index'))
+                return redirect(next_url or url_for('index_page.dashboard'))
+    elif form.errors:
+        flash(', '.join(form.errors), 'error')
 
     return render_template('login/login.html', form=form)
 
@@ -52,4 +60,4 @@ def logout():
     session.pop('logged_in', None)
     session.pop('user_id', None)
     flash('You were logged out', 'success')
-    return redirect(url_for('index_page.index'))
+    return redirect(url_for('.login'))

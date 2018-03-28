@@ -6,9 +6,53 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import init, migrate
 
 from .password import hash_password
-from .common import color_themes
 
 db = SQLAlchemy()
+
+# Default theme data ##########################################################
+site_themes = {
+    'black': {'top': '#777777', 'bottom': '#777777'},
+    'blue': {'top': '#1F77D0', 'bottom': '#533CE1'},
+    'azure': {'top': '#1DC7EA', 'bottom': '#4091FF'},
+    'green': {'top': '#87CB16', 'bottom': '#6DC030'},
+    'orange': {'top': '#FFA534', 'bottom': '#FF5221'},
+    'red': {'top': '#FB404B', 'bottom': '#BB0502'},
+    'purple': {'top': '#9368E9', 'bottom': '#943BEA'},
+}
+
+# See here https://www.w3schools.com/w3css/w3css_color_themes.asp
+# `banner` is `w3-theme-d1`, and `table_header` is `w3-theme`
+color_theme_data = {
+    'red': {
+        'banner_color': '#fff', 'banner_background_color': '#f32617',
+        'table_header_color': '#fff', 'table_header_background_color': '#f44336',
+    },
+    'khaki': {
+        'banner_color': '#fff', 'banner_background_color': '#ecdf6c',
+        'table_header_color': '#000', 'table_header_background_color': '#f0e68c',
+    },
+    'blue-grey': {
+        'banner_color': '#fff', 'banner_background_color': '#57707d',
+        'table_header_color': '#fff', 'table_header_background_color': '#607d8b',
+    },
+    'indigo': {
+        'banner_color': '#fff', 'banner_background_color': '#3949a3',
+        'table_header_color': '#fff', 'table_header_background_color': '#3f51b5',
+    },
+    'teal': {
+        'banner_color': '#fff', 'banner_background_color': '#008578',
+        'table_header_color': '#fff', 'table_header_background_color': '#009688',
+    },
+    'deep-orange': {
+        'banner_color': '#fff', 'banner_background_color': '#ff4107',
+        'table_header_color': '#fff', 'table_header_background_color': '#ff5722',
+    },
+    'dark-grey': {
+        'banner_color': '#fff', 'banner_background_color': '#575757',
+        'table_header_color': '#fff', 'table_header_background_color': '#616161',
+    },
+}
+###############################################################################
 
 
 def init_db(sample_data=False, apply_migrations=False):
@@ -20,18 +64,21 @@ def init_db(sample_data=False, apply_migrations=False):
     db.drop_all()
     db.create_all()
 
-    themes = [models.W3Theme(theme=x) for x in sorted(color_themes) if x]
-    db.session.add_all(themes)
+    for name, data in site_themes.items():
+        db.session.add(models.SiteTheme(name=name, **data))
+
+    for name, data in color_theme_data.items():
+        db.session.add(models.InvoiceTheme(name=name, **data))
 
     if apply_migrations:
         try:
             init()
-        except:
+        except Exception:
             pass
 
         try:
             migrate()
-        except:
+        except Exception:
             pass
 
     if sample_data:
@@ -39,7 +86,7 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first(),
+            site_theme=models.SiteTheme.query.filter_by(name='black').first(),
         )
 
         user = models.User(
@@ -198,13 +245,13 @@ def init_db(sample_data=False, apply_migrations=False):
             full_name='John Doe', email='j.doe@____.com',
             street='1313 Mockingbird Ln', city='New York',
             state='NY', zip='11111', terms=45,
-            w3_theme=models.W3Theme.query.filter_by(theme='dark-grey').first(),
+            site_theme=models.SiteTheme.query.filter_by(name='orange').first(),
         )
 
         user2 = models.User(
             username='user2',
-            hashed_password=hash_password('default'),
-            profile=profile,
+            hashed_password=hash_password('user2'),
+            profile=profile2,
             application_settings=models.ApplicationSettings(
                 debug_mode=False,
             ),

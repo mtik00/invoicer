@@ -2,7 +2,7 @@ from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
     session)
 from ..common import login_required, form_is_deleting
-from ..models import Customer, Invoice, User, W3Theme
+from ..models import Customer, Invoice, User, InvoiceTheme
 from ..database import db
 from .forms import CustomerForm
 
@@ -38,8 +38,8 @@ def update(customer_id):
     customer = get_customer(customer_id)
     form = CustomerForm(request.form, obj=customer)
 
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
-    form.w3_theme.choices = theme_choices
+    theme_choices = [('', '')] + [(x.name, x.name) for x in InvoiceTheme.query.all()]
+    form.invoice_theme.choices = theme_choices
 
     if form.validate_on_submit():
         if form_is_deleting():
@@ -60,17 +60,17 @@ def update(customer_id):
         db.session.add(customer)
         db.session.commit()
         flash('address updated', 'success')
-        return redirect(url_for('customers_page.index'))
+        return redirect(url_for('customers_page.detail', number=customer.number))
 
-    return render_template('customers/customer_form.html', form=form, customer=customer)
+    return render_template('customers/customer-form.html', form=form, customer=customer, theme_choices=theme_choices)
 
 
 @customers_page.route('/create', methods=["GET", "POST"])
 @login_required
 def create():
     form = CustomerForm(request.form, number=get_next_customer_number())
-    theme_choices = [('', '')] + [(x.theme, x.theme) for x in W3Theme.query.all()]
-    form.w3_theme.choices = theme_choices
+    theme_choices = [('', '')] + [(x.name, x.name) for x in InvoiceTheme.query.all()]
+    form.invoice_theme.choices = theme_choices
 
     if form.validate_on_submit():
         if Customer.query.filter_by(user_id=session['user_id'], number=form.number.data).first():
@@ -85,9 +85,9 @@ def create():
             db.session.commit()
 
             flash('address added', 'success')
-            return redirect(url_for('customers_page.index'))
+            return redirect(url_for('customers_page.detail', number=customer.number))
 
-    return render_template('customers/customer_form.html', form=form)
+    return render_template('customers/customer-form.html', form=form, customer=None, theme_choices=theme_choices)
 
 
 @customers_page.route('/')
@@ -108,13 +108,16 @@ def detail(number):
             continue
 
         year = invoice.submitted_date.format('YYYY')
-
         if year not in summary:
-            summary[year] = {'submitted': 0, 'paid': 0, 'year': year}
+            summary[year] = {'year': year, 'submitted': 0, 'paid': 0}
 
         summary[year]['submitted'] += invoice.total
 
         if invoice.paid_date:
+            year = invoice.paid_date.paid_date.format('YYYY')
+            if year not in summary:
+                summary[year] = {'year': year, 'submitted': 0, 'paid': 0}
+
             summary[year]['paid'] += invoice.total
 
     # Reformat the dict into a sorted list

@@ -1,13 +1,7 @@
 from functools import wraps
+from urlparse import urlparse, urljoin
+
 from flask import request, redirect, session, url_for
-
-
-color_themes = [
-    '',
-    'red', 'pink', 'purple', 'deep-purple', 'blue', 'light-blue', 'cyan', 'teal',
-    'green', 'light-green', 'lime', 'khaki', 'yellow', 'amber', 'orange',
-    'deep-orange', 'blue-grey', 'brown', 'grey', 'dark-grey', 'black'
-]
 
 
 def login_required(f):
@@ -33,3 +27,9 @@ def form_is_deleting():
         (request.form.get('validate_delete', '').lower() == 'delete') or
         ('delete' in request.form.get('delete_modal_target', ''))
     )
+
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return (test_url.scheme in ('http', 'https')) and (ref_url.netloc == test_url.netloc)

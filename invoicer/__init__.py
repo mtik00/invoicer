@@ -1,19 +1,18 @@
 import os
 import re
+import code
 import time
 import locale
 import zipfile
 
 import click
 import arrow
-from flask import render_template, url_for, redirect, session
 from wtforms import Field
 
 from .app import create_app
 from .submitter import sendmail
 from .database import init_db, export as export_db, import_clean_json, add_user
-from .models import Invoice, Customer, User
-from .common import login_required
+from .models import Customer
 
 
 locale.setlocale(locale.LC_ALL, '')
@@ -88,8 +87,15 @@ def remove_older_backups(days=30):
 
 
 @app.cli.command('initdb')
-def initdb_command():
+@click.argument('force', default='n')
+def initdb_command(force):
     """Initializes the database."""
+    if force.lower().startswith('y'):
+        init_db(True, apply_migrations=True)
+        click.echo('Sample data added to database.')
+        click.echo('Initialized the database.')
+        return
+
     click.echo("WARNING: Continue will delete all data in the databse")
     if not click.confirm('Do you want to continue?'):
         raise click.Abort()
@@ -162,3 +168,11 @@ def import_json(path):
 def new_user(username, password):
     add_user(username=username, password=password)
     click.echo("User [%s] has been added to the database" % username)
+
+
+@app.cli.command('cli')
+def interactive():
+    """
+    Launch an interactive REPL
+    """
+    code.interact(local=dict(globals(), **locals()))

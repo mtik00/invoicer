@@ -9,13 +9,14 @@
 
 .fluidMedia iframe {
     position: absolute;
-    top: 0; 
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
 }
 
 .error{color:#fff!important;background-color:#f44336!important}
+.alert-error{color:#fff!important;background-color:#f44336!important}
 .success{color:#fff!important;background-color:#4CAF50!important}
 .warning{color:#000!important;background-color:#ff9800!important}
 
@@ -41,4 +42,23 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Get font-awesome icons to be the same size as top sidebar div */
+.fa-nav {
+    font-size: 20px !important;
+    line-height: 30px !important;
+}
+
+.navbar .navbar-nav .nav-item .nav-link-disabled {
+    color: #CCCCCC !important;
+}
+
+.navbar .navbar-nav .nav-item .nav-link-disabled:hover {
+    color: #CCCCCC !important;
+    cursor: not-allowed;
+}
+
+button.disabled {
+    cursor: not-allowed;
 }

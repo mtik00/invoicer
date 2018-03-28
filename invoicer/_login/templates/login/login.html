@@ -1,38 +1,85 @@
-{% extends "base.html" %}
-{% block body %}
-<h1>Invoicer Login</h1>
+<!DOCTYPE html>
+<html lang="en">
 
-<form class="w3-container w3-col m5" action="{{ url_for('login_page.login') }}" method="POST">
-    {{ form.hidden_tag() }}
-    <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
-
-    <div class="input-group">
-        <span class="input-group-addon w3-padding"><i class="fa fa-envelope-o"></i></span>
-        <input class="w3-padding" id="username" type="text" name="username" placeholder="username" autofocus>
-    </div>
-    <div class="input-group">
-        <span class="input-group-addon w3-padding"><i class="fa fa-key"></i></span>
-        <input class="w3-padding" id="password" name="password" placeholder="password" type="password" value="">
-        <span class="icon"><i id="eye" class="fa fa-eye" aria-hidden="true" title="Show Password"></i></span>
-    </div>
-
-    <p><input type=submit value="Login" class="w3-btn w3-theme-action"></p>
-</form>
-{% endblock %}
-
-{% block extrascripts %}
-<script>
-$( document ).ready(function() {
-    $('.icon').click(function () {
-        if ($('#password').attr('type') === 'text') {
-            $('#password').attr('type', 'password');
-            $('#eye').removeClass('fa-eye-slash').addClass('fa-eye');
-        } else {
-            $('#password').attr('type', 'text');
-            $('#eye').removeClass('fa-eye').addClass('fa-eye-slash');
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Invoicer | Login</title>
+    <style>
+        body {
+            background-image: linear-gradient(#14567F, #14567F);
         }
-    });
-});
 
-</script>
-{% endblock %}
+        #box {
+            border: 1px solid rgb(200, 200, 200);
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 5px 2px;
+            background: rgba(200, 200, 200, 0.1);
+            border-radius: 4px;
+            top:50px;
+        }
+
+        h2 {
+            text-align:center;
+            color:#fff;
+        }
+
+        .alert {
+            margin-bottom: 1em;
+            padding: 1em;
+        }
+
+        .error {
+            color: white;
+            background-color: red;
+            opacity: .7;
+        }
+
+        .success {
+            color: white !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row-fluid d-flex justify-content-center" >
+            <div class="col-md-offset-4 col-md-4" id="box">
+                <h2>Login</h2>
+                <hr>
+                <form class="form-horizontal" action="{{ url_for('login_page.login') }}" method="POST" id="contact_form">
+                    <fieldset>
+                        {% for category, message in get_flashed_messages(with_categories=True) %}
+                        <div class="row alert {{category}}">
+                            <span><b> {{category.upper()}} - </b> {{message}}</span>
+                        </div>
+                        {% endfor %}
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input name="username" placeholder="Username" class="form-control" type="text" autofocus>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                    <input name="password" placeholder="Password" class="form-control" type="password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-md btn-danger pull-right">Login </button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </body>

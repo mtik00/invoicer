@@ -6,8 +6,8 @@ from werkzeug.routing import BaseConverter
 from flask_migrate import Migrate
 
 from .database import db
+from .cache import app_cache
 
-from .models import Profile
 from ._index import index_page
 from ._profile import profile_page
 from ._units import unit_page
@@ -41,7 +41,11 @@ def create_app():
 
         # https://www.w3schools.com/w3css/w3css_color_themes.asp
         # Replace this with the short name (e.g. w3-theme-cyan --> 'cyan')
-        W3_THEME='blue-grey',
+        INVOICE_THEME='blue-grey',
+
+        SITE_THEME='black',
+        SITE_THEME_TOP='#777777',
+        SITE_THEME_BOTTOM='#777777',
 
         # You must add this to your configuration to enable PDF functionality
         WKHTMLTOPDF=None,
@@ -74,13 +78,6 @@ def create_app():
     db.init_app(app)
     app.db = db
     Migrate(app, db)
-
-    # with app.app_context():
-    #     try:
-    #         profile = Profile.query.first()
-    #         if profile:
-    #             app.config['W3_THEME'] = profile.w3_theme or app.config['W3_THEME']
-    #     except Exception:
-    #         app.config['W3_THEME'] = 'dark-grey'
+    app_cache.init_app(app)
 
     return app

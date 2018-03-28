@@ -1,0 +1,93 @@
+{% set current_page = 'customers' %}
+{% set help_step = '6' %}
+{% extends "base.html" %}
+{% set subtitle = customer.name1 %}
+{% block content %}
+{% from "_formhelpers.html" import bs_render_field, bs_render_select %}
+{% from "_modals.html" import render_delete_modal %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Edit Customer</h4>
+            </div>
+            <div class="card-body">
+                {% if customer %}
+                <form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.update', customer_id=customer.id)}}" method="POST">
+                {% else %}
+                <form id="customer_form" class="w3-container w3-col m5" action="{{url_for('customers_page.create')}}" method="POST">
+                {%- endif %}
+
+                    {{ form.hidden_tag() }}
+                        <div data-step='6' data-intro='You need at least 1 name here.  The second one is most useful for a <i>Care Of</i>.  E.g. <tt>C/O Michael Smith</tt>'>
+                            <div class="row">
+                                {{ bs_render_field(form.name1, customer.name1) }}
+                            </div>
+                            <div class="row">
+                                {{ bs_render_field(form.name2, customer.name2) }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            {{ bs_render_field(form.addrline1, customer.addrline1) }}
+                        </div>
+                        <div class="row">
+                            {{ bs_render_field(form.addrline2, customer.addrline2) }}
+                        </div>
+                        <div class="row">
+                            {{ bs_render_field(form.city, customer.city, 'City', 9) }}
+                            {{ bs_render_field(form.state, customer.state, 'State', 1) }}
+                            {{ bs_render_field(form.zip, customer.zip, 'Zip', 2) }}
+                        </div>
+                        <div class="row">
+                            {{ bs_render_field(form.email, customer.email, None, None, 'You can have only 1 email address.  However, this application allows you to enter multiple users') }}
+                        </div>
+                        <div class="row">
+                            {{ bs_render_field(form.terms, customer.terms, None, 4, 'This is the number of days until the customer must pay it.  I.e. the <i>NET</i>') }}
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Number<br><b>NOTE: You cannot change the customer number once an invoice has been submitted</b></label>
+                                    {% if customer and customer.invoices %}
+                                    <input type="text" class="form-control col-md-4" placeholder="45" value="{{customer.number}}" disabled>
+                                    {% else %}
+                                    <input type="text" class="form-control col-md-4" placeholder="45" value="{{customer.number}}">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            {% if customer %}{% set theme = customer.invoice_theme.name %}{% else %}{% set theme = '' %}{% endif %}
+                            {{ bs_render_select(form.invoice_theme, theme_choices, selected=theme, cols=4, help='You can select a theme that is associated with the customer.  The default invoice theme will be set
+                            to this theme, instead of your profile theme.  Also note that you can modify the invoice theme manually.') }}
+                        </div>
+                      <p>
+                          <input class="btn btn-info btn-fill" type=submit value="{% if customer %}Update{%else%}Add{%endif%}">
+                          {%- if customer %}
+                            {%- if customer.invoices %}
+                            <input class="btn btn-danger btn-fill pull-right" type=submit value="Delete" name="delete" disabled title="You cannot delete a customer if it has invoices">
+                            {%- else %}
+                            <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+                            <a data-toggle="modal" data-target="#delete-modal" class="btn btn-danger btn-fill pull-right text-light">Delete Customer</a>
+                            {%- endif %}
+                          {%- endif %}
+                      </p>
+                </form>
+            </div> {# card-body #}
+        </div> {# card #}
+    </div> {# col-md-8 #}
+</div> {# row #}
+
+{%- if customer %}
+{{ render_delete_modal() }}
+{%- endif %}
+
+{% endblock %}
+
+{% block extrascripts %}
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
+{% endblock %}
+
+{% block extracss %}
+{% endblock %}

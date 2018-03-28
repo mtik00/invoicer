@@ -59,7 +59,7 @@ two categories:
 *   Site theme: Controlled by the user profile
 *   Invoice themes:  
     order of precedence: invoice theme, customer theme, invoice theme in profile,
-    the site theme in the user profile, and finally `app.config['W3_THEME']`.
+    the site theme in the user profile, and finally `app.config['INVOICE_THEME']`.
 
 # Customer Emails
 You have a case (like I do) where an invoice should be sent to multiple people.
@@ -83,17 +83,18 @@ Each of these addresses will be put on the `to` line of the email.
 To use the application's delete confirmation modal, you must create your form
 like so:  
 ```
+{% from "_modals.html" import render_delete_modal %}
+
 <form...action="{{url_for(...)}}" method="POST">
     <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
-
-    <span onclick="show_delete_modal();" class="w3-btn w3-red">Delete My Things</span>
+    <a class="btn btn-danger btn-fill" data-toggle="modal" data-target="#delete-modal" href="#">Delete</a>
 </form>
 
 {{ render_delete_modal() }}
 {% endblock %}
 
 {% block extrascripts %}
-{% include '_delete_modal.js' %}
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
 {% endblock %}
 ```
 
@@ -119,3 +120,25 @@ You may also check the value of `#delete_modal_target`, which gets set to
 ```python
 if ('delete' in request.form.get('delete_modal_target', '')
 ```
+
+# Invoices
+We have 3 types of invoices:
+*   Plain text.  These are submitted along with HTML when sending email.
+*   Full HTML with `<link>`, `<style>`, etc.  These are based on Bootstrap 4.
+*   `Premailer` converted Bootstrap 4.
+
+The full HTML version is only used to create the PDF when submitting an invoice
+through email.  The `Premailer`-converted invoice is what's displayed on the
+Invoice page, and the body of the submit email.
+
+The reason why we "pre processed" the invoice using `Premailer` is because that
+process takes tens of seconds.  By having it already converted, we speed
+everything up by quite a bit.
+
+The downside, of course, is that changes need to take place in both places.
+Suggestion: Do the changes in the full BS4 version, then store a Premailer
+version, then hack that to work.
+
+The upside is that the invoice the users sees on `/invoice` is the exact same
+HTML that goes into the body of the email.  If something's not right, the user
+should notice right away.

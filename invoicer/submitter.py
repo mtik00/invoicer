@@ -85,7 +85,6 @@ def sendmail(
     if username and password:
         s.login(username, password)
 
-
     if text_body and html_body:
         outer = MIMEMultipart('alternative')
     else:

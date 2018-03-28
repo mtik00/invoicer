@@ -35,3 +35,53 @@
       {%- endfor %}
   </div>
 {%- endmacro %}
+
+{% macro bs_render_field(field, value=None, placeholder=None, cols=None, help=None, id=None, class=None, readonly=False) %}
+<div class="col{%if cols%} col-md-{{cols}}{%endif%}">
+    {% if help %}<div data-intro='{{help}}'>{% endif %}
+    <div class="form-group">
+        <label class="{%if field.errors%}text-danger{%endif%}">{{field.label.text}}{%if 'required' in field.flags%}*{%endif%}</label>
+        <input type="text" name="{{field.name}}" id="{{id or field.name}}" class="form-control {%if field.errors%}border border-danger{% elif 'required' in field.flags%}border border-secondary{%endif%}{%if class%} {{class}}{%endif%}" placeholder="{% if placeholder%}{{placeholder}}{%else%}{{field.label.text}}{%endif%}" value="{%if value%}{{value}}{%elif field.data%}{{field.data}}{% endif %}" {%if 'required' in field.flags%}required{%endif%}{%if readonly%} readonly{%endif%}>
+        {% if field.errors %}<small id="{{field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
+    </div>
+    {% if help %}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro bs_render_select(field, options, selected=None, cols=None, help=None, help_step=None, id=None) %}
+<div class="col{%if cols%} col-md-{{cols}}{%endif%}">
+    {% if help %}<div {% if help_step %}data-step='{{help_step}}'{%endif%} data-intro='{{help}}'>{% endif %}
+    <div class="form-group">
+        <label class="{%if field.errors%}text-danger{%endif%}">{{field.label.text}}</label>
+        <select name="{{field.name}}" id="{{id or field.name}}" class="form-control {%if field.errors%}border border-danger{% elif 'required' in field.flags%}border border-secondary{%endif%}" placeholder="{% if placeholder%}{{placeholder}}{%else%}{{field.label.text}}{%endif%}" value="{{value}}" {%if 'required' in field.flags%}required{%endif%}>
+            {% for choice in options -%}
+            <option value="{{choice[0]}}" {%if choice[0]==selected%}selected{%endif%}>{{choice[1]}}</option>
+            {% endfor %}
+        </select>
+        {% if field.errors %}<small id="{{field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
+    </div>
+    {% if help %}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro bs_render_checkbox(field, checked=False, id=None) %}
+<div class="col{%if cols%} col-md-{{cols}}{%endif%}">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="{{field.name}}" id="{{field.name}}" {% if checked %}checked{% endif %}>
+        <label class="form-check-label" for="{{field.name}}">{{field.label.text}}</label>
+        {% if field.errors %}<small id="{{id or field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro bs_render_checkbox_switch(field, checked=False, id=None, class=None) %}
+<div class="col{%if cols%} col-md-{{cols}}{%endif%}">
+    <div class="form-group">
+        <span class="switch{%if class%} {{class}}{%endif%}">
+            <input type="checkbox" class="switch" id="{{field.name}}" name="{{field.name}}" {% if checked %}checked{% endif %}>
+            <label for="{{field.name}}">{{field.label.text}}</label>
+        </span>
+        {% if field.errors %}<small id="{{id or field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
+    </div>
+</div>
+{% endmacro %}
