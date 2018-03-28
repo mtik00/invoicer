@@ -1,7 +1,9 @@
 from flask import (
     Blueprint, render_template, request, flash, redirect, url_for,
     session)
-from ..common import login_required, form_is_deleting
+from flask_login import login_required, current_user
+
+from ..common import form_is_deleting
 from ..models import Customer, Invoice, User, InvoiceTheme
 from ..database import db
 from .forms import CustomerForm
@@ -14,11 +16,11 @@ def customer_has_invoices(customer_id):
 
 
 def get_next_customer_number():
-    user = User.query.get(session['user_id'])
+    user = User.query.get(current_user.id)
     starting = user.profile.starting_customer_number
     increment = user.profile.customer_increment
 
-    numbers = [round(float(x.number), -1) for x in Customer.query.filter_by(user_id=session['user_id']).all()]
+    numbers = [round(float(x.number), -1) for x in Customer.query.filter_by(user_id=current_user.id).all()]
 
     customer_number = starting
     for number in numbers:
@@ -29,7 +31,7 @@ def get_next_customer_number():
 
 
 def get_customer(customer_id):
-    return Customer.query.filter_by(id=customer_id, user_id=session['user_id']).first_or_404()
+    return Customer.query.filter_by(id=customer_id, user_id=current_user.id).first_or_404()
 
 
 @customers_page.route('/<customer_id>/update', methods=["GET", "POST"])
@@ -73,14 +75,14 @@ def create():
     form.invoice_theme.choices = theme_choices
 
     if form.validate_on_submit():
-        if Customer.query.filter_by(user_id=session['user_id'], number=form.number.data).first():
+        if Customer.query.filter_by(user_id=current_user.id, number=form.number.data).first():
             flash('The customer number "%s" is already in use' % form.number.data, 'error')
             form.number.data = get_next_customer_number()
             form.number.raw_data = [form.number.data]
         else:
             customer = Customer()
             form.populate_obj(customer)
-            customer.user = User.query.get(session['user_id'])
+            customer.user = User.query.get(current_user.id)
             db.session.add(customer)
             db.session.commit()
 
@@ -93,14 +95,14 @@ def create():
 @customers_page.route('/')
 @login_required
 def index():
-    customers = Customer.query.filter_by(user_id=session['user_id']).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('customers/customers.html', customers=customers)
 
 
 @customers_page.route('/<number>')
 @login_required
 def detail(number):
-    customer = Customer.query.filter_by(user_id=session['user_id'], number=number).first_or_404()
+    customer = Customer.query.filter_by(user_id=current_user.id, number=number).first_or_404()
     summary = {}
 
     for invoice in customer.invoices:
@@ -137,7 +139,7 @@ def delete(number):
         flash('Invalid delete request', 'error')
         return redirect(url_for('.detail', number=number))
 
-    customer = Customer.query.filter_by(user_id=session['user_id'], number=number).first_or_404()
+    customer = Customer.query.filter_by(user_id=current_user.id, number=number).first_or_404()
     if customer.invoices:
         flash("You cannot delete a customer that has invoices", "error")
         return redirect(url_for('.detail', number=number))

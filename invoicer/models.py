@@ -2,6 +2,7 @@ import arrow
 from sqlalchemy import event, UniqueConstraint
 from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
+from flask_login import UserMixin
 
 from .database import db
 
@@ -216,7 +217,7 @@ class InvoicePaidDate(db.Model):
         return '<InvoicePaidDate %r>' % (self.paid_date)
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150))

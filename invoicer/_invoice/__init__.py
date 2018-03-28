@@ -10,13 +10,13 @@ from flask import (
     Blueprint, request, redirect, url_for, render_template, flash, current_app,
     Response, session)
 from sqlalchemy.orm import joinedload
+from flask_login import login_required, current_user
 
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
 from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, InvoiceTheme)
-from ..common import login_required
 from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
 
@@ -82,7 +82,7 @@ def can_submit(customer_id):
 
 
 def format_my_address(html=True):
-    address = User.query.get(session['user_id']).profile
+    address = User.query.get(current_user.id).profile
     join_with = '<br>' if html else '\n'
 
     if not address.full_name:
@@ -105,7 +105,7 @@ def format_my_address(html=True):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/delete', methods=["GET", "POST"])
 @login_required
 def delete_items(invoice_number):
-    invoices = user_invoices(session['user_id'])
+    invoices = user_invoices(current_user.id)
     invoice = next((x for x in invoices if x.number == invoice_number), None)
 
     if not invoice:
@@ -146,9 +146,9 @@ def delete_items(invoice_number):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/items/create', methods=["GET", "POST"])
 @login_required
 def create_item(invoice_number):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
     form = ItemForm(quantity=1)
-    unit_prices = UnitPrice.query.filter_by(user_id=session['user_id']).all()
+    unit_prices = UnitPrice.query.filter_by(user_id=current_user.id).all()
 
     if (request.method == 'POST') and ('cancel' in request.form):
         flash('Action canceled', 'warning')
@@ -198,9 +198,9 @@ def get_user_unit_prices(user_id):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/item/<item_id>/update', methods=["GET", "POST"])
 @login_required
 def update_item(invoice_number, item_id):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
     item = Item.query.filter_by(invoice_id=invoice.id, id=item_id).first_or_404()
-    unit_prices = get_user_unit_prices(session['user_id'])
+    unit_prices = get_user_unit_prices(current_user.id)
 
     form = ItemForm(
         date=item.date.format('DD-MMM-YYYY').upper(),
@@ -270,9 +270,9 @@ def update_item(invoice_number, item_id):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/update', methods=["GET", "POST"])
 @login_required
 def update(invoice_number):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
 
-    customers = Customer.query.filter_by(user_id=session['user_id']).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
     addr_choices = [(x.id, x.name1) for x in customers]
     theme_choices = [('', '')] + [(x, x) for x in get_color_theme_data().keys()]
 
@@ -343,7 +343,7 @@ def update(invoice_number):
 @login_required
 def invoice_by_number(invoice_number):
     form = EmptyForm(request.form)
-    invoices = user_invoices(session['user_id'])
+    invoices = user_invoices(current_user.id)
     invoice = next((x for x in invoices if x.number == invoice_number), None)
 
     if not invoice:
@@ -382,10 +382,10 @@ def invoice_by_number(invoice_number):
         to_emails=to_emails,
         can_submit=to_emails and invoice and can_submit(invoice.customer_id),
         pdf_ok=pdf_ok(),  # The binary exists
-        show_pdf_button=User.query.get(session['user_id']).profile.enable_pdf,
+        show_pdf_button=User.query.get(current_user.id).profile.enable_pdf,
         invoice_numbers=invoice_numbers,
         simplified_invoice=simplified_invoice(invoice_number, show_item_edit=allow_editing, embedded=True),
-        invoices=user_invoices(session['user_id']),
+        invoices=user_invoices(current_user.id),
     )
 
 
@@ -393,7 +393,7 @@ def invoice_by_number(invoice_number):
 @login_required
 def create():
     form = InvoiceForm(request.form)
-    customers = Customer.query.filter_by(user_id=session['user_id']).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
 
     if not customers:
         flash('You must add at least 1 customer before creating invoices', 'error')
@@ -405,12 +405,12 @@ def create():
     theme_choices = [('', '')] + [(x, x) for x in get_color_theme_data().keys()]
     form.invoice_theme.choices = theme_choices
 
-    me = User.query.get(session['user_id']).profile
+    me = User.query.get(current_user.id).profile
 
     if form.validate_on_submit():
         customer_id = int(request.form['customer'])
         number = next_invoice_number(customer_id)
-        customer = Customer.query.filter_by(id=customer_id, user_id=session['user_id']).first_or_404()
+        customer = Customer.query.filter_by(id=customer_id, user_id=current_user.id).first_or_404()
 
         submitted_date = None
         if form.submitted_date.data:
@@ -433,7 +433,7 @@ def create():
                 terms=terms,
                 submitted_date=submitted_date,
                 paid_date=paid_date,
-                user=User.query.get(session['user_id']),
+                user=User.query.get(current_user.id),
             )
         )
         db.session.commit()
@@ -450,7 +450,7 @@ def create():
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/delete', methods=['POST'])
 @login_required
 def delete(invoice_number):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
     form = EmptyForm(request.form)
 
     if request.form.get('validate_delete', '').lower() != 'delete':
@@ -488,7 +488,7 @@ def to_pdf(invoice_number):
         flash('PDF configuration not supported', 'error')
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
-    text = bs4_invoice(session['user_id'], invoice_number)
+    text = bs4_invoice(current_user.id, invoice_number)
     config = Configuration(current_app.config['WKHTMLTOPDF'])
     options = {
         'print-media-type': None,
@@ -511,7 +511,7 @@ def get_address_emails(customer_id):
     if (session['user_debug'] or current_app.config['DEBUG']) and ('EMAIL_USERNAME' in current_app.config):
         return [current_app.config['EMAIL_USERNAME'] or '']
 
-    customer = Customer.query.filter_by(user_id=session['user_id'], id=customer_id).first_or_404()
+    customer = Customer.query.filter_by(user_id=current_user.id, id=customer_id).first_or_404()
     email = customer.email
 
     if '|' in email:
@@ -523,7 +523,7 @@ def get_address_emails(customer_id):
 
 @login_required
 def mark_invoice_submitted(invoice_number):
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
 
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
@@ -549,7 +549,7 @@ def submit_invoice(invoice_number):
     if 'mark' in request.form:
         return mark_invoice_submitted(invoice_number)
 
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
 
     # Only update the submitted date if the invoice didn't have one in the
     # first place.  We want the user to be able to re-submit invoices to remind
@@ -569,7 +569,7 @@ def submit_invoice(invoice_number):
     stream_attachments = []
     pdf_fh = None
     if pdf_ok():
-        bs4_body = bs4_invoice(session['user_id'], invoice_number)
+        bs4_body = bs4_invoice(current_user.id, invoice_number)
         fname = "invoice-%s.pdf" % invoice_number
         config = Configuration(current_app.config['WKHTMLTOPDF'])
         options = {
@@ -592,7 +592,7 @@ def submit_invoice(invoice_number):
             sender=current_app.config['EMAIL_FROM'] or current_app.config['EMAIL_USERNAME'],
             to=email_to,
             cc=[current_app.config['EMAIL_USERNAME']],
-            subject='Invoice %s from %s' % (invoice.number, User.query.get(session['user_id']).profile.full_name),
+            subject='Invoice %s from %s' % (invoice.number, User.query.get(current_user.id).profile.full_name),
             server=current_app.config['EMAIL_SERVER'],
             html_body=uhtml_body,
             text_body=raw_text,
@@ -614,11 +614,11 @@ def submit_invoice(invoice_number):
 
 
 def get_invoice_ids():
-    return [x.id for x in user_invoices(session['user_id'])]
+    return [x.id for x in user_invoices(current_user.id)]
 
 
 def last_invoice_id():
-    invoice = next((x for x in user_invoices(session['user_id'])), None)
+    invoice = next((x for x in user_invoices(current_user.id)), None)
 
     if invoice:
         return invoice.id
@@ -627,7 +627,7 @@ def last_invoice_id():
 
 
 def last_invoice_number():
-    invoice = next((x for x in user_invoices(session['user_id'])), None)
+    invoice = next((x for x in user_invoices(current_user.id)), None)
     if invoice:
         return invoice.number
 
@@ -640,12 +640,12 @@ def next_invoice_number(customer_id):
     Returns the next available invoice number in the format:
         YYYY-<customer number>-<invoice number>
     """
-    customer = Customer.query.filter_by(user_id=session['user_id'], id=customer_id).first_or_404()
+    customer = Customer.query.filter_by(user_id=current_user.id, id=customer_id).first_or_404()
     number = customer.number
 
     this_years_invoice_numbers = '%s-%s' % (number, arrow.now().format('YYYY'))
     ilike = '%s%%' % this_years_invoice_numbers
-    numbers = [x.number for x in Invoice.query.filter_by(user_id=session['user_id']).filter(Invoice.number.ilike(ilike)).all()]
+    numbers = [x.number for x in Invoice.query.filter_by(user_id=current_user.id).filter(Invoice.number.ilike(ilike)).all()]
 
     last = 0
     for number in numbers:
@@ -700,12 +700,12 @@ def simplified_invoice(invoice_number, show_item_edit=False, embedded=False):
     Displays a single invoice in HTML format with all <style> converted to
     inline `style=""`.
     """
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
+    customer = Customer.query.filter_by(user_id=current_user.id, id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address()
 
-    terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
+    terms = invoice.terms or customer.terms or User.query.get(current_user.id).profile.terms
     invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
     return render_template(
@@ -727,12 +727,12 @@ def text_invoice(invoice_number):
     """
     Displays a single invoice
     """
-    invoice = Invoice.query.filter_by(number=invoice_number, user_id=session['user_id']).first_or_404()
-    customer = Customer.query.filter_by(user_id=session['user_id'], id=invoice.customer_id).first_or_404()
+    invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
+    customer = Customer.query.filter_by(user_id=current_user.id, id=invoice.customer_id).first_or_404()
     customer_address = customer.format_address()
     submit_address = format_my_address(html=False)
 
-    terms = invoice.terms or customer.terms or User.query.get(session['user_id']).profile.terms
+    terms = invoice.terms or customer.terms or User.query.get(current_user.id).profile.terms
 
     return render_template(
         'invoice/text-invoice.txt',

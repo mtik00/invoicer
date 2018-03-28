@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 
 from .database import db
 from .cache import app_cache
+from .login_manager import login_manager
 
 from ._index import index_page
 from ._profile import profile_page
@@ -79,5 +80,6 @@ def create_app():
     app.db = db
     Migrate(app, db)
     app_cache.init_app(app)
+    login_manager.init_app(app)
 
     return app
