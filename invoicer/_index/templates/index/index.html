@@ -29,10 +29,13 @@
     width: 20%;
 }
 .description {
-    width: 30%;
+    width: 25%;
 }
 .date {
-    width: 20%;
+    width: 10%;
+}
+.overdue {
+    color: red;
 }
 </style>
 {% endblock %}
@@ -76,6 +79,7 @@
                             <th class="customer">Customer</th>
                             <th class="description">Description</th>
                             <th class="date">Submitted Date</th>
+                            <th class="date">Due Date</th>
                             <th>Total</th>
                         </thead>
                     </tr>
@@ -84,6 +88,7 @@
                         <td>{{invoice.customer.name1}}</td>
                         <td>{{invoice.description}}</td>
                         <td>{{invoice.submitted_date.format('YYYY-MMM-DD').upper()}}</td>
+                        <td {%if invoice.overdue()%} class="overdue"{%endif%}>{{invoice.due_date.format('YYYY-MMM-DD').upper()}}</td>
                         <td>{{invoice.total|currency}}</td>
                     </tr>{% endfor %}
                 </table>
