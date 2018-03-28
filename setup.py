@@ -8,6 +8,7 @@ setup(
         'argon2-cffi==18.1.0',
         'arrow==0.12.0',
         'Flask-Caching==1.3.3',
+        'Flask-Login==0.4.1',
         'Flask-Migrate==2.1.1',
         'Flask-SQLAlchemy==2.3.2',
         'Flask-WTF==0.14.2',

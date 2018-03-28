@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
+from flask_login import login_required, current_user
 
-from ..common import login_required
 from ..models import Profile, User, InvoiceTheme, SiteTheme
 from ..database import db
 from ..cache import app_cache
@@ -34,14 +34,14 @@ def get_color_theme_data():
 @profile_page.route('/')
 @login_required
 def index():
-    profile = User.query.get(session['user_id']).profile
+    profile = User.query.get(current_user.id).profile
     return render_template('profile/index.html', profile=profile)
 
 
 @profile_page.route('/edit', methods=["GET", "POST"])
 @login_required
 def edit():
-    user = User.query.get(session['user_id'])
+    user = User.query.get(current_user.id)
     form = ProfileForm(request.form, obj=user.profile)
 
     site_theme_choices = [(x, x) for x in bs4_color_themes()]

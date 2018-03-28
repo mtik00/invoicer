@@ -3,8 +3,8 @@ import json
 import arrow
 from sqlalchemy.orm import joinedload
 from flask import Blueprint, render_template, session, redirect, url_for
+from flask_login import login_required, current_user
 
-from ..common import login_required
 from ..models import Invoice
 from ..cache import app_cache
 
@@ -20,7 +20,7 @@ def index():
 @index_page.route('/dashboard')
 @login_required
 def dashboard():
-    uid = session['user_id']
+    uid = current_user.id
     invoices = get_user_invoices(uid)
     invoice_stats = get_invoice_stats(uid)
 
