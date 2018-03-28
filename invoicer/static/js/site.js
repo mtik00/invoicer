@@ -1,3 +1,7 @@
+$("body").click(function(){  
+    $(".alert").alert("close");
+});
+
 $().ready(function() {
     $sidebar = $('.sidebar');
     $sidebar_img_container = $sidebar.find('.sidebar-background');
@@ -147,7 +151,7 @@ demo = {
                 from: from,
                 align: align
             },
-            showProgressbar: true
+            showProgressbar: false
         });
     }
 

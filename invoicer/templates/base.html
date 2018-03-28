@@ -104,6 +104,7 @@
             {% for category, message in get_flashed_messages(with_categories=True) %}
             demo.showNotification(text="{{message}}", color="{{category}}", from='top', align='center', icon_class="nc-icon nc-app");
             {% endfor %}
+            $('.alert').addClass('pointer');
         });
     </script>
 
