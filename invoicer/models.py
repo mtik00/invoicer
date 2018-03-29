@@ -232,6 +232,8 @@ class User(db.Model, UserMixin):
     application_settings_id = db.Column(db.Integer, db.ForeignKey('application_settings.id', use_alter=True, name='fk_application_settings_id'))
     application_settings = db.relationship('ApplicationSettings', foreign_keys=application_settings_id, post_update=True)
 
+    is_active = db.Column(db.Boolean, default=True)
+
     def __repr__(self):
         return '<User %r>' % (self.username)
 

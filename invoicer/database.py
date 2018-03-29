@@ -3,7 +3,7 @@ import string
 
 import arrow
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import init, migrate
+from flask_migrate import migrate
 
 from .password import hash_password
 
@@ -71,11 +71,6 @@ def init_db(sample_data=False, apply_migrations=False):
         db.session.add(models.InvoiceTheme(name=name, **data))
 
     if apply_migrations:
-        try:
-            init()
-        except Exception:
-            pass
-
         try:
             migrate()
         except Exception:

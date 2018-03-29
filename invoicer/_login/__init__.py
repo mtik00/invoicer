@@ -35,6 +35,10 @@ def login():
             flash('Invalid username and/or password', 'error')
             return redirect(url_for('.login'), code=401)
 
+        if not user.is_active:
+            flash('You account is not active', 'error')
+            return redirect(url_for('.login'), code=401)
+
         login_user(user)
         session['logged_in'] = True
         session['user_debug'] = user.application_settings.debug_mode
