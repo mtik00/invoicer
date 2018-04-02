@@ -1,0 +1,3 @@
+# Copy this file to /etc/fail2ban/filter.d/invoicer.conf
+[Definition]
+failregex = Invalid login for username \[(.*?)\] from \[<HOST>\]

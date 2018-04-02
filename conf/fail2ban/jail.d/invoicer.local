@@ -1,0 +1,9 @@
+# Add this to /etc/fail2ban/jail.d/invoicer.local
+[invoicer]
+enabled  = true
+filter   = invoicer
+port     = http,https
+logpath  = /var/log/invoicer/auth.log
+bantime  = 604800  ; 1 week
+findtime = 86400   ; 1 day
+maxretry = 6
