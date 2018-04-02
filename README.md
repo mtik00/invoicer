@@ -142,3 +142,8 @@ version, then hack that to work.
 The upside is that the invoice the users sees on `/invoice` is the exact same
 HTML that goes into the body of the email.  If something's not right, the user
 should notice right away.
+
+# fail2ban
+Inside the 'conf' folder you'll find a subfolder for `fail2ban` configuration.
+The log file that gets parsed is `invoicer.logger.AUTH_LOG`.  This defaults
+to `/var/log/invoicer/auth.log`.  This makes it easy to search for bad people.

@@ -8,6 +8,7 @@ from .forms import LoginForm
 from ..common import is_safe_url
 from ..password import verify_password
 from ..models import User
+from ..logger import AUTH_LOG
 
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
@@ -32,6 +33,14 @@ def login():
             error = True
 
         if error:
+            # NOTE: You must not change this format without changing the
+            # fail2ban filter.
+            AUTH_LOG.error(
+                "Invalid login for username [{0}] from [{1}]".format(
+                    form.username.data,
+                    request.remote_addr)
+            )
+
             flash('Invalid username and/or password', 'error')
             return redirect(url_for('.login'), code=401)
 
