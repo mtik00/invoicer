@@ -1,5 +1,7 @@
 ---
 
+log_dir: /var/log/invoicer
+
 # uwsgi ini ###################################################################
 # The socket that gets created when uwsgi runs
 socket: <path to socket> # e.g /run/uwsgi/invoicer.sock
@@ -26,6 +28,7 @@ conda_env_name: invoicer
 
 # nginx partial conf ##########################################################
 location: /invoicer
+www_dir: /var/www/invoicer_app
 # `socket` from above is also used
 ###############################################################################
 

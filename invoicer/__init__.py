@@ -262,3 +262,15 @@ def build():
         fh.write(content)
     click.echo('...done')
     ###########################################################################
+
+    ###########################################################################
+    click.echo('Creating `_build/deploy.bash')
+
+    with open(os.path.join(conf_dir, 'deploy.bash.j2')) as fh:
+        template = Template(fh.read())
+
+    content = template.render(**options)
+    with open(os.path.join(outdir, 'deploy.bash'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+    ###########################################################################

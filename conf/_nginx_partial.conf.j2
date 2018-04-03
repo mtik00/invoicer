@@ -1,7 +1,20 @@
 # This is a partial configuration file.  You'll want to add the following
 # location to whichever server location you'll be using.
 
-    location {{location}} {
-        include     uwsgi_params;
-        uwsgi_pass  unix:{{socket}};
-   }
+# This goes outside of the `server` section
+upstream _invoicer_sock {
+    server unix:{{socket}};
+}
+
+
+# This section goes *inside* the server block
+
+    # Allow Nginx to serve our static content before going to the app
+    location /invoicer {
+        try_files $uri @uwsgi;
+    }
+
+    location @uwsgi {
+        include uwsgi_params;
+        uwsgi_pass _invoicer_sock;
+    }

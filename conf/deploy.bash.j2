@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+pushd $BASEDIR
+
+# Check the folders ###########################################################
+if [[ ! -d {{app_log_dir}} ]]; then
+    echo "creating log dir"
+    mkdir -p {{app_log_dir}}
+    chown {{chown_socket}} {{app_log_dir}}/
+fi
+
+if [[ ! -d {{run_dir}} ]]; then
+    echo "creating socket run dir"
+    mkdir -p {{run_dir}}
+    chown {{chown_socket}} {{run_dir}}
+fi
+
+if [[ ! -d {{www_dir}}/html ]]; then
+    echo "creating html folder"
+    mkdir -p {{www_dir}}/html
+    chown {{chown_socket}} {{www_dir}}/html
+fi
+chmod -R 775 {{www_dir}}
+###############################################################################
+
+if [[ ! -d instance ]]; then
+    mkdir instance
+fi
+
+if [[ ! -e instance/env.sh ]]; then
+    echo "creating instance env vars file"
+    echo export SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1) > instance/env.sh
+    chmod +x instance/env.sh
+fi
+
+# Check the nginx config file #################################################
+# NOTE: We don't use a complete nginx configuration file; it's assumed that the
+# invoicer app will be integrated into the *main* nginx config file
+###############################################################################
+
+# Check the service ###########################################################
+if [[ ! -e {{service_path}} ]]; then
+    echo "creating the service"
+    cp _build/invoicer-systemd.service {{service_path}}
+    chmod 755 {{service_path}}
+    systemctl daemon-reload
+    systemctl enable hinvoicer.service
+elif [[ -n `diff _build/invoicer-systemd.service {{service_path}}` ]]; then
+    echo "deploying the service"
+    cp _build/invoicer-systemd.service {{service_path}}
+    chmod 755 {{service_path}}
+    systemctl daemon-reload
+else
+    echo "no change detected in service script"
+fi
+
+# Set up our static files.
+# NOTE: The folder will only ever have the static files so Nginx can serve them
+# instead of passing the requests to our app.  Nginx is **much** better suited
+# for this purpose.
+echo "deploying static folder"
+rm -rf {{www_dir}}/html/*
+cp -r ./invoicer/static {{www_dir}}/html/
+chown -R {{chown_socket}} {{www_dir}}/html
+chmod -R 775 {{www_dir}}
+
+# We always want to restart the service to pick up the code changes.
+echo "restarting the service"
+systemctl restart invoicer.service
+
+popd
