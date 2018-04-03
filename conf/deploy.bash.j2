@@ -18,7 +18,6 @@ if [[ ! -d {{nginx_www_dir}}/html ]]; then
     mkdir -p {{nginx_www_dir}}/html
     chown {{chown_socket}} {{nginx_www_dir}}/html
 fi
-chmod -R 775 {{nginx_www_dir}}
 ###############################################################################
 
 if [[ ! -d instance ]]; then
@@ -51,6 +50,8 @@ if [[ ! -e {{nginx_upstream_file_path}} ]] || [[ `diff _build/invoicer-upstream.
     fi
 
     systemctl restart nginx.service
+else
+    echo "no change detected in {{nginx_upstream_file_path}}"
 fi
 
 if [[ ! -e {{nginx_location_file_path}} ]] || [[ `diff _build/invoicer-location.nginx {{nginx_location_file_path}}` ]]; then
@@ -72,6 +73,8 @@ if [[ ! -e {{nginx_location_file_path}} ]] || [[ `diff _build/invoicer-location.
     fi
 
     systemctl restart nginx.service
+else
+    echo "no change detected in {{nginx_location_file_path}}"
 fi
 
 # Check the service ###########################################################
@@ -87,7 +90,7 @@ elif [[ -n `diff _build/invoicer-systemd.service {{service_path}}/{{service_name
     chmod 755 {{service_path}}/{{service_name}}
     systemctl daemon-reload
 else
-    echo "no change detected in service script"
+    echo "no change detected in {{service_path}}/{{service_name}}"
 fi
 
 # Set up our static files.

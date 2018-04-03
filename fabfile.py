@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 # Globals #####################################################################
 INVOICER_APP_HOME_FOLDER = os.environ['INVOICER_APP_HOME_FOLDER']
-VENV_ACTIVATE = os.environ['INVOICER_VENV_ACTIVATE_COMMAND']
+VENV_ACTIVATE = os.environ['INVOICER_VENV_ACTIVATE_COMMAND'].strip('"').strip("'")
 ###############################################################################
 
 # Fabric environment setup ####################################################
