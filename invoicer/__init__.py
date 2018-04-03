@@ -9,7 +9,7 @@ import zipfile
 import click
 import arrow
 from wtforms import Field
-from jinja2 import Template
+from jinja2 import Template, Environment, StrictUndefined, FileSystemLoader
 import ruamel.yaml
 
 from .app import create_app
@@ -202,11 +202,13 @@ def build():
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
 
+    env = Environment(
+        loader=FileSystemLoader(conf_dir),
+        undefined=StrictUndefined)
+
     ###########################################################################
     click.echo('Creating `_build/invoicer-uwsgi.ini')
-    with open(os.path.join(conf_dir, 'invoicer-uwsgi.ini.j2')) as fh:
-        template = Template(fh.read())
-
+    template = env.get_template('invoicer-uwsgi.ini.j2')
     content = template.render(**options)
     with open(os.path.join(outdir, 'invoicer-uwsgi.ini'), 'wb') as fh:
         fh.write(content)
@@ -215,9 +217,7 @@ def build():
 
     ###########################################################################
     click.echo('Creating `_build/invoicer-systemd.service')
-    with open(os.path.join(conf_dir, 'invoicer-systemd.service.j2')) as fh:
-        template = Template(fh.read())
-
+    template = env.get_template('invoicer-systemd.service.j2')
     content = template.render(**options)
     with open(os.path.join(outdir, 'invoicer-systemd.service'), 'wb') as fh:
         fh.write(content)
@@ -226,9 +226,7 @@ def build():
 
     ###########################################################################
     click.echo('Creating `_build/invoicer.nginx')
-    with open(os.path.join(conf_dir, 'invoicer.nginx.j2')) as fh:
-        template = Template(fh.read())
-
+    template = env.get_template('invoicer.nginx.j2')
     content = template.render(**options)
     with open(os.path.join(outdir, 'invoicer.nginx'), 'wb') as fh:
         fh.write(content)
@@ -241,9 +239,7 @@ def build():
     if not os.path.isdir(f2b_filter_outdir):
         os.makedirs(f2b_filter_outdir)
 
-    with open(os.path.join(conf_dir, 'fail2ban', 'filter.d', 'invoicer.local.j2')) as fh:
-        template = Template(fh.read())
-
+    template = env.get_template('fail2ban/filter.d/invoicer.local.j2')
     content = template.render(**options)
     with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'wb') as fh:
         fh.write(content)
@@ -256,9 +252,7 @@ def build():
     if not os.path.isdir(f2b_filter_outdir):
         os.makedirs(f2b_filter_outdir)
 
-    with open(os.path.join(conf_dir, 'fail2ban', 'jail.d', 'invoicer.local.j2')) as fh:
-        template = Template(fh.read())
-
+    template = env.get_template('fail2ban/jail.d/invoicer.local.j2')
     content = template.render(**options)
     with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'wb') as fh:
         fh.write(content)
@@ -267,10 +261,7 @@ def build():
 
     ###########################################################################
     click.echo('Creating `_build/deploy.bash')
-
-    with open(os.path.join(conf_dir, 'deploy.bash.j2')) as fh:
-        template = Template(fh.read())
-
+    template = env.get_template('deploy.bash.j2')
     content = template.render(**options)
     with open(os.path.join(outdir, 'deploy.bash'), 'wb') as fh:
         fh.write(content)
