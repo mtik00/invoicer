@@ -1,0 +1,12 @@
+# NOTE: Copy this file to /etc/systemd/system/invoicer.service during deployment
+#       also set permissions: `sudo chmod 755 /etc/systemd/system/invoicer.service`
+
+[Unit]
+Description=uWSGI instance to serve the invoicer application
+
+[Service]
+ExecStartPre=-/usr/bin/bash -c 'mkdir -p {{run_dir}}; chown {{chown_socket}} {{run_dir}}; chmod -R 775 {{run_dir}}'
+ExecStart=/usr/bin/bash -c 'cd {{chdir}}; source {{conda_dir}}/bin/activate {{conda_env_name}}; source instance/env.sh; {{conda_dir}}/bin/uwsgi --ini _build/invoicer-uwsgi.ini'
+
+[Install]
+WantedBy=multi-user.target

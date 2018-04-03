@@ -1,0 +1,37 @@
+---
+
+# uwsgi ini ###################################################################
+# The socket that gets created when uwsgi runs
+socket: <path to socket> # e.g /run/uwsgi/invoicer.sock
+socket_mode: 664
+chown_socket: <some user name>:nginx  # e.g. myusername:nginx
+
+# Running uwsgi
+uid: <some user name> # e.g. myusername
+gid: nginx
+chdir: /home/<username>/invoicer
+mount: /invoicer # this is the subdirectory in NGINX
+number_of_processes: 5
+
+# Application logging
+req_logger: file:/var/log/invoicer/request.log
+logger: file:/var/log/invoicer/error.log
+###############################################################################
+
+# systemd service #############################################################
+run_dir: /run/uwsgi
+conda_dir: <some dir>  # e.g. /home/<username>/.conda/envs/invoicer
+conda_env_name: invoicer
+###############################################################################
+
+# nginx partial conf ##########################################################
+location: /invoicer
+# `socket` from above is also used
+###############################################################################
+
+# fail2ban ####################################################################
+logpath: /var/log/invoicer/auth.log
+bantime_seconds: "604800 # 1 week"
+findtime_seconds: "86400 # 1 day"
+maxretry: 6
+###############################################################################

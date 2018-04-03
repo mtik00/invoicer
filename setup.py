@@ -16,6 +16,7 @@ setup(
         'htmlmin==0.1.12',
         'pdfkit==0.6.1',
         'premailer==3.1.1',
+        'ruamel.yaml==0.15.37',
         'SQLAlchemy-Utils==0.32.21',
     ],
     extras_require={

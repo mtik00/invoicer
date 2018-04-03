@@ -3,7 +3,7 @@
 enabled  = true
 filter   = invoicer
 port     = http,https
-logpath  = /var/log/invoicer/auth.log
-bantime  = 604800  ; 1 week
-findtime = 86400   ; 1 day
-maxretry = 6
+logpath  = {{logpath}}
+bantime  = {{bantime_seconds}}
+findtime = {{findtime_seconds}}
+maxretry = {{maxretry}}

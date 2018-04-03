@@ -8,6 +8,8 @@ import zipfile
 import click
 import arrow
 from wtforms import Field
+from jinja2 import Template
+import ruamel.yaml
 
 from .app import create_app
 from .submitter import sendmail
@@ -176,3 +178,87 @@ def interactive():
     Launch an interactive REPL
     """
     code.interact(local=dict(globals(), **locals()))
+
+
+@app.cli.command('build')
+def build():
+    """
+    Build the configuration files
+    """
+    conf_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'conf'))
+    instance_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'instance'))
+    outdir = os.path.join(conf_dir, '..', '_build')
+
+    options_file = os.path.join(instance_dir, 'site.yaml')
+    if not os.path.exists(options_file):
+        click.echo('ERROR: Could not find %s' % options_file)
+        click.echo('...a sample is located in `conf`')
+        raise Exception('Options file does not exist: %s' % options_file)
+
+    options = ruamel.yaml.safe_load(open(options_file).read())
+
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+
+    ###########################################################################
+    click.echo('Creating `_build/invoicer-uwsgi.ini')
+    with open(os.path.join(conf_dir, 'invoicer-uwsgi.ini.j2')) as fh:
+        template = Template(fh.read())
+
+    content = template.render(**options)
+    with open(os.path.join(outdir, 'invoicer-uwsgi.ini'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+    ###########################################################################
+
+    ###########################################################################
+    click.echo('Creating `_build/invoicer-systemd.service')
+    with open(os.path.join(conf_dir, 'invoicer-systemd.service.j2')) as fh:
+        template = Template(fh.read())
+
+    content = template.render(**options)
+    with open(os.path.join(outdir, 'invoicer-systemd.service'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+    ###########################################################################
+
+    ###########################################################################
+    click.echo('Creating `_build/_nginx_partial.conf')
+    with open(os.path.join(conf_dir, '_nginx_partial.conf.j2')) as fh:
+        template = Template(fh.read())
+
+    content = template.render(**options)
+    with open(os.path.join(outdir, '_nginx_partial.conf'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+    ###########################################################################
+
+    ###########################################################################
+    click.echo('Creating `_build/fail2ban/filter.d/invoicer.local')
+    f2b_filter_outdir = os.path.join(outdir, 'fail2ban', 'filter.d')
+    if not os.path.isdir(f2b_filter_outdir):
+        os.makedirs(f2b_filter_outdir)
+
+    with open(os.path.join(conf_dir, 'fail2ban', 'filter.d', 'invoicer.local.j2')) as fh:
+        template = Template(fh.read())
+
+    content = template.render(**options)
+    with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+    ###########################################################################
+
+    ###########################################################################
+    click.echo('Creating `_build/fail2ban/jail.d/invoicer.local')
+    f2b_filter_outdir = os.path.join(outdir, 'fail2ban', 'jail.d')
+    if not os.path.isdir(f2b_filter_outdir):
+        os.makedirs(f2b_filter_outdir)
+
+    with open(os.path.join(conf_dir, 'fail2ban', 'jail.d', 'invoicer.local.j2')) as fh:
+        template = Template(fh.read())
+
+    content = template.render(**options)
+    with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+    ###########################################################################

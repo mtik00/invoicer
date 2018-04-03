@@ -7,22 +7,22 @@
 # start our app on boot.
 [uwsgi]
 manage-script-name = true
-socket = /run/uwsgi/invoicer.sock
-chmod-socket = 664
-chown-socket = timcfadd:nginx
+socket = {{socket}}
+chmod-socket = {{socket_mode}}
+chown-socket = {{chown_socket}}
 vacuum = true
 
 # Change this directory to the home directory of your application
 master = true
-uid = timcfadd
-gid = nginx
+uid = {{uid}}
+gid = {{gid}}
 die-on-term = true
 
-chdir = /home/timcfadd/invoicer
-mount=/invoicer=wsgi.py
+chdir = {{chdir}}
+mount={{mount}}=wsgi.py
 
 # Change this to whatever makes sense for your application
-processes = 5
+processes = {{number_of_processes}}
 
-req-logger = file:/var/log/invoicer/request.log
-logger = file:/var/log/invoicer/error.log
+req-logger = {{req_logger}}
+logger = {{logger}}
