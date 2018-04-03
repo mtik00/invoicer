@@ -38,7 +38,8 @@ nginx_socket: *socket
 # This path is where the deploy script will copy the file.  This needs to be
 # added to your nginx site config file.  E.g:
 # `include /etc/nginx/conf.d/invoicer.nginx;
-nginx_file_path: /etc/nginx/conf.d/invoicer.nginx
+nginx_upstream_file_path: /etc/nginx/conf.d/invoicer-upstream.nginx
+nginx_location_file_path: /etc/nginx/conf.d/invoicer-location.nginx
 ###############################################################################
 
 # fail2ban ####################################################################
