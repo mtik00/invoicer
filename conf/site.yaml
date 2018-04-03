@@ -1,6 +1,6 @@
 ---
 
-log_dir: /var/log/invoicer
+app_log_dir: /var/log/invoicer
 
 # uwsgi ini ###################################################################
 # The socket that gets created when uwsgi runs
