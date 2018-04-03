@@ -75,7 +75,7 @@ fi
 # for this purpose.
 echo "deploying static folder"
 rm -rf {{nginx_www_dir}}/html/*
-cp -r ../invoicer/static {{nginx_www_dir}}/html/
+cp -r ./invoicer/static {{nginx_www_dir}}/html/
 chown -R {{nginx_www_dir_owner}} {{nginx_www_dir}}/html
 chmod -R {{nginx_www_dir_perms}} {{nginx_www_dir}}
 
