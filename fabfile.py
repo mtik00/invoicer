@@ -14,7 +14,7 @@ from fabric.context_managers import cd
 
 # Metadata ####################################################################
 __author__ = "Timothy McFadden"
-__creationDate__ = "02-APR-2018
+__creationDate__ = "02-APR-2018"
 __license__ = "MIT"
 
 # Globals #####################################################################
