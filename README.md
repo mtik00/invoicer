@@ -23,12 +23,24 @@ to its path.
 
 # Initialization
 To initialize the application, follow these steps:
-*   Create a virtual env for this project and activate it
+*   Create a virtual env for this project and activate it:  
+    `conda create -n invoicer python=2`  
+    `source activate invoicer`
 *   Copy/clone the repo
-*   run `pip install -r requirements.txt`
-*   Create the instance folder and `instance/application.cfg`
+*   Install the package  
+    dev environment: `pip install -e .[test,manage]`  
+    run environment: `pip install -e .`
+*   Create the instance folder and `instance/application.cfg`  
+    `mkdir instance && touch instance/application.cfg`
+*   Create an `env.sh` file:  
+    `echo export FLASK_APP=invoicer > instance/env.sh && chmod +x instance/env.sh && . instance/env.sh`
+*   Create the log folder:  
+    `sudo mkdir -p /var/log/invoicer`
+    `sudo chown <username>:nginx /var/log/invoicer`
 *   Run `flask initdb` (you may want to skip adding sample data)
 *   Run `flask add-user` to create the first user
+*   Tell alembic that your DB is up to date:  
+    `flask db stamp head`
 *   Run the application: `flask run`
 *   Open the browser
 *   Edit your profile: `http://127.0.0.1:5000/profile/update`

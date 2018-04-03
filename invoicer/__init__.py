@@ -225,10 +225,17 @@ def build():
     ###########################################################################
 
     ###########################################################################
-    click.echo('Creating `_build/invoicer.nginx')
-    template = env.get_template('invoicer.nginx.j2')
+    click.echo('Creating `_build/invoicer-upstream.nginx')
+    template = env.get_template('invoicer-upstream.nginx.j2')
     content = template.render(**options)
-    with open(os.path.join(outdir, 'invoicer.nginx'), 'wb') as fh:
+    with open(os.path.join(outdir, 'invoicer-upstream.nginx'), 'wb') as fh:
+        fh.write(content)
+    click.echo('...done')
+
+    click.echo('Creating `_build/invoicer-location.nginx')
+    template = env.get_template('invoicer-location.nginx.j2')
+    content = template.render(**options)
+    with open(os.path.join(outdir, 'invoicer-location.nginx'), 'wb') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################

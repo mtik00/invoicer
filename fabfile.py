@@ -4,12 +4,10 @@ This script is used to control deployment of the invoicer app
 """
 # Imports ######################################################################
 import os
-import json
-import zlib
 from fabric.utils import abort
 from fabric.api import env, task
 from fabric.operations import run, sudo, local
-from fabric.context_managers import cd
+from fabric.context_managers import cd, prefix
 
 
 # Metadata ####################################################################
@@ -19,7 +17,7 @@ __license__ = "MIT"
 
 # Globals #####################################################################
 INVOICER_APP_HOME_FOLDER = os.environ['INVOICER_APP_HOME_FOLDER']
-VENV_ACTIVATE = os.environ.get('INVOICER_VENV_ACTIVATE_COMMAND')
+VENV_ACTIVATE = os.environ['INVOICER_VENV_ACTIVATE_COMMAND']
 ###############################################################################
 
 # Fabric environment setup ####################################################

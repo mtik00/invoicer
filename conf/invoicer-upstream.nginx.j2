@@ -1,0 +1,6 @@
+# This is a partial Nginx configuration file.  It should be included in your
+# site's main configuration file outside the server block:
+# `include {{nginx_upstream_file_path}};`
+upstream _invoicer_sock {
+    server unix:{{nginx_socket}};
+}
