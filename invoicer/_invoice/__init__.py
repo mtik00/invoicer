@@ -282,6 +282,7 @@ def update(invoice_number):
         paid_date=invoice.paid_date.paid_date.format('DD-MMM-YYYY').upper() if invoice.paid_date else '',
         paid_date_notes=invoice.paid_date.description if invoice.paid_date else '',
         terms=invoice.terms,
+        number=invoice.number
     )
     form.customer.choices = addr_choices
     form.invoice_theme.choices = theme_choices
@@ -293,43 +294,43 @@ def update(invoice_number):
         # Set the default theme only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
         form.invoice_theme.process_data(selected_theme)
+    elif request.method == 'POST' and ('cancel' in request.form):
+        flash('invoice updated canceled', 'warning')
     elif form.validate_on_submit():
-        if 'cancel' in request.form:
-            flash('invoice updated canceled', 'warning')
+        submitted_date = invoice.submitted_date
+        if form.submitted_date.data:
+            submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
+
+        paid_date = None
+        if form.paid_date.data:
+            paid_date = InvoicePaidDate(
+                paid_date=arrow.get(form.paid_date.data, 'DD-MMM-YYYY'),
+                description=form.paid_date_notes.data
+            )
+            db.session.flush()
+
+        terms = invoice.terms
+        if form.terms.data:
+            terms = form.terms.data
+
+        invoice.description = form.description.data
+        invoice.customer_id = form.customer.data
+        invoice.submitted_date = submitted_date
+        invoice.paid_date = paid_date
+        invoice.terms = terms
+        invoice.number = form.number.data
+
+        if form.invoice_theme.data:
+            invoice.invoice_theme = InvoiceTheme.query.filter_by(name=form.invoice_theme.data).first()
         else:
-            submitted_date = invoice.submitted_date
-            if form.submitted_date.data:
-                submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
+            invoice.invoice_theme = None
 
-            paid_date = None
-            if form.paid_date.data:
-                paid_date = InvoicePaidDate(
-                    paid_date=arrow.get(form.paid_date.data, 'DD-MMM-YYYY'),
-                    description=form.paid_date_notes.data
-                )
-                db.session.flush()
+        db.session.commit()
 
-            terms = invoice.terms
-            if form.terms.data:
-                terms = form.terms.data
+        # Clear the app cache so everything updates
+        app_cache.clear()
 
-            invoice.description = form.description.data
-            invoice.customer_id = form.customer.data
-            invoice.submitted_date = submitted_date
-            invoice.paid_date = paid_date
-            invoice.terms = terms
-
-            if form.invoice_theme.data:
-                invoice.invoice_theme = InvoiceTheme.query.filter_by(name=form.invoice_theme.data).first()
-            else:
-                invoice.invoice_theme = None
-
-            db.session.commit()
-
-            # Clear the app cache so everything updates
-            app_cache.clear()
-
-            flash('invoice updated', 'success')
+        flash('invoice updated', 'success')
 
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice.number))
 

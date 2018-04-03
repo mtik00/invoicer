@@ -9,8 +9,8 @@
 
 {% if form.errors %}
 <ul>
-{% for error in form.errors.values() %}
-      <li>{{ error }}</li>
+{% for item, error in form.errors.items() %}
+      <li>{{ item }}: {{ error }}</li>
 {% endfor %}
 </ul>
 {% endif %}
@@ -43,43 +43,55 @@
 
     <div class="row">
         {% if invoice and invoice.submitted_date %}
-        <div class="col col-md-5">
+        <div class="col col-md-6">
             <div class="form-group">
-                <label for="terms">Terms (number of days)<br/><b>NOTE: You cannot change the terms once the invoice has been submitted</b></label>
-                <input class="form-control" id="terms" name="terms" type="text" value="{{invoice.terms}}" disabled>
+                <label for="terms">Invoice Number*<br/><b>NOTE: You cannot change the invoice number once the invoice has been submitted</b></label>
+                <input class="form-control" type="text" value="{{invoice.number}}" disabled>
+                <input id="number" name="number" type="hidden" value="{{invoice.number}}">
+                {% if form.number.errors %}<small class="text-danger">{{form.number.errors[0]}}</small>{% endif %}
             </div>
         </div>
-        {% elif invoice %}{{ bs_render_field(form.terms, cols=5) }}{% endif %}
+        <div class="col col-md-6">
+            <div class="form-group">
+                <label for="terms">Terms (number of days)<br/><b>NOTE: You cannot change the terms once the invoice has been submitted</b></label>
+                <input class="form-control" type="text" value="{{invoice.terms}}" disabled>
+                <input id="terms" name="terms" type="hidden" value="{{invoice.terms}}">
+                {% if form.terms.errors %}<small class="text-danger">{{form.terms.errors[0]}}</small>{% endif %}
+            </div>
+        </div>
+        {% elif invoice %}{{ bs_render_field(form.number, cols=6, value=invoice.number) }}{{ bs_render_field(form.terms, cols=6) }}{% endif %}
     </div>
 
     <div class="row">
         {% if invoice and invoice.submitted_date %}
-        <div class="col col-md-5">
+        <div class="col col-md-6">
             <div class="form-group">
                 <label for="terms">Submitted Date<br/><b>NOTE: You cannot change the submitted date once the invoice has been submitted</b></label>
-                <input class="form-control" id="submitted_date" name="submitted_date" type="text" value="{{invoice.submitted_date.format('DD-MMM-YYYY').upper()}}" disabled>
+                <input class="form-control" type="text" value="{{invoice.submitted_date.format('DD-MMM-YYYY').upper()}}" disabled>
+                {% if form.submitted_date.errors %}<small class="text-danger">{{form.terms.errors[0]}}</small>{% endif %}
+                <input id="submitted_date" name="submitted_date" type="hidden" value="{{invoice.submitted_date.format('DD-MMM-YYYY').upper()}}">
             </div>
         </div>
-        {% else %}{{ bs_render_field(form.submitted_date, cols=5, id="datepicker1") }}{% endif %}
+        {% else %}{{ bs_render_field(form.submitted_date, cols=6, id="datepicker1") }}{% endif %}
     </div>
 
     <div class="row">
-        <div class="col col-md-5">
+        <div class="col col-md-6">
             <div class="form-group">
-                <label>Paid Date</label>
+                <label for="datepicker2">Paid Date</label>
                 <input class="form-control" id="datepicker2" name="paid_date" type="text" value="{{form.paid_date.data if form.paid_date.data else ''}}">
             </div>
         </div>
-        <div class="col col-md-5">
+        <div class="col col-md-6">
             <div class="form-group">
-                <label>Payment Notes</label>
+                <label for="paid_date_notes">Payment Notes</label>
                 <input class="form-control" id="paid_date_notes" name="paid_date_notes" type="text" value="{{form.paid_date_notes.data if form.paid_date_notes.data else ''}}" placeholder="e.g. Check 123">
             </div>
         </div>
     </div>
 
     <div class="row">
-        {{ bs_render_select(form.invoice_theme, theme_choices, selected=selected_theme if invoice else '', cols=5) }}
+        {{ bs_render_select(form.invoice_theme, theme_choices, selected=selected_theme if invoice else '', cols=6) }}
     </div>
 
     {% if invoice -%}

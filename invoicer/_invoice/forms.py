@@ -21,6 +21,9 @@ class InvoiceForm(FlaskForm):
     terms = IntegerField(u'Terms (number of days)')
     invoice_theme = SelectField('Theme')
 
+    # We can't make the number required because "Add Invoice" won't have one
+    number = StringField(u'Invoice Number')
+
     def populate_obj(self, obj):
         for name, field in iteritems(self._fields):
             if name == 'invoice_theme':
