@@ -2,9 +2,9 @@
 {% set help_step = '6' %}
 {% extends "base.html" %}
 
-{% block extracss %}
+{# block extracss %}
 <link href="{{ url_for('static', filename='css/switch.css') }}" rel="stylesheet" />
-{% endblock %}
+{% endblock #}
 
 {% block content %}
 {% from "_formhelpers.html" import bs_render_field, bs_render_select, bs_render_checkbox, bs_render_checkbox_switch %}
