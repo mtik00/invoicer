@@ -70,6 +70,8 @@ def init_db(sample_data=False, apply_migrations=False):
     for name, data in color_theme_data.items():
         db.session.add(models.InvoiceTheme(name=name, **data))
 
+    db.session.commit()
+
     if apply_migrations:
         try:
             migrate()
