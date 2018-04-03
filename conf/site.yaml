@@ -4,15 +4,15 @@ log_dir: /var/log/invoicer
 
 # uwsgi ini ###################################################################
 # The socket that gets created when uwsgi runs
-socket: <path to socket> # e.g /run/uwsgi/invoicer.sock
+socket: &socket <path to socket> # e.g /run/uwsgi/invoicer.sock
 socket_mode: 664
-chown_socket: <some user name>:nginx  # e.g. myusername:nginx
+chown_socket: &chown_socket <some user name>:nginx  # e.g. myusername:nginx
 
 # Running uwsgi
 uid: <some user name> # e.g. myusername
 gid: nginx
 chdir: /home/<username>/invoicer
-mount: /invoicer # this is the subdirectory in NGINX
+mount: &mount /invoicer # this is the subdirectory in NGINX
 number_of_processes: 5
 
 # Application logging
@@ -24,12 +24,21 @@ logger: file:/var/log/invoicer/error.log
 run_dir: /run/uwsgi
 conda_dir: <some dir>  # e.g. /home/<username>/.conda/envs/invoicer
 conda_env_name: invoicer
+service_name: invoicer.service
+# The service file (invoicer.service) will get copied here
+service_path: /etc/systemd/system
 ###############################################################################
 
-# nginx partial conf ##########################################################
-location: /invoicer
-www_dir: /var/www/invoicer_app
-# `socket` from above is also used
+# nginx config ################################################################
+nginx_location: *mount
+nginx_www_dir: /var/www/invoicer_app
+nginx_www_dir_owner: *chown_socket
+nginx_www_dir_perms: 775
+nginx_socket: *socket
+# This path is where the deploy script will copy the file.  This needs to be
+# added to your nginx site config file.  E.g:
+# `include /etc/nginx/conf.d/invoicer.nginx;
+nginx_file_path: /etc/nginx/conf.d/invoicer.nginx
 ###############################################################################
 
 # fail2ban ####################################################################

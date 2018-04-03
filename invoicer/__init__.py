@@ -3,6 +3,7 @@ import re
 import code
 import time
 import locale
+import shutil
 import zipfile
 
 import click
@@ -193,7 +194,8 @@ def build():
     if not os.path.exists(options_file):
         click.echo('ERROR: Could not find %s' % options_file)
         click.echo('...a sample is located in `conf`')
-        raise Exception('Options file does not exist: %s' % options_file)
+        click.echo('...copy `conf/site.yaml` to your instance folder, and modify it as needed')
+        raise click.Abort()
 
     options = ruamel.yaml.safe_load(open(options_file).read())
 
@@ -223,12 +225,12 @@ def build():
     ###########################################################################
 
     ###########################################################################
-    click.echo('Creating `_build/_nginx_partial.conf')
-    with open(os.path.join(conf_dir, '_nginx_partial.conf.j2')) as fh:
+    click.echo('Creating `_build/invoicer.nginx')
+    with open(os.path.join(conf_dir, 'invoicer.nginx.j2')) as fh:
         template = Template(fh.read())
 
     content = template.render(**options)
-    with open(os.path.join(outdir, '_nginx_partial.conf'), 'wb') as fh:
+    with open(os.path.join(outdir, 'invoicer.nginx'), 'wb') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################

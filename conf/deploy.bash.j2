@@ -15,12 +15,12 @@ if [[ ! -d {{run_dir}} ]]; then
     chown {{chown_socket}} {{run_dir}}
 fi
 
-if [[ ! -d {{www_dir}}/html ]]; then
+if [[ ! -d {{nginx_www_dir}}/html ]]; then
     echo "creating html folder"
-    mkdir -p {{www_dir}}/html
-    chown {{chown_socket}} {{www_dir}}/html
+    mkdir -p {{nginx_www_dir}}/html
+    chown {{chown_socket}} {{nginx_www_dir}}/html
 fi
-chmod -R 775 {{www_dir}}
+chmod -R 775 {{nginx_www_dir}}
 ###############################################################################
 
 if [[ ! -d instance ]]; then
@@ -34,21 +34,38 @@ if [[ ! -e instance/env.sh ]]; then
 fi
 
 # Check the nginx config file #################################################
-# NOTE: We don't use a complete nginx configuration file; it's assumed that the
-# invoicer app will be integrated into the *main* nginx config file
-###############################################################################
+if [[ ! -e {{nginx_file_path}} ]] || [[ `diff _build/invoicer.nginx {{nginx_file_path}}` ]]; then
+    echo "deploying nginx config"
+
+    if [[ -e {{nginx_file_path}} ]]; then
+        # Make a backup of the existing file.  This works because nginx only
+        # looks for ".conf" files.
+        today=`date +%Y-%m-%d-%H:%M:%S`
+        mv {{nginx_file_path}} {{nginx_file_path}}.$today
+    fi
+
+    cp _build/invoicer.nginx {{nginx_file_path}}
+
+    $(nginx -t > /dev/null 2>&1)
+    if [[ ! "$?" -eq 0 ]]; then
+        echo "nginx config file test failed!"
+        exit 1
+    fi
+
+    systemctl restart nginx.service
+fi
 
 # Check the service ###########################################################
-if [[ ! -e {{service_path}} ]]; then
+if [[ ! -e {{service_path}}/{{service_name}} ]]; then
     echo "creating the service"
-    cp _build/invoicer-systemd.service {{service_path}}
-    chmod 755 {{service_path}}
+    cp _build/invoicer-systemd.service {{service_path}}/{{service_name}}
+    chmod 755 {{service_path}}/{{service_name}}
     systemctl daemon-reload
-    systemctl enable hinvoicer.service
-elif [[ -n `diff _build/invoicer-systemd.service {{service_path}}` ]]; then
+    systemctl enable {{service_name}}
+elif [[ -n `diff _build/invoicer-systemd.service {{service_path}}/{{service_name}}` ]]; then
     echo "deploying the service"
-    cp _build/invoicer-systemd.service {{service_path}}
-    chmod 755 {{service_path}}
+    cp _build/invoicer-systemd.service {{service_path}}/{{service_name}}
+    chmod 755 {{service_path}}/{{service_name}}
     systemctl daemon-reload
 else
     echo "no change detected in service script"
@@ -59,13 +76,18 @@ fi
 # instead of passing the requests to our app.  Nginx is **much** better suited
 # for this purpose.
 echo "deploying static folder"
-rm -rf {{www_dir}}/html/*
-cp -r ./invoicer/static {{www_dir}}/html/
-chown -R {{chown_socket}} {{www_dir}}/html
-chmod -R 775 {{www_dir}}
+rm -rf {{nginx_www_dir}}/html/*
+cp -r ../invoicer/static {{nginx_www_dir}}/html/
+chown -R {{nginx_www_dir_owner}} {{nginx_www_dir}}/html
+chmod -R {{nginx_www_dir_perms}} {{nginx_www_dir}}
+
+# Migrate the database as needed
+pushd ..
+flask db migrate
+popd
+
+popd
 
 # We always want to restart the service to pick up the code changes.
 echo "restarting the service"
-systemctl restart invoicer.service
-
-popd
+systemctl restart {{service_name}}

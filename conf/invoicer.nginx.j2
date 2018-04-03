@@ -1,0 +1,16 @@
+# This is a partial Nginx configuration file.  It should be included in your
+# site's main configuration file with: `include /path/to/invoicer.nginx;`
+
+upstream _invoicer_sock {
+    server unix:{{nginx_socket}};
+}
+
+# Allow Nginx to serve our static content before going to the app
+location {{nginx_location}} {
+    try_files $uri @uwsgi;
+}
+
+location @uwsgi {
+    include uwsgi_params;
+    uwsgi_pass _invoicer_sock;
+}

@@ -23,7 +23,9 @@ to its path.
 
 # Initialization
 To initialize the application, follow these steps:
-*   Create a virtual env and run `pip install -r requirements.txt`
+*   Create a virtual env for this project and activate it
+*   Copy/clone the repo
+*   run `pip install -r requirements.txt`
 *   Create the instance folder and `instance/application.cfg`
 *   Run `flask initdb` (you may want to skip adding sample data)
 *   Run `flask add-user` to create the first user
