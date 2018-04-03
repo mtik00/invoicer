@@ -93,6 +93,26 @@ else
     echo "no change detected in {{service_path}}/{{service_name}}"
 fi
 
+# Check fail2ban ##############################################################
+fail2ban=0
+paths=(fail2ban/filter.d/invoicer.local fail2ban/jail.d/local)
+for fname in "${paths[@]}" ; do
+    if [[ ! -e /etc/${fname} ]]; then
+        echo "creating ${fname}"
+        cp _build/${fname} /etc/${fname}
+        ((fail2ban++))
+    elif [[ -n `diff _build/${fname} /etc/${fname}` ]]; then
+        echo "change detected in ${fname}"
+        cp _build/${fname} /etc/${fname}
+        ((fail2ban++))
+    fi
+done
+
+if [[ "${fail2ban}" -gt "0" ]] ; then
+    echo "restarting fail2ban"
+    systemctl restart fail2ban.service
+fi
+
 # Set up our static files.
 # NOTE: The folder will only ever have the static files so Nginx can serve them
 # instead of passing the requests to our app.  Nginx is **much** better suited
