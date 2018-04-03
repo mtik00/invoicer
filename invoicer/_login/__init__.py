@@ -51,9 +51,9 @@ def login():
         login_user(user)
         session['logged_in'] = True
         session['user_debug'] = user.application_settings.debug_mode
-        session['site_theme'] = user.profile.site_theme.name
-        session['site_theme_top'] = user.profile.site_theme.top
-        session['site_theme_bottom'] = user.profile.site_theme.bottom
+        session['site_theme'] = user.profile.site_theme.name if user.profile.site_theme else 'black'
+        session['site_theme_top'] = user.profile.site_theme.top if user.profile.site_theme else '#777777'
+        session['site_theme_bottom'] = user.profile.site_theme.bottom if user.profile.site_theme else '#777777'
 
         flash('You were logged in', 'success')
 
