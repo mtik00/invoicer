@@ -690,7 +690,7 @@ def bs4_invoice(user_id, invoice_number):
         submit_address=submit_address,
         terms=terms,
         overdue=invoice.overdue(),
-        theme=get_color_theme_data()[invoice_theme.name]
+        theme=get_color_theme_data()[invoice_theme]
     )
 
 
