@@ -3,7 +3,7 @@
 # target host.
 
 # Make sure we bring in any changes to python #################################
-pip install -r rquirements.txt
+pip install -e .
 ###############################################################################
 
 # make sure the build directory is clear
