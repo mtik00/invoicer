@@ -12,8 +12,8 @@ rm -rf _build/*
 # build the config files
 flask build
 
-# Migrate the database
-flask db migrate
+# Upgrade the database
+flask db upgrade
 
 # bootstrap the built deploy file
-bash _build/deploy.bash
+sudo bash _build/deploy.bash
