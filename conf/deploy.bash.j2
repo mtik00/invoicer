@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-pushd $BASEDIR
 
 # Check the folders ###########################################################
 if [[ ! -d {{app_log_dir}} ]]; then
@@ -82,11 +80,7 @@ chown -R {{nginx_www_dir_owner}} {{nginx_www_dir}}/html
 chmod -R {{nginx_www_dir_perms}} {{nginx_www_dir}}
 
 # Migrate the database as needed
-pushd ..
 flask db migrate
-popd
-
-popd
 
 # We always want to restart the service to pick up the code changes.
 echo "restarting the service"
