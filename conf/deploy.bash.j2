@@ -95,7 +95,7 @@ fi
 
 # Check fail2ban ##############################################################
 fail2ban=0
-paths=(fail2ban/filter.d/invoicer.local fail2ban/jail.d/local)
+paths=(fail2ban/filter.d/invoicer.local fail2ban/jail.d/invoicer.local)
 for fname in "${paths[@]}" ; do
     if [[ ! -e /etc/${fname} ]]; then
         echo "creating ${fname}"
