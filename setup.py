@@ -21,5 +21,6 @@ setup(
     ],
     extras_require={
         'test': ['pytest-flask==0.10.0', 'flake8'],
+        'manage': ['Fabric==1.14.0']
     },
 )
