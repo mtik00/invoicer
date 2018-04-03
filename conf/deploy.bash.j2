@@ -79,9 +79,6 @@ cp -r ../invoicer/static {{nginx_www_dir}}/html/
 chown -R {{nginx_www_dir_owner}} {{nginx_www_dir}}/html
 chmod -R {{nginx_www_dir_perms}} {{nginx_www_dir}}
 
-# Migrate the database as needed
-flask db migrate
-
 # We always want to restart the service to pick up the code changes.
 echo "restarting the service"
 systemctl restart {{service_name}}
