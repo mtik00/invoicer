@@ -26,10 +26,10 @@ To initialize the application, follow these steps:
 *   Create a virtual env for this project and activate it:  
     `conda create -n invoicer python=2`  
     `source activate invoicer`
-*   Copy/clone the repo
+*   Copy/clone the repository
 *   Install the package  
     dev environment: `pip install -e .[test,manage]`  
-    run environment: `pip install -e .`
+    run environment: `pip install -e .[memcached]`
 *   Create the instance folder and `instance/application.cfg`  
     `mkdir instance && touch instance/application.cfg`
 *   Create an `env.sh` file:  
@@ -161,3 +161,21 @@ should notice right away.
 Inside the 'conf' folder you'll find a subfolder for `fail2ban` configuration.
 The log file that gets parsed is `invoicer.logger.AUTH_LOG`.  This defaults
 to `/var/log/invoicer/auth.log`.  This makes it easy to search for bad people.
+
+# Caching
+Invoicer supports caching through `Flask-Caching`.  The default is to use
+`CACHE_TYPE = 'simple'`.  You can modify this by changing `CACHE_CONFIG` in
+`instance/application.cfg`.
+
+For example, to use `memcached`:  
+```python
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'memcached',
+    'CACHE_MEMCACHED_SERVERS': ('127.0.0.1',),
+    'CACHE_KEY_PREFIX': 'invoicer-',
+    'CACHE_DEFAULT_TIMEOUT': 300
+}
+```
+
+NOTE: `setup.py` requires `python-memcached` for simplicity (when installing on
+Linux).
