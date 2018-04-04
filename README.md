@@ -177,5 +177,5 @@ CACHE_CONFIG = {
 }
 ```
 
-NOTE: `setup.py` requires `python-memcached` for simplicity (when installing on
-Linux).
+NOTE: You can install `python-memcached` along with invoicer by using some
+version of `pip install .[memcached]`.

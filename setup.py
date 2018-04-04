@@ -23,6 +23,6 @@ setup(
     extras_require={
         'test': ['pytest-flask==0.10.0', 'flake8'],
         'manage': ['Fabric==1.14.0'],
-        'memcached': ['python-memcached==1.59;platform_system=="Linux"']
+        'memcached': ['python-memcached==1.59']
     },
 )
