@@ -79,7 +79,10 @@ def create_app():
     db.init_app(app)
     app.db = db
     Migrate(app, db)
-    app_cache.init_app(app)
+
+    cache_config = app.config.get('CACHE_CONFIG') or {'CACHE_TYPE': 'simple'}
+    app_cache.init_app(app, config=cache_config)
+
     login_manager.init_app(app)
 
     return app
