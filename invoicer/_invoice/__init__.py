@@ -270,6 +270,10 @@ def update_item(invoice_number, item_id):
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/update', methods=["GET", "POST"])
 @login_required
 def update(invoice_number):
+    if 'cancel' in request.form:
+        flash('invoice updated canceled', 'warning')
+        return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
+
     invoice = Invoice.query.filter_by(number=invoice_number, user_id=current_user.id).first_or_404()
 
     customers = Customer.query.filter_by(user_id=current_user.id).all()
@@ -294,8 +298,6 @@ def update(invoice_number):
         # Set the default theme only for `GET` or the value will never change.
         form.customer.process_data(invoice.customer_id)
         form.invoice_theme.process_data(selected_theme)
-    elif request.method == 'POST' and ('cancel' in request.form):
-        flash('invoice updated canceled', 'warning')
     elif form.validate_on_submit():
         submitted_date = invoice.submitted_date
         if form.submitted_date.data:
