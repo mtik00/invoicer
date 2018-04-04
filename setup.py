@@ -18,7 +18,8 @@ setup(
         'premailer==3.1.1',
         'ruamel.yaml==0.15.37',
         'SQLAlchemy-Utils==0.32.21',
-        'uwsgi==2.0.17;platform_system=="Linux"'
+        'uwsgi==2.0.17;platform_system=="Linux"',
+        'python-memcached==1.59;platform_system=="Linux"'
     ],
     extras_require={
         'test': ['pytest-flask==0.10.0', 'flake8'],
