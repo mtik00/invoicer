@@ -234,6 +234,11 @@ class User(db.Model, UserMixin):
 
     is_active = db.Column(db.Boolean, default=True)
 
+    # Set this to True if you've changed the password-hashing configuration.
+    # This will cause the app to re-hash the user's plain-text password and
+    # store it in the DB.
+    rehash_password = db.Column(db.Boolean, default=False)
+
     def __repr__(self):
         return '<User %r>' % (self.username)
 
