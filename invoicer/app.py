@@ -62,7 +62,9 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_envvar('INVOICER_SETTINGS', silent=True)
+
     app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
+    password_hasher.reset(**app.config.get('ARGON2_CONFIG', {}))
 
     app.url_map.converters['regex'] = RegexConverter
 
@@ -76,8 +78,6 @@ def create_app():
 
     if app.config.get('SESSION_TIMEOUT_MINUTES'):
         app.before_request(make_session_permanent)
-
-    password_hasher.set(time_cost=app.config.get('ARGON2_TIMECOST', 99))
 
     db.init_app(app)
     app.db = db

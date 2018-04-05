@@ -1,21 +1,18 @@
-from argon2 import (
-    PasswordHasher, DEFAULT_HASH_LENGTH, DEFAULT_MEMORY_COST,
-    DEFAULT_PARALLELISM, DEFAULT_RANDOM_SALT_LENGTH, DEFAULT_TIME_COST
-)
+from argon2 import PasswordHasher
 
 
 class Hasher(object):
+    '''
+    This object is used to create and verify password hashes.
+    '''
     def __init__(self):
         self._hasher = PasswordHasher()
 
-    def set(
-        self, time_cost=DEFAULT_TIME_COST, memory_cost=DEFAULT_MEMORY_COST,
-        parallelism=DEFAULT_PARALLELISM, hash_len=DEFAULT_HASH_LENGTH,
-        salt_len=DEFAULT_RANDOM_SALT_LENGTH
-    ):
-        self._hasher = PasswordHasher(
-            time_cost=time_cost, memory_cost=memory_cost, parallelism=parallelism,
-            hash_len=hash_len, salt_len=salt_len)
+    def reset(self, *args, **kwargs):
+        '''
+        Reset the hasher arguments.
+        '''
+        self._hasher = PasswordHasher(*args, **kwargs)
 
     def hash(self, password):
         return self._hasher.hash(password)
@@ -32,4 +29,7 @@ def hash_password(password=''):
 
 
 def verify_password(hashed_password, password):
+    '''
+    :raises: argon2.exceptions.VerifyMismatchError
+    '''
     return password_hasher.verify(hashed_password, password)
