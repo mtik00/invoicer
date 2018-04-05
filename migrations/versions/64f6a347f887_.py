@@ -26,4 +26,3 @@ def downgrade():
     '''Remove `rehash_password` from `users`'''
     with op.batch_alter_table("users") as batch_op:
         batch_op.drop_column('rehash_password')
-

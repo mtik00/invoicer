@@ -13,7 +13,9 @@ import ruamel.yaml
 
 from .app import create_app
 from .submitter import sendmail
-from .database import init_db, export as export_db, import_clean_json, add_user
+from .database import (
+    init_db, export as export_db, import_clean_json, add_user,
+    rehash_passwords as force_rehash_passwords)
 from .models import Customer
 
 
@@ -273,3 +275,17 @@ def build():
         fh.write(content)
     click.echo('...done')
     ###########################################################################
+
+
+@app.cli.command('rehash-passwords')
+def rehash_passwords():
+    '''
+    App will rehash user passwords next time they log in
+    '''
+    try:
+        force_rehash_passwords()
+    except Exception as e:
+        click.echo('Operation failed: %s' % e)
+        return
+
+    click.echo("User's passwords are set to be re-hashed")

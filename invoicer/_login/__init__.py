@@ -6,9 +6,10 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from .forms import LoginForm
 from ..common import is_safe_url
-from ..password import verify_password
+from ..password import verify_password, hash_password
 from ..models import User
 from ..logger import AUTH_LOG
+from ..database import db
 
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
@@ -47,6 +48,12 @@ def login():
         if not user.is_active:
             flash('You account is not active', 'error')
             return redirect(url_for('.login'), code=401)
+
+        if getattr(user, 'rehash_password', False):
+            user.hashed_password = hash_password(form.password.data)
+            user.rehash_password = False
+            db.session.add(user)
+            db.session.commit()
 
         login_user(user)
         session['logged_in'] = True

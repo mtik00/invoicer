@@ -393,3 +393,17 @@ def add_user(username, password):
 
     db.session.add(user)
     db.session.commit()
+
+
+def rehash_passwords():
+    """
+    Set's a flag in all user models so the app will re-hash their password
+    the next time they log in.
+    """
+    import models
+    for user in models.User.query.all():
+        user.rehash_password = True
+        db.session.add(user)
+
+    db.session.commit()
+    return True
