@@ -25,11 +25,11 @@ def login():
     hashed_password = ''
 
     if form.validate_on_submit():
-        user = User.query.filter(User.username == form.username.data).first()
+        user = User.query.filter(User.username == form.username.data[:1024]).first()
         hashed_password = user.hashed_password if user else ''
 
         try:
-            verify_password(hashed_password, form.password.data)
+            verify_password(hashed_password, form.password.data[:1024])
         except Exception:
             error = True
 
@@ -38,7 +38,7 @@ def login():
             # fail2ban filter.
             AUTH_LOG.error(
                 "Invalid login for username [{0}] from [{1}]".format(
-                    form.username.data,
+                    form.username.data[:1024],
                     request.remote_addr)
             )
 
@@ -50,7 +50,7 @@ def login():
             return redirect(url_for('.login'), code=401)
 
         if getattr(user, 'rehash_password', False):
-            user.hashed_password = hash_password(form.password.data)
+            user.hashed_password = hash_password(form.password.data[:1024])
             user.rehash_password = False
             db.session.add(user)
             db.session.commit()

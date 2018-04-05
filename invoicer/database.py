@@ -377,6 +377,12 @@ def add_user(username, password):
     Adds a new user to the database.
     """
     import models
+
+    if len(username) > 1024:
+        raise ValueError('username cannot be more than 1024 characters')
+    elif len(password) > 1024:
+        raise ValueError('password cannot be more than 1024 characters')
+
     hashed_password = hash_password(password)
 
     profile = models.Profile()

@@ -64,6 +64,7 @@
                                     <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                                     <input name="username" placeholder="Username" class="form-control" type="text" required autofocus>
                                 </div>
+                                {% if form.username.errors %}<small class="text-danger">{{form.username.errors[0]}}</small>{% endif %}
                             </div>
                         </div>
                         <div class="form-group">
@@ -72,6 +73,7 @@
                                     <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
                                     <input name="password" placeholder="Password" class="form-control" type="password" required>
                                 </div>
+                                {% if form.password.errors %}<small class="text-danger">{{form.password.errors[0]}}</small>{% endif %}
                             </div>
                         </div>
                         <div class="form-group">
