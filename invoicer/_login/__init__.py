@@ -94,10 +94,10 @@ def two_fa():
 
 
 def complete_login(user):
-    # import pdb; pdb.set_trace()
     login_user(user)
     current_user.is_authenticated = True
     db.session.commit()
+
     session['logged_in'] = True
     session['user_debug'] = user.application_settings.debug_mode
     session['site_theme'] = user.profile.site_theme.name if user.profile.site_theme else 'black'
