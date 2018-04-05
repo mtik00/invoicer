@@ -4,12 +4,12 @@ from flask import (
 
 from flask_login import login_user, logout_user, login_required, current_user
 
-from .forms import LoginForm
 from ..common import is_safe_url
 from ..password import verify_password, hash_password
 from ..models import User
 from ..logger import AUTH_LOG
 from ..database import db
+from .forms import LoginForm, TwoFAEnableForm
 
 
 login_page = Blueprint('login_page', __name__, template_folder='templates')
@@ -17,7 +17,7 @@ login_page = Blueprint('login_page', __name__, template_folder='templates')
 
 @login_page.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         return redirect(url_for('index_page.dashboard'))
 
     form = LoginForm(request.form)
@@ -55,20 +55,11 @@ def login():
             db.session.add(user)
             db.session.commit()
 
-        login_user(user)
-        session['logged_in'] = True
-        session['user_debug'] = user.application_settings.debug_mode
-        session['site_theme'] = user.profile.site_theme.name if user.profile.site_theme else 'black'
-        session['site_theme_top'] = user.profile.site_theme.top if user.profile.site_theme else '#777777'
-        session['site_theme_bottom'] = user.profile.site_theme.bottom if user.profile.site_theme else '#777777'
+        if user.totp_enabled:
+            session['user_id'] = user.id
+            return redirect(url_for('.two_fa'))
 
-        flash('You were logged in', 'success')
-
-        next_url = request.form.get('next')
-        if not is_safe_url(next_url):
-            return abort(400)
-
-        return redirect(next_url or url_for('index_page.dashboard'))
+        return complete_login(user)
     elif form.errors:
         flash(', '.join(form.errors), 'error')
 
@@ -78,8 +69,45 @@ def login():
 @login_page.route('/logout')
 @login_required
 def logout():
+    current_user.is_authenticated = False
+    db.session.commit()
     session.pop('logged_in', None)
     session.pop('user_id', None)
     logout_user()
     flash('You were logged out', 'success')
     return redirect(url_for('.login'))
+
+
+@login_page.route('/2fa', methods=['GET', 'POST'])
+def two_fa():
+    user = User.query.get(session['user_id'])
+    form = TwoFAEnableForm()
+
+    if form.validate_on_submit():
+        if current_user.verify_totp(form.token.data):
+            return complete_login(user)
+        else:
+            flash('Invalid 2FA token', 'error')
+            form.token.errors = ['Invalid 2FA token']
+
+    return render_template('login/2fa.html', form=form)
+
+
+def complete_login(user):
+    # import pdb; pdb.set_trace()
+    login_user(user)
+    current_user.is_authenticated = True
+    db.session.commit()
+    session['logged_in'] = True
+    session['user_debug'] = user.application_settings.debug_mode
+    session['site_theme'] = user.profile.site_theme.name if user.profile.site_theme else 'black'
+    session['site_theme_top'] = user.profile.site_theme.top if user.profile.site_theme else '#777777'
+    session['site_theme_bottom'] = user.profile.site_theme.bottom if user.profile.site_theme else '#777777'
+
+    flash('You were logged in', 'success')
+
+    next_url = request.form.get('next')
+    if not is_safe_url(next_url):
+        return abort(400)
+
+    return redirect(next_url or url_for('index_page.dashboard'))

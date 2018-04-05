@@ -3,16 +3,16 @@
     Usage:
         :param str delete_url: The URL of the POST endpoint to handle
 #}
-{% macro render_delete_modal() %}
+{% macro render_delete_modal(title='Delete', message='Enter DELETE in the input box below to really delete this item') %}
 <div class="modal fade modal-primary" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-light">
-                <h2>Delete</h2>
+                <h2>{{title}}</h2>
             </div>
             <div class="modal-body">
                 <p>WARNING: This action cannot be undone</p>
-                <p>Enter DELETE in the input box below to really delete this item</p>
+                <p>{{message}}</p>
                 <input class="form-control" id="validate_delete" name='validate_delete' autofocus>
             </div>
             <div class="modal-footer">

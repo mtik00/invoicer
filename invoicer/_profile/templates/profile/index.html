@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "_modals.html" import render_delete_modal %}
+
 {% block topleftnav %}
 {% if profile %}{% set action = 'Edit' %}{% else %}{% set action = 'Create' %}{% endif %}
 <ul class="nav navbar-nav mr-auto">
@@ -6,6 +8,17 @@
         <a class="nav-link" title="{{action}} Settings" href="{{url_for('profile_page.edit')}}">
             {{action}} Profile
         </a>
+    </li>
+    <li class="nav-item">
+        {% if current_user.totp_enabled %}
+        {#<a class="nav-link" title="Disable 2FA" href="{{url_for('profile_page.edit')}}">Disable 2FA</a>#}
+        <form action="{{url_for('profile_page.disable_2fa')}}" method="POST">
+            <input type="hidden" id="delete_modal_target" name="delete_modal_target" value="">
+            <a class="nav-link" data-toggle="modal" data-target="#delete-modal" href="#">Disable 2FA</a>
+        </form>
+        {% else %}
+        <a class="nav-link" title="Enable 2FA" href="{{url_for('profile_page.enable_2fa')}}">Enable 2FA</a>
+        {% endif %}
     </li>
 </ul>
 {% endblock %}
@@ -30,6 +43,8 @@
             <dd>Number of invoices per page: {{profile.index_items_per_page}}</dd>
             <dd>&nbsp;</dd>
             <dd>Enable PDF: {{profile.enable_pdf}}</dd>
+            <dd>&nbsp;</dd>
+            <dd>2FA Enabled: {{current_user.totp_enabled}}</dd>
         </dl>
         {% else %}
         No profile yet<br>
@@ -37,4 +52,9 @@
     </div>
 </div>
 
+{{ render_delete_modal(title='Disable 2FA', message='Enter DELETE in the input box below to really delete your 2FA credentials') }}
+{% endblock %}
+
+{% block extrascripts %}
+<script src="{{ url_for('static', filename='js/delete_modal.js') }}"></script>
 {% endblock %}

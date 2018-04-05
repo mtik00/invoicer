@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+{% from "_formhelpers.html" import bs_render_field %}
+
+<div class="card col-md-5">
+    <div class="card-body">
+        <div class="text-center">
+            <img src="{{ qrcode(qr_uri) }}">
+        </div>
+        <p>This is a "QR code".  You can use an application on your phone, like
+            Google Authenticator or Authy, to scan the code.  Once that's done,
+            you should see a 6 digit number that changes every 30 seconds.
+        </p>
+        <p>Enter that number here, and press Submit:</p>
+        <form action="{{url_for('profile_page.enable_2fa')}}" method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                {{ bs_render_field(form.token) }}
+            </div>
+            <input class="btn btn-info btn-fill" type=submit value="Submit">
+            <input type=submit value="Cancel" name="cancel" class="btn btn-fill pull-right text-light">
+        </form>
+    </div>
+</div>
+
+{% endblock %}

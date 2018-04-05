@@ -4,6 +4,7 @@ from datetime import timedelta
 from flask import Flask, current_app, session
 from werkzeug.routing import BaseConverter
 from flask_migrate import Migrate
+from flask_qrcode import QRcode
 
 from .database import db
 from .cache import app_cache
@@ -82,6 +83,7 @@ def create_app():
     db.init_app(app)
     app.db = db
     Migrate(app, db)
+    QRcode(app)
 
     cache_config = app.config.get('CACHE_CONFIG') or {'CACHE_TYPE': 'simple'}
     app_cache.init_app(app, config=cache_config)

@@ -1,4 +1,5 @@
 import arrow
+import pyotp
 from sqlalchemy import event, UniqueConstraint
 from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
@@ -217,7 +218,7 @@ class InvoicePaidDate(db.Model):
         return '<InvoicePaidDate %r>' % (self.paid_date)
 
 
-class User(db.Model, UserMixin):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150))
@@ -233,14 +234,27 @@ class User(db.Model, UserMixin):
     application_settings = db.relationship('ApplicationSettings', foreign_keys=application_settings_id, post_update=True)
 
     is_active = db.Column(db.Boolean, default=True)
+    is_authenticated = db.Column(db.Boolean, default=False)
 
     # Set this to True if you've changed the password-hashing configuration.
     # This will cause the app to re-hash the user's plain-text password and
     # store it in the DB.
     rehash_password = db.Column(db.Boolean, default=False)
 
+    totp_secret = db.Column(db.String(16))
+    totp_enabled = db.Column(db.Boolean, default=False)
+
     def __repr__(self):
         return '<User %r>' % (self.username)
+
+    def get_totp_uri(self):
+        return pyotp.TOTP(self.totp_secret).provisioning_uri(
+            self.username,
+            issuer_name='Invoicer App'
+        )
+
+    def verify_totp(self, token, for_time=None, window=2):
+        return pyotp.TOTP(self.totp_secret).verify(token, for_time=for_time, valid_window=window)
 
 
 class ApplicationSettings(db.Model):

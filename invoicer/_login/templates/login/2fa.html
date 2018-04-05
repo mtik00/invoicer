@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Invoicer | 2FA Login</title>
+    <style>
+        body {
+            background-image: linear-gradient(#14567F, #14567F);
+        }
+
+        #box {
+            border: 1px solid rgb(200, 200, 200);
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 5px 2px;
+            background: rgba(200, 200, 200, 0.1);
+            border-radius: 4px;
+            top:50px;
+        }
+
+        h2 {
+            text-align:center;
+            color:#fff;
+        }
+
+        .alert {
+            margin-bottom: 1em;
+            padding: 1em;
+        }
+
+        .error {
+            color: white;
+            background-color: red;
+            opacity: .7;
+        }
+
+        .success {
+            color: white;
+            background-color: #339933;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row-fluid d-flex justify-content-center" >
+            <div class="col-md-offset-4 col-md-4" id="box">
+                <h2>2FA Login</h2>
+                <hr>
+                <form class="form-horizontal" action="{{ url_for('login_page.two_fa') }}" method="POST" id="twofa_login">
+                    <fieldset>
+                        {% for category, message in get_flashed_messages(with_categories=True) %}
+                        <div class="row alert {{category}}">
+                            <span><b> {{category.upper()}} - </b> {{message}}</span>
+                        </div>
+                        {% endfor %}
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="text-white" for="token">Please enter the 2FA token from your app</label>
+                                    <input name="token" placeholder="2FA Token" class="form-control" type="text" required autofocus>
+                                </div>
+                                {% if form.token.errors %}<small class="text-danger">{{form.token.errors[0]}}</small>{% endif %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-md btn-danger pull-right">Login </button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </body>

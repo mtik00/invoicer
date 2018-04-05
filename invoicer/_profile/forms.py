@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, IntegerField, BooleanField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SelectField, IntegerField, BooleanField, HiddenField
+from wtforms.validators import DataRequired, Regexp
 from wtforms.compat import iteritems
 
 from ..models import InvoiceTheme, SiteTheme
@@ -32,3 +32,8 @@ class ProfileForm(FlaskForm):
 
         obj.site_theme = SiteTheme.query.filter_by(name=self.site_theme.data).first()
         obj.invoice_theme = InvoiceTheme.query.filter_by(name=self.invoice_theme.data).first()
+
+
+class TwoFAEnableForm(FlaskForm):
+    qr_uri = HiddenField()
+    token = StringField('2FA Token', validators=[Regexp('\d{6}', message='Token must be 6 digits')])

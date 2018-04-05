@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
+import pyotp
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_required, current_user
 
 from ..models import Profile, User, InvoiceTheme, SiteTheme
 from ..database import db
 from ..cache import app_cache
-from .forms import ProfileForm
+from .forms import ProfileForm, TwoFAEnableForm
 
 profile_page = Blueprint('profile_page', __name__, template_folder='templates')
 
@@ -88,3 +89,54 @@ def edit():
     return render_template(
         'profile/profile_form.html', form=form, profile=user.profile,
         theme_choices=theme_choices, site_theme_choices=site_theme_choices)
+
+
+@profile_page.route('/enable-2fa', methods=["GET", "POST"])
+@login_required
+def enable_2fa():
+    if 'cancel' in request.form:
+        current_user.totp_secret = None
+        current_user.totp_enabled = False
+        db.session.commit()
+
+        flash('2FA enable canceled', 'warning')
+        return redirect(url_for('profile_page.index'))
+
+    if not current_user.totp_secret:
+        current_user.totp_secret = pyotp.random_base32()
+        db.session.commit()
+
+    qr_uri = current_user.get_totp_uri()
+    form = TwoFAEnableForm(request.form, qr_uri=qr_uri)
+
+    if form.validate_on_submit():
+        if current_user.verify_totp(form.token.data):
+            current_user.totp_enabled = True
+            db.session.commit()
+            flash('2FA authentication enabled', 'success')
+            return redirect(url_for('profile_page.index'))
+        else:
+            flash('Invalid 2FA token', 'error')
+            form.token.errors = ['Invalid 2FA token']
+
+    return render_template(
+        'profile/enable_2fa.html', qr_uri=qr_uri, form=form
+    ), 200, {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    }
+
+
+@profile_page.route('/disable-2fa', methods=["POST"])
+@login_required
+def disable_2fa():
+    '''Disables 2FA'''
+
+    # Re-generate the secret so the next time they enable 2FA it's different
+    current_user.totp_secret = pyotp.random_base32()
+    current_user.totp_enabled = False
+    db.session.commit()
+
+    flash('2FA has been disabled', 'warning')
+    return redirect(url_for('profile_page.index'))
