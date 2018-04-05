@@ -179,3 +179,29 @@ CACHE_CONFIG = {
 
 NOTE: You can install `python-memcached` along with invoicer by using some
 version of `pip install .[memcached]`.
+
+# Password storage
+Password hashes are stored in the `User` model using
+[Argon2](https://argon2-cffi.readthedocs.io/en/stable/).  The default options
+will be used unless you specify different options in `instance/application.cfg`.
+
+To modify some or all of the options, use this data structure:
+```python
+ARGON2_CONFIG = {
+    'time_cost': 10,
+    # 'memory_cost': 512,
+    # 'parallelism': 2,
+    # 'hash_len': 16,
+    # 'salt_len': 16
+}
+```
+This will be passed to the `argon2.PasswordHasher()` contructor.
+
+You can also change these settings at a later point in time (e.g. to increase
+complexity).  If you change them in your application, be sure to use the
+`flask rehash-passwords` CLI command.  This will set a bit in the `User` model
+that will tell the application to re-hash the user's password and store it in
+the database.  This will only occur once.
+
+See the `argon2_cffi` documentation for some recommendations:
+https://argon2-cffi.readthedocs.io/en/stable/cli.html
