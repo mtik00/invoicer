@@ -3,13 +3,12 @@ import re
 import code
 import time
 import locale
-import shutil
 import zipfile
 
 import click
 import arrow
 from wtforms import Field
-from jinja2 import Template, Environment, StrictUndefined, FileSystemLoader
+from jinja2 import Environment, StrictUndefined, FileSystemLoader
 import ruamel.yaml
 
 from .app import create_app

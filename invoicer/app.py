@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from .database import db
 from .cache import app_cache
 from .login_manager import login_manager
+from .password import password_hasher
 
 from ._index import index_page
 from ._profile import profile_page
@@ -75,6 +76,8 @@ def create_app():
 
     if app.config.get('SESSION_TIMEOUT_MINUTES'):
         app.before_request(make_session_permanent)
+
+    password_hasher.set(time_cost=app.config.get('ARGON2_TIMECOST', 99))
 
     db.init_app(app)
     app.db = db
