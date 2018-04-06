@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+today=`date +%Y-%m-%d-%H:%M:%S`
 
 # Check the folders ###########################################################
 if [[ ! -d {{app_log_dir}} ]]; then
@@ -37,7 +38,7 @@ if [[ ! -e {{nginx_upstream_file_path}} ]] || [[ `diff _build/invoicer-upstream.
     if [[ -e {{nginx_upstream_file_path}} ]]; then
         # Make a backup of the existing file.  This works because nginx only
         # looks for ".conf" files.
-        today=`date +%Y-%m-%d-%H:%M:%S`
+        echo "backing up existing nginx upstream config"
         mv {{nginx_upstream_file_path}} {{nginx_upstream_file_path}}.$today
     fi
 
@@ -60,7 +61,7 @@ if [[ ! -e {{nginx_location_file_path}} ]] || [[ `diff _build/invoicer-location.
     if [[ -e {{nginx_location_file_path}} ]]; then
         # Make a backup of the existing file.  This works because nginx only
         # looks for ".conf" files.
-        today=`date +%Y-%m-%d-%H:%M:%S`
+        echo "backing up existing nginx location config"
         mv {{nginx_location_file_path}} {{nginx_location_file_path}}.$today
     fi
 
@@ -85,6 +86,9 @@ if [[ ! -e {{service_path}}/{{service_name}} ]]; then
     systemctl daemon-reload
     systemctl enable {{service_name}}
 elif [[ -n `diff _build/invoicer-systemd.service {{service_path}}/{{service_name}}` ]]; then
+    echo "backing up existing service file"
+    mv {{service_path}}/{{service_name}} {{service_path}}/{{service_name}}.$today
+
     echo "deploying the service"
     cp _build/invoicer-systemd.service {{service_path}}/{{service_name}}
     chmod 755 {{service_path}}/{{service_name}}
@@ -103,6 +107,10 @@ for fname in "${paths[@]}" ; do
         ((fail2ban++))
     elif [[ -n `diff _build/${fname} /etc/${fname}` ]]; then
         echo "change detected in ${fname}"
+
+        echo "backing up /etc/${fname}"
+        mv /etc/${fname} /etc/${fname}.$today
+
         cp _build/${fname} /etc/${fname}
         ((fail2ban++))
     fi

@@ -1,8 +1,9 @@
 # This is a partial Nginx configuration file.  It should be included in your
 # site's main configuration file inside the server block:
 # `include {{nginx_location_file_path}};`
+# NOTE: You may need move the location of the `include` line depending on your config.
 
-# Allow Nginx to serve our static content before going to the app
+# Allow Nginx to serve our static content before going to the app.
 location {{nginx_location}} {
     try_files $uri @invoicer_app_uwsgi;
 }
