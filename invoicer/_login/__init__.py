@@ -15,11 +15,27 @@ from .forms import LoginForm, TwoFAEnableForm
 login_page = Blueprint('login_page', __name__, template_folder='templates')
 
 
+def get_redirect_target():
+    for target in request.values.get('next'), request.referrer:
+        if not target:
+            continue
+        if is_safe_url(target):
+            return target
+
+
+def redirect_back(endpoint, **values):
+    target = request.form['next']
+    if not target or not is_safe_url(target):
+        target = url_for(endpoint, **values)
+    return redirect(target)
+
+
 @login_page.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user and current_user.is_authenticated:
         return redirect(url_for('index_page.dashboard'))
 
+    next_url = get_redirect_target()
     form = LoginForm(request.form)
     error = False
     hashed_password = ''
@@ -43,7 +59,7 @@ def login():
             )
 
             flash('Invalid username and/or password', 'error')
-            return redirect(url_for('.login'), code=401)
+            return render_template('login/login.html', form=form, next_url=next_url), 401
 
         if not user.is_active:
             flash('You account is not active', 'error')
@@ -57,13 +73,13 @@ def login():
 
         if user.totp_enabled:
             session['user_id'] = user.id
-            return redirect(url_for('.two_fa'))
+            return redirect(url_for('.two_fa', next=next_url))
 
         return complete_login(user)
     elif form.errors:
         flash(', '.join(form.errors), 'error')
 
-    return render_template('login/login.html', form=form)
+    return render_template('login/login.html', form=form, next_url=next_url)
 
 
 @login_page.route('/logout')
@@ -79,7 +95,8 @@ def logout():
 
 
 @login_page.route('/2fa', methods=['GET', 'POST'])
-def two_fa():
+def two_fa(next=None):
+    next_url = next or get_redirect_target()
     user = User.query.get(session['user_id'])
     form = TwoFAEnableForm()
 
@@ -90,7 +107,7 @@ def two_fa():
             flash('Invalid 2FA token', 'error')
             form.token.errors = ['Invalid 2FA token']
 
-    return render_template('login/2fa.html', form=form)
+    return render_template('login/2fa.html', form=form, next_url=next_url)
 
 
 def complete_login(user):
@@ -106,8 +123,4 @@ def complete_login(user):
 
     flash('You were logged in', 'success')
 
-    next_url = request.form.get('next')
-    if not is_safe_url(next_url):
-        return abort(400)
-
-    return redirect(next_url or url_for('index_page.dashboard'))
+    return redirect_back('index_page.dashboard')

@@ -57,7 +57,6 @@
                         </div>
                         {% endfor %}
                         {{ form.hidden_tag() }}
-                        <input type="hidden" value="{{ request.args.get('next', '') }}" name="next"/>
                         <div class="form-group">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -73,6 +72,7 @@
                             </div>
                         </div>
                     </fieldset>
+                    <input type=hidden value="{{ next_url or '' }}" name=next>
                 </form>
             </div>
         </div>
