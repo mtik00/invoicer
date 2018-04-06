@@ -205,3 +205,11 @@ the database.  This will only occur once.
 
 See the `argon2_cffi` documentation for some recommendations:
 https://argon2-cffi.readthedocs.io/en/stable/cli.html
+
+# Two Factor Authentication
+2FA is provided by `pyotp` and `Flask-QRCode`.  Users can enable/disable 2FA
+from the profile page.
+
+# Adding Users
+I purposefully let out registration and user management.  The only supported
+way of adding users is by using `flask add-user`.
