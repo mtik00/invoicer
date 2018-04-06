@@ -1,6 +1,5 @@
 from flask import (
-    Blueprint, render_template, request, flash, redirect, url_for, session,
-    abort)
+    Blueprint, render_template, request, flash, redirect, url_for, session)
 
 from flask_login import login_user, logout_user, login_required, current_user
 
