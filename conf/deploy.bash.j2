@@ -117,8 +117,8 @@ for fname in "${paths[@]}" ; do
 done
 
 if [[ "${fail2ban}" -gt "0" ]] ; then
-    echo "restarting fail2ban"
-    systemctl restart fail2ban.service
+    echo "restarting fail2ban:invoicer"
+    fail2ban-client reload invoicer
 fi
 
 # Set up our static files.
