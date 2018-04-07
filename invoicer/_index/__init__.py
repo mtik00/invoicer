@@ -9,6 +9,12 @@ from ..models import Invoice
 from ..cache import app_cache
 
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
+
 index_page = Blueprint('index_page', __name__, template_folder='templates')
 
 

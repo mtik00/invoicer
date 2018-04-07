@@ -9,6 +9,12 @@ from flask import session
 from .database import db
 
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
+
 class Profile(db.Model):
     __tablename__ = 'profiles'
     id = db.Column(db.Integer, primary_key=True)

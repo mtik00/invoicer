@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import re
 import code
@@ -86,7 +87,7 @@ def remove_older_backups(days=30):
     for fpath in files:
         s = os.stat(fpath)
         if s.st_ctime < oldest:
-            print "deleting", fpath
+            print("deleting", fpath)
             os.unlink(fpath)
 
 

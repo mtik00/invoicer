@@ -1,6 +1,9 @@
 import os
 import re
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except Exception:
+    from io import StringIO
 
 import arrow
 import pdfkit
