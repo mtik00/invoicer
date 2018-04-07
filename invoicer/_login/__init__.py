@@ -85,7 +85,6 @@ def login():
 @login_required
 def logout():
     current_user.is_authenticated = False
-    db.session.commit()
     session.pop('logged_in', None)
     session.pop('user_id', None)
     logout_user()
@@ -112,7 +111,6 @@ def two_fa(next=None):
 def complete_login(user):
     login_user(user)
     current_user.is_authenticated = True
-    db.session.commit()
 
     session['logged_in'] = True
     session['user_debug'] = user.application_settings.debug_mode

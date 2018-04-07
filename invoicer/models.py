@@ -4,6 +4,7 @@ from sqlalchemy import event, UniqueConstraint
 from sqlalchemy_utils.types import ArrowType
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
+from flask import session
 
 from .database import db
 
@@ -234,7 +235,6 @@ class User(UserMixin, db.Model):
     application_settings = db.relationship('ApplicationSettings', foreign_keys=application_settings_id, post_update=True)
 
     is_active = db.Column(db.Boolean, default=True)
-    is_authenticated = db.Column(db.Boolean, default=False)
 
     # Set this to True if you've changed the password-hashing configuration.
     # This will cause the app to re-hash the user's plain-text password and
@@ -255,6 +255,19 @@ class User(UserMixin, db.Model):
 
     def verify_totp(self, token, for_time=None, window=2):
         return pyotp.TOTP(self.totp_secret).verify(token, for_time=for_time, valid_window=window)
+
+    # We should be fine storing this bit in the session, since it's highly
+    # tamper-proof.
+    @property
+    def is_authenticated(self):
+        return session.get('is_authenticated', False)
+
+    @is_authenticated.setter
+    def is_authenticated(self, value):
+        if not value:
+            session.pop('is_authenticated', None)
+        else:
+            session['is_authenticated'] = value
 
 
 class ApplicationSettings(db.Model):
