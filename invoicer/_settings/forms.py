@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, SelectField, IntegerField
+from wtforms import BooleanField
 
 
 class SettingsForm(FlaskForm):

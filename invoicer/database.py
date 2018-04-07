@@ -3,7 +3,7 @@ import string
 
 import arrow
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import migrate, stamp
+from flask_migrate import stamp
 
 from .password import hash_password
 
