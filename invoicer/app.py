@@ -38,7 +38,7 @@ def create_app():
     # Load default config and override config from an environment variable
     app.config.update(dict(
         DATABASE=os.path.join(app.instance_path, 'invoicer.db'),
-        SECRET_KEY='development key',
+        SECRET_KEY='development key',  # NOTE: This should be overriden by `application.cfg`
         BACKUP_DIR=app.instance_path,
         SESSION_TIMEOUT_MINUTES=30,
 
@@ -58,6 +58,8 @@ def create_app():
         EMAIL_PASSWORD=None,
         EMAIL_SERVER=None,
         EMAIL_STARTTLS=True,
+
+        DEFAULT_TERMS=30
     ))
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE']

@@ -683,7 +683,7 @@ def bs4_invoice(user_id, invoice_number):
     submit_address = format_my_address()
     invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
-    terms = invoice.terms or customer.terms or User.query.get(user_id).profile.terms
+    terms = invoice.terms or customer.terms or User.query.get(user_id).profile.terms or current_app.config['DEFAULT_TERMS']
 
     return render_template(
         'invoice/b4-invoice.html',
@@ -708,7 +708,7 @@ def simplified_invoice(invoice_number, show_item_edit=False, embedded=False):
     customer_address = customer.format_address()
     submit_address = format_my_address()
 
-    terms = invoice.terms or customer.terms or User.query.get(current_user.id).profile.terms
+    terms = invoice.terms or customer.terms or User.query.get(current_user.id).profile.terms or current_app.config['DEFAULT_TERMS']
     invoice_theme = invoice.get_theme() or current_app.config['INVOICE_THEME']
 
     return render_template(
