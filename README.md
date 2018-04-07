@@ -39,8 +39,6 @@ To initialize the application, follow these steps:
     `sudo chown <username>:nginx /var/log/invoicer`
 *   Run `flask initdb` (you may want to skip adding sample data)
 *   Run `flask add-user` to create the first user
-*   Tell alembic that your DB is up to date:  
-    `flask db stamp head`
 *   Run the application: `flask run`
 *   Open the browser
 *   Edit your profile: `http://127.0.0.1:5000/profile/update`

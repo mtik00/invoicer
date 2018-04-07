@@ -95,7 +95,7 @@ def remove_older_backups(days=30):
 def initdb_command(force):
     """Initializes the database."""
     if force.lower().startswith('y'):
-        init_db(True, apply_migrations=True)
+        init_db(True)
         click.echo('Sample data added to database.')
         click.echo('Initialized the database.')
         return
@@ -105,10 +105,10 @@ def initdb_command(force):
         raise click.Abort()
 
     if click.confirm('Populate with sample data?'):
-        init_db(True, apply_migrations=True)
+        init_db(True)
         click.echo('Sample data added to database.')
     else:
-        init_db(False, apply_migrations=True)
+        init_db(False)
     click.echo('Initialized the database.')
 
 

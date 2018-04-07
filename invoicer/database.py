@@ -3,7 +3,7 @@ import string
 
 import arrow
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import migrate
+from flask_migrate import migrate, stamp
 
 from .password import hash_password
 
@@ -55,7 +55,7 @@ color_theme_data = {
 ###############################################################################
 
 
-def init_db(sample_data=False, apply_migrations=False):
+def init_db(sample_data=False):
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
@@ -72,11 +72,10 @@ def init_db(sample_data=False, apply_migrations=False):
 
     db.session.commit()
 
-    if apply_migrations:
-        try:
-            migrate()
-        except Exception:
-            pass
+    # We've recreated the database structure, therefore, it can't be anything
+    # other that the "latest".  Tell alembic this by stamping the DB with the
+    # latest migration so it will be "up to date".
+    stamp()
 
     if sample_data:
         profile = models.Profile(
