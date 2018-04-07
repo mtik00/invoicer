@@ -28,9 +28,9 @@ class User(Base):
 
 
 def upgrade():
-    op.add_column('users', sa.Column('totp_enabled', sa.Boolean(), nullable=True, server_default='0'))
+    op.add_column('users', sa.Column('totp_enabled', sa.Boolean(), nullable=True, server_default=sa.false()))
     op.add_column('users', sa.Column('totp_secret', sa.String(length=16), nullable=True))
-    op.add_column('users', sa.Column('is_authenticated', sa.Boolean(), nullable=True, server_default='0'))
+    op.add_column('users', sa.Column('is_authenticated', sa.Boolean(), nullable=True, server_default=sa.false()))
 
 
 def downgrade():

@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     '''Add `is_active` to user's table'''
-    op.add_column('users', sa.Column('is_active', sa.Boolean(), nullable=True, server_default='1'))
+    op.add_column('users', sa.Column('is_active', sa.Boolean(), nullable=True, server_default=sa.true()))
 
 
 def downgrade():
