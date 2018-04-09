@@ -4,6 +4,7 @@ import re
 import code
 import time
 import locale
+import sqlite3
 import zipfile
 
 import click
@@ -62,18 +63,16 @@ def create_backup(wait=True):
     fname = 'backup-{index:04d}.zip'.format(index=index)
     fpath = os.path.join(app.config['BACKUP_DIR'], fname)
 
-    tend = time.time() + 30
-    journaling = [x for x in os.listdir(app.config['BACKUP_DIR']) if 'db-journal' in x]
-    while journaling and (time.time() < tend):
-        click.echo('Waiting for journal file to be removed')
-        time.sleep(1)
-        journaling = [x for x in os.listdir(app.config['BACKUP_DIR']) if 'db-journal' in x]
-
-    if journaling:
-        raise Exception("Timeout while waiting for journal to be written")
+    # Use a connection/cursor so we don't have to worry about in-progress
+    # db function.
+    conn = sqlite3.connect(app.config['DATABASE'])
+    cursor = conn.cursor()
+    cursor.execute('begin immediate')
 
     with zipfile.ZipFile(fpath, 'w', zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(app.config['DATABASE'], '/invoicer.db')
+
+    conn.rollback()
 
     click.echo(fname + " created")
 
