@@ -38,7 +38,7 @@ def test_admin_login(client):
     login_url = url_for('login_page.login')
     client.post(login_url, data=dict(username='admin', password='default'))
 
-    assert session.get('user_id', 0) == 1
+    assert session.get('user_id', 0) == '1'
     assert session.get('logged_in') is True
 
     # Make sure we can log out
@@ -50,9 +50,9 @@ def test_admin_login(client):
 
 def test_user2_login(client):
     login_url = url_for('login_page.login')
-    client.post(login_url, data=dict(username='user2', password='default'))
+    client.post(login_url, data=dict(username='user2', password='user2'))
 
-    assert session.get('user_id', 0) == 2
+    assert session.get('user_id', 0) == '2'
     assert session.get('logged_in') is True
 
     # Make sure we can log out

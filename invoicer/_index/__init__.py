@@ -19,6 +19,7 @@ index_page = Blueprint('index_page', __name__, template_folder='templates')
 
 
 @index_page.route('/')
+@login_required
 def index():
     return redirect(url_for('.dashboard'))
 

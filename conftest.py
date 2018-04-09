@@ -9,6 +9,6 @@ def app():
     the_app.config['WTF_CSRF_ENABLED'] = False
 
     with the_app.app_context():
-        init_db(sample_data=True, apply_migrations=False)
+        init_db(sample_data=True)
 
     return the_app
