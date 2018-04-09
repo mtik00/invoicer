@@ -2,7 +2,6 @@ from __future__ import print_function
 import os
 import re
 import code
-import time
 import locale
 import sqlite3
 import zipfile
