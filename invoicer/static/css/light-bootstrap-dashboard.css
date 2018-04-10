@@ -1650,8 +1650,9 @@ fieldset[disabled] .form-control {
 }
 
 .alert[data-notify="container"] {
-    padding: 10px 10px 10px 20px;
+    padding: 30px 30px 30px 20px;
     border-radius: 4px;
+    font-weight: bolder;
 }
 
 .alert.alert-with-icon {
@@ -1667,11 +1668,11 @@ fieldset[disabled] .form-control {
 }
 
 .alert-success {
-    background-color: #a1e82c;
+    background-color: #009933;
 }
 
 .alert-warning {
-    background-color: #ffbc67;
+    background-color: #ff9900;
 }
 
 .alert-danger {
