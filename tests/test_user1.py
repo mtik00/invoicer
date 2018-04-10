@@ -3,19 +3,6 @@ import pytest
 from flask import url_for, session
 
 
-@pytest.fixture
-def user1(client):
-    login_url = url_for('login_page.login')
-    client.post(login_url, data=dict(username='admin', password='default'))
-    assert session.get('user_id', 0) == '1'
-
-    yield
-
-    # Make sure we can log out
-    client.get(url_for('login_page.logout'))
-    assert 'user_id' not in session
-
-
 def test_index(client, user1):
     """
     We should have 3 invoices on the index page

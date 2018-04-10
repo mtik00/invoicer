@@ -254,6 +254,15 @@ def init_db(sample_data=False):
             ),
         )
 
+        db.session.add_all([
+            invoicer.models.UnitPrice(
+                description="User2 Unit Price",
+                unit_price=99.99,
+                units="hr",
+                user=user2
+            )
+        ])
+
         user2_customer1 = invoicer.models.Customer(
             name1='Employer #3', addrline1='1234 45th St', city='New York',
             state='NY', zip='11133', email='billing@example.com', number=1010,
