@@ -48,13 +48,27 @@ def test_create(client, user2):
 
 def test_delete(client, user2):
     '''Can delete a UnitPrice'''
+    response = client.get(url_for('unit_page.index'))
+    assert response.status_code == 200
+    assert 'User2: A new unit price' in response.data
+
+    # This should not work since we don't have 'validate_delete'
     response = client.post(
         url_for('unit_page.delete', unit_id=8),
     )
 
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
+    assert 'User2: A new unit price' in response.data
 
+    # Now really delete it
+    response = client.post(
+        url_for('unit_page.delete', unit_id=8),
+        data={'validate_delete': 'delete'}
+    )
+
+    response = client.get(url_for('unit_page.index'))
+    assert response.status_code == 200
     assert 'User2: A new unit price' not in response.data
 
 
