@@ -4,7 +4,7 @@ from invoicer import app as the_app
 from invoicer.database import init_db
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def app():
     the_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
     the_app.config['WTF_CSRF_ENABLED'] = False
