@@ -1,6 +1,5 @@
 import re
-import pytest
-from flask import url_for, session
+from flask import url_for
 
 
 def test_index(client, user1):
