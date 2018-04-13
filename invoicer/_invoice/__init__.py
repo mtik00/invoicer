@@ -569,8 +569,8 @@ def submit_invoice(invoice_number):
         app_cache.clear()
 
     raw_text = text_invoice(invoice_number)
-    uhtml_body = simplified_invoice(invoice_number).encode('utf-8')
-    uhtml_body = htmlmin.minify(uhtml_body)
+    uhtml_body = simplified_invoice(invoice_number).encode('utf-8')  # PY3 quirk
+    uhtml_body = htmlmin.minify(uhtml_body.decode("utf-8"))
 
     stream_attachments = []
     pdf_fh = None
@@ -584,7 +584,7 @@ def submit_invoice(invoice_number):
             'no-outline': None,
             'quiet': None
         }
-        pdf_text = pdfkit.from_string(bs4_body, None, options=options, configuration=config)
+        pdf_text = str(pdfkit.from_string(bs4_body, None, options=options, configuration=config))
         pdf_fh = StringIO()
 
         pdf_fh.write(pdf_text)
