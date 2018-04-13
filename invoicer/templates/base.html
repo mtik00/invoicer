@@ -105,6 +105,10 @@
             demo.showNotification(text="{{message}}", color="{{category}}", from='top', align='center', icon_class="nc-icon nc-app");
             {% endfor %}
             $('.alert').addClass('pointer');
+
+            $(".alert").click(function() {
+                $(".alert").alert("close");
+            });
         });
     </script>
 
