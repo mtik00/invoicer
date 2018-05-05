@@ -1,10 +1,12 @@
 from flask import (
     Blueprint, render_template, request, flash, redirect, url_for)
 from flask_login import login_required, current_user
+import arrow
 
 from ..common import form_is_deleting
 from ..models import Customer, Invoice, User, InvoiceTheme
 from ..database import db
+from ..cache import app_cache
 from .forms import CustomerForm
 
 customers_page = Blueprint('customers_page', __name__, template_folder='templates')
@@ -127,7 +129,8 @@ def detail(number):
     return render_template(
         'customers/detail.html',
         customer=customer,
-        summary=summary
+        summary=summary,
+        invoices=sorted(customer.invoices, cmp=lambda x,y: cmp(x.submitted_date or arrow.get(0), y.submitted_date or arrow.get(0)))
     )
 
 

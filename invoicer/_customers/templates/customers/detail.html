@@ -73,7 +73,7 @@
                         <th>Paid Date</th>
                     </thead>
                     <tbody>
-                    {% for invoice in customer.invoices %}
+                    {% for invoice in invoices %}
                     <tr onclick="window.location='{{url_for('invoice_page.invoice_by_number', invoice_number=invoice.number)}}';" class="pointer">
                         <td>{{invoice.number}}</td>
                         <td>{{invoice.total|currency}}</td>
