@@ -137,7 +137,8 @@ def get_unpaid_invoices(user_id):
         if invoice.submitted_date and (not invoice.paid_date):
             result.append(invoice)
 
-    return result
+    # Sort in by due date so the next one due is on top
+    return sorted(result, cmp=lambda x,y: cmp(x.due_date, y.due_date))
 
 
 @app_cache.memoize(timeout=300)
@@ -151,4 +152,5 @@ def get_unsubmitted_invoices(user_id):
         if not invoice.submitted_date:
             result.append(invoice)
 
-    return result
+    # Sort in by due date so the next one due is on top
+    return sorted(result, cmp=lambda x,y: cmp(x.due_date, y.due_date))
