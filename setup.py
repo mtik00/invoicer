@@ -13,13 +13,13 @@ setup(
         'Flask-QRcode==2.0.2',
         'Flask-SQLAlchemy==2.3.2',
         'Flask-WTF==0.14.2',
-        'flask~>0.12.3',
+        'flask>=1.0.0',
         'htmlmin==0.1.12',
         'pdfkit==0.6.1',
         'premailer==3.1.1',
         'pyotp==2.2.6',
         'ruamel.yaml==0.15.37',
-        'SQLAlchemy-Utils==0.32.21',
+        'SQLAlchemy-Utils==0.34.2',
         'uwsgi==2.0.17;platform_system=="Linux"'
     ],
     extras_require={

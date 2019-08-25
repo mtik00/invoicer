@@ -35,8 +35,7 @@ To initialize the application, follow these steps:
 *   Create an `env.sh` file:  
     `echo export FLASK_APP=invoicer > instance/env.sh && chmod +x instance/env.sh && . instance/env.sh`
 *   Create the log folder:  
-    `sudo mkdir -p /var/log/invoicer`
-    `sudo chown <username>:nginx /var/log/invoicer`
+    `sudo mkdir -p /var/log/invoicer && sudo chown $USER:nginx /var/log/invoicer`
 *   Run `flask initdb` (you may want to skip adding sample data)
 *   Run `flask add-user` to create the first user
 *   Run the application: `flask run`
