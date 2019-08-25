@@ -385,7 +385,7 @@ def add_user(username, password):
     """
     Adds a new user to the database.
     """
-    import models
+    from invoicer import models
 
     if len(username) > 1024:
         raise ValueError('username cannot be more than 1024 characters')
