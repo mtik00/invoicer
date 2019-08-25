@@ -2,6 +2,7 @@ instance/
 .vscode/
 .pytest_cache/
 /_build
+.direnv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
