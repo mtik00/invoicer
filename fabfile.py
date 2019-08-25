@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 # Globals #####################################################################
 INVOICER_APP_HOME_FOLDER = os.environ['INVOICER_APP_HOME_FOLDER']
-VENV_ACTIVATE = os.environ['INVOICER_VENV_ACTIVATE_COMMAND'].strip('"').strip("'")
+VENV_DIR = os.environ['INVOICER_VENV_DIR'].strip('"').strip("'")
 ###############################################################################
 
 # Fabric environment setup ####################################################
@@ -40,6 +40,4 @@ def deploy():
     with cd(INVOICER_APP_HOME_FOLDER):
         run('git reset --hard HEAD')
         run('git pull')
-
-        with prefix(VENV_ACTIVATE):
-            sudo('bash deploy.bash')
+        sudo('PATH=' + VENV_DIR + ':$PATH bash deploy.bash')

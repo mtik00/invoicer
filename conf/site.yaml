@@ -22,8 +22,7 @@ logger: file:/var/log/invoicer/error.log
 
 # systemd service #############################################################
 run_dir: /run/uwsgi
-conda_dir: <some dir>  # e.g. /home/<username>/.conda/envs/invoicer
-conda_env_name: invoicer
+venv_dir: <some dir>  # e.g. /home/<username>/.conda/envs/invoicer
 service_name: invoicer.service
 # The service file (invoicer.service) will get copied here
 service_path: /etc/systemd/system
