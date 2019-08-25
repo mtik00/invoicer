@@ -20,7 +20,7 @@ from .database import (
 from .models import Customer
 
 
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 app = create_app()
 
 
