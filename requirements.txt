@@ -11,5 +11,6 @@ htmlmin==0.1.12
 pdfkit==0.6.1
 premailer==3.1.1
 pyotp==2.2.6
+python-memcached==1.59
 ruamel.yaml==0.15.37
 SQLAlchemy-Utils==0.34.2
