@@ -12,6 +12,11 @@ rm -rf _build/*
 # build the config files
 flask build
 
+# Back up the database
+if [[ -e instance/invoicer.db ]]; then
+    cp -f instance/invoicer.db instance/invoicer-$(date +%F_%R:%S).db
+fi
+
 # Upgrade the database
 flask db upgrade
 
