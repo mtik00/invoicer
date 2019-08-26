@@ -91,7 +91,7 @@ class InvoiceStats(object):
             }
 
             for month in xrange(1, 13):
-                result[year]['labels'].append(arrow.get('2017-%02d-01' % month, 'YYYY-MM-DD').format('MMM'))
+                result[year]['labels'].append(arrow.get(f'2017-{month:02d}-01', 'YYYY-MM-DD').format('MMM'))
 
                 total = series['submit'].get(month, 0)
                 result[year]['series'][0].append(total)
@@ -138,7 +138,7 @@ def get_unpaid_invoices(user_id):
             result.append(invoice)
 
     # Sort in by due date so the next one due is on top
-    return sorted(result, cmp=lambda x,y: cmp(x.due_date, y.due_date))
+    return sorted(result, key=lambda x: x.due_date or 0)
 
 
 @app_cache.memoize(timeout=300)
@@ -153,4 +153,4 @@ def get_unsubmitted_invoices(user_id):
             result.append(invoice)
 
     # Sort in by due date so the next one due is on top
-    return sorted(result, cmp=lambda x,y: cmp(x.due_date, y.due_date))
+    return sorted(result, key=lambda x: x.due_date or 0)

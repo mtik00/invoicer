@@ -51,12 +51,13 @@
                 <hr>
                 <form class="form-horizontal" action="{{ url_for('login_page.login') }}" method="POST" id="contact_form">
                     <fieldset>
+                        {{ form.hidden_tag() }}
                         {% for category, message in get_flashed_messages(with_categories=True) %}
                         <div class="row alert {{category}}">
                             <span><b> {{category.upper()}} - </b> {{message}}</span>
                         </div>
                         {% endfor %}
-                        {{ form.hidden_tag() }}
+
                         <div class="form-group">
                             <div class="col-md-12">
                                 <div class="input-group">

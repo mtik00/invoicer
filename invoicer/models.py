@@ -6,6 +6,8 @@ from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from flask import session
 
+from invoicer.arrow_ignore import ignore_ArrowParseWarning
+
 from .database import db
 
 
@@ -173,11 +175,12 @@ class Invoice(db.Model):
 
 @event.listens_for(Invoice, 'before_insert')
 def receive_before_insert(mapper, connection, invoice):
+    ignore_ArrowParseWarning()
     if isinstance(invoice.submitted_date, basestring):
         invoice.submitted_date = arrow.get(invoice.submitted_date)
 
     if (invoice.submitted_date and invoice.terms):
-        invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
+        invoice.due_date = invoice.submitted_date.shift(days=+invoice.terms)
 
     # For an insert, we can't assume that all of the Items have been inserted
     # prior to this invoice.  However, any items will be associated through the
@@ -189,11 +192,12 @@ def receive_before_insert(mapper, connection, invoice):
 # will fire, however, if you use: `invoice.description = 'asdf'; db.session.commit()`
 @event.listens_for(Invoice, 'before_update')
 def receive_before_update(mapper, connection, invoice):
+    ignore_ArrowParseWarning()
     if isinstance(invoice.submitted_date, basestring):
         invoice.submitted_date = arrow.get(invoice.submitted_date)
 
     if (invoice.submitted_date and invoice.terms):
-        invoice.due_date = invoice.submitted_date.replace(days=+invoice.terms)
+        invoice.due_date = invoice.submitted_date.shift(days=+invoice.terms)
 
     # For the update, we can't assume that the invoice has all of the items
     # associated yet.  Therefore, run a query, and use that sum.
