@@ -18,7 +18,6 @@ from .database import (
     rehash_passwords as force_rehash_passwords)
 from .models import Customer
 
-
 locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 app = create_app()
 
@@ -40,13 +39,13 @@ def is_field(item):
 
 
 def last_backup():
-    files = [x for x in os.listdir(app.config['BACKUP_DIR']) if re.search('backup-(\d{4}).zip', x, re.IGNORECASE)]
+    files = [x for x in os.listdir(app.config['BACKUP_DIR']) if re.search(r'backup-(\d{4}).zip', x, re.IGNORECASE)]
     if not files:
         return 0
 
     backup_index = 0
     for fname in files:
-        index = int(re.search('backup-(\d{4}).zip', fname, re.IGNORECASE).group(1))
+        index = int(re.search(r'backup-(\d{4}).zip', fname, re.IGNORECASE).group(1))
         if index > backup_index:
             backup_index = index
 
@@ -79,8 +78,8 @@ def remove_older_backups(days=30):
     """
     Deletes all backup files older than `days`.
     """
-    oldest = arrow.now().replace(days=-30).timestamp
-    files = [os.path.join(app.config['BACKUP_DIR'], x) for x in os.listdir(app.config['BACKUP_DIR']) if re.search('backup-(\d{4}).zip', x, re.IGNORECASE)]
+    oldest = arrow.now().shift(days=-30).timestamp
+    files = [os.path.join(app.config['BACKUP_DIR'], x) for x in os.listdir(app.config['BACKUP_DIR']) if re.search(r'backup-(\d{4}).zip', x, re.IGNORECASE)]
     for fpath in files:
         s = os.stat(fpath)
         if s.st_ctime < oldest:

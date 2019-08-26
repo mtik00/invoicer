@@ -5,9 +5,11 @@ def test_index(client, user2):
     '''Test UnitPrice index'''
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
-    assert 'User2 Unit Price' in response.data
-    assert 'Units: hr' in response.data
-    assert 'Price: $99.99' in response.data
+
+    response_text = response.data.decode()
+    assert 'User2 Unit Price' in response_text
+    assert 'Units: hr' in response_text
+    assert 'Price: $99.99' in response_text
 
 
 def test_update(client, user2):
@@ -24,7 +26,7 @@ def test_update(client, user2):
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
 
-    assert 'Units: hour' in response.data
+    assert 'Units: hour' in response.data.decode()
 
 
 def test_create(client, user2):
@@ -41,16 +43,18 @@ def test_create(client, user2):
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
 
-    assert 'User2: A new unit price' in response.data
-    assert 'Units: day' in response.data
-    assert 'Price: $499.00' in response.data
+    response_text = response.data.decode()
+
+    assert 'User2: A new unit price' in response_text
+    assert 'Units: day' in response_text
+    assert 'Price: $499.00' in response_text
 
 
 def test_delete(client, user2):
     '''Can delete a UnitPrice'''
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
-    assert 'User2: A new unit price' in response.data
+    assert 'User2: A new unit price' in response.data.decode()
 
     # This should not work since we don't have 'validate_delete'
     response = client.post(
@@ -59,7 +63,7 @@ def test_delete(client, user2):
 
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
-    assert 'User2: A new unit price' in response.data
+    assert 'User2: A new unit price' in response.data.decode()
 
     # Now really delete it
     response = client.post(
@@ -69,7 +73,7 @@ def test_delete(client, user2):
 
     response = client.get(url_for('unit_page.index'))
     assert response.status_code == 200
-    assert 'User2: A new unit price' not in response.data
+    assert 'User2: A new unit price' not in response.data.decode()
 
 
 def test_delete_otheruser(client, user2):
