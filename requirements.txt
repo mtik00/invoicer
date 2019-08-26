@@ -14,3 +14,5 @@ pyotp==2.2.6
 python-memcached==1.59
 ruamel.yaml==0.15.37
 SQLAlchemy-Utils==0.34.2
+ipython==7.7.0
+black>=19.3b0

@@ -1,7 +1,5 @@
-from __future__ import print_function
 import os
 import re
-import code
 import locale
 import sqlite3
 import zipfile
@@ -11,6 +9,7 @@ import arrow
 from wtforms import Field
 from jinja2 import Environment, StrictUndefined, FileSystemLoader
 import ruamel.yaml
+import IPython
 
 from .app import create_app
 from .submitter import sendmail
@@ -178,7 +177,7 @@ def interactive():
     """
     Launch an interactive REPL
     """
-    code.interact(local=dict(globals(), **locals()))
+    IPython.start_ipython(argv=[])
 
 
 @app.cli.command('build')
