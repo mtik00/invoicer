@@ -61,6 +61,7 @@ def update(customer_id):
             form['number'].data = customer.number
 
         form.populate_obj(customer)
+        customer.state = customer.state.upper()
 
         db.session.add(customer)
         db.session.commit()
@@ -85,6 +86,7 @@ def create():
         else:
             customer = Customer()
             form.populate_obj(customer)
+            customer.state = customer.state.upper()
             customer.user = User.query.get(current_user.id)
             db.session.add(customer)
             db.session.commit()
