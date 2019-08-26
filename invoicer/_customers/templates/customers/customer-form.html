@@ -35,8 +35,8 @@
                             {{ bs_render_field(form.addrline2, customer.addrline2) }}
                         </div>
                         <div class="row">
-                            {{ bs_render_field(form.city, customer.city, 'City', 9) }}
-                            {{ bs_render_field(form.state, customer.state, 'State', 1) }}
+                            {{ bs_render_field(form.city, customer.city, 'City', 7) }}
+                            {{ bs_render_field(form.state, customer.state, 'State', 2, upper=True) }}
                             {{ bs_render_field(form.zip, customer.zip, 'Zip', 2) }}
                         </div>
                         <div class="row">
