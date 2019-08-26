@@ -41,7 +41,7 @@
     {% if help %}<div data-intro='{{help}}'>{% endif %}
     <div class="form-group">
         <label class="{%if field.errors%}text-danger{%endif%}">{{field.label.text}}{%if 'required' in field.flags%}*{%endif%}</label>
-        <input type="text" name="{{field.name}}" id="{{id or field.name}}" class="form-control {%if field.errors%}border border-danger{% elif 'required' in field.flags%}border border-secondary{%endif%}{%if class%} {{class}}{%endif%}" placeholder="{% if placeholder%}{{placeholder}}{%else%}{{field.label.text}}{%endif%}" value="{%if value%}{{value}}{%elif field.data%}{{field.data}}{% endif %}" {%if 'required' in field.flags%}required{%endif%}{%if readonly%} readonly{%endif%} {%if upper%}onkeyup="this.value = this.value.toUpperCase();"{%endif%}>
+        <input type="text" name="{{field.name}}" id="{{id or field.name}}" class="form-control {%if field.errors%}border border-danger{% elif 'required' in field.flags%}border border-secondary{%endif%}{%if class%} {{class}}{%endif%}" placeholder="{% if placeholder%}{{placeholder}}{%else%}{{field.label.text}}{%endif%}" value="{%if value%}{{value}}{%elif field.data%}{{field.data}}{% endif %}" {%if 'required' in field.flags%}required{%endif%}{%if readonly%} readonly{%endif%} {%if upper%}style="text-transform: uppercase;"{%endif%}>
         {% if field.errors %}<small id="{{field.name}}_help" class="text-danger">{{field.errors[0]}}</small>{% endif %}
     </div>
     {% if help %}</div>{% endif %}
