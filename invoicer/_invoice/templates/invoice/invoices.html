@@ -65,14 +65,10 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="exportDropdownMenuLink">
             {% if show_pdf_button -%}
-                <a class="dropdown-item" data-intro="Download the invoice as a PDF for offline-viewing"
-                {% if pdf_ok -%}
+                <a class="dropdown-item{%if not pdf_ok%} disabled{%endif%}" data-intro="Download the invoice as a PDF for offline-viewing"
                 href="{{ url_for('invoice_page.to_pdf', invoice_number=invoice_obj.number)}}" target="_blank">
-                {%- else -%}
-                href="#" disabled>
-                {%- endif -%}
                 Download PDF</a>
-            {%- endif -%}
+            {%- endif %}
             <a class="dropdown-item" data-intro="Save an HTML version of the invoice"
                 href="{{ url_for('invoice_page.simplified_invoice', invoice_number=invoice_obj.number)}}" target="_blank">
                 Download HTML
