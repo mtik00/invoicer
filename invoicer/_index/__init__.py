@@ -36,7 +36,8 @@ def dashboard():
         invoices=invoices,
         invoice_stats=json.dumps(invoice_stats),
         unpaid_invoices=get_unpaid_invoices(uid),
-        unsubmitted_invoices=get_unsubmitted_invoices(uid)
+        unsubmitted_invoices=get_unsubmitted_invoices(uid),
+        current_year=arrow.now().year,
     )
 
 
