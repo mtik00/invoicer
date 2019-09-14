@@ -62,3 +62,9 @@
 button.disabled {
     cursor: not-allowed;
 }
+
+a.disabled {
+    pointer-events: none;
+    cursor: not-allowed;
+    color: #CCCCCC !important;
+}
