@@ -208,7 +208,7 @@ def build():
     click.echo('Creating `_build/invoicer-uwsgi.ini')
     template = env.get_template('invoicer-uwsgi.ini.j2')
     content = template.render(**options)
-    with open(os.path.join(outdir, 'invoicer-uwsgi.ini'), 'wb') as fh:
+    with open(os.path.join(outdir, 'invoicer-uwsgi.ini'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################
@@ -217,7 +217,7 @@ def build():
     click.echo('Creating `_build/invoicer-systemd.service')
     template = env.get_template('invoicer-systemd.service.j2')
     content = template.render(**options)
-    with open(os.path.join(outdir, 'invoicer-systemd.service'), 'wb') as fh:
+    with open(os.path.join(outdir, 'invoicer-systemd.service'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################
@@ -226,14 +226,14 @@ def build():
     click.echo('Creating `_build/invoicer-upstream.nginx')
     template = env.get_template('invoicer-upstream.nginx.j2')
     content = template.render(**options)
-    with open(os.path.join(outdir, 'invoicer-upstream.nginx'), 'wb') as fh:
+    with open(os.path.join(outdir, 'invoicer-upstream.nginx'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
 
     click.echo('Creating `_build/invoicer-location.nginx')
     template = env.get_template('invoicer-location.nginx.j2')
     content = template.render(**options)
-    with open(os.path.join(outdir, 'invoicer-location.nginx'), 'wb') as fh:
+    with open(os.path.join(outdir, 'invoicer-location.nginx'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################
@@ -246,7 +246,7 @@ def build():
 
     template = env.get_template('fail2ban/filter.d/invoicer.local.j2')
     content = template.render(**options)
-    with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'wb') as fh:
+    with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################
@@ -259,7 +259,7 @@ def build():
 
     template = env.get_template('fail2ban/jail.d/invoicer.local.j2')
     content = template.render(**options)
-    with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'wb') as fh:
+    with open(os.path.join(f2b_filter_outdir, 'invoicer.local'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################
@@ -268,7 +268,7 @@ def build():
     click.echo('Creating `_build/deploy.bash')
     template = env.get_template('deploy.bash.j2')
     content = template.render(**options)
-    with open(os.path.join(outdir, 'deploy.bash'), 'wb') as fh:
+    with open(os.path.join(outdir, 'deploy.bash'), 'w') as fh:
         fh.write(content)
     click.echo('...done')
     ###########################################################################
