@@ -8,7 +8,7 @@ APPDIR = os.path.abspath(os.path.dirname(__file__))
 
 def get_logger(name=None, screen_level=logging.INFO,
                logfile_path=None, logfile_level=logging.DEBUG,
-               logfile_mode="ab"):
+               logfile_mode="a"):
     """Returns a logging object.
 
     You should use the parameterized function once to initialize

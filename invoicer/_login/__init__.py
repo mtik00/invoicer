@@ -52,9 +52,9 @@ def login():
             # NOTE: You must not change this format without changing the
             # fail2ban filter.
             AUTH_LOG.error(
-                "Invalid login for username [{0}] from [{1}]".format(
+                "Invalid login for username [%s] from [%s]",
                     form.username.data[:1024],
-                    request.remote_addr)
+                    request.remote_addr,
             )
 
             flash('Invalid username and/or password', 'error')
