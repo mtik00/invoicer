@@ -1,5 +1,10 @@
 import re
+
+import arrow
 from flask import url_for
+
+
+current_year = arrow.now().year
 
 
 def test_index(client, user1):
@@ -8,8 +13,8 @@ def test_index(client, user1):
     """
     response = client.get(url_for('index_page.dashboard'))
     assert response.status_code == 200
-    assert response.data.decode().count('<td>1010-2018') == 2
-    assert response.data.decode().count('<td>1020-2018') == 1
+    assert response.data.decode().count(f'<td>1010-{current_year}') == 2
+    assert response.data.decode().count(f'<td>1020-{current_year}') == 1
 
 
 # def test_invoice1(client, user1):
