@@ -83,6 +83,8 @@ def init_db(sample_data=False):
     ignore_ArrowParseWarning()
 
     if sample_data:
+        current_year = arrow.now().year
+
         profile = invoicer.models.Profile(
             full_name='Tom Smith', email='me@example.com',
             street='1313 Mockingbird Ln', city='New York',
@@ -106,34 +108,34 @@ def init_db(sample_data=False):
 
         invoice1 = invoicer.models.Invoice(
             customer=customer1,
-            submitted_date=arrow.get('20-JAN-2018', 'DD-MMM-YYYY'),
-            description='2018 Website Redesign',
-            number='1010-2018-001',
+            submitted_date=arrow.get(f'20-JAN-{current_year}', 'DD-MMM-YYYY'),
+            description=f'{current_year} Website Redesign',
+            number=f'1010-{current_year}-001',
             terms=30,
             paid_date=invoicer.models.InvoicePaidDate(
-                paid_date=arrow.get('07-FEB-2018', 'DD-MMM-YYYY'),
+                paid_date=arrow.get(f'07-FEB-{current_year}', 'DD-MMM-YYYY'),
                 description='Check 1234'),
             user=user
         )
 
         db.session.add_all([
             invoicer.models.Item(
-                date=arrow.get('01-JAN-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'01-JAN-{current_year}', 'DD-MMM-YYYY'),
                 description='Backend design', unit_price=200.0, units='hr',
                 quantity=8, invoice=invoice1, customer=customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('04-JAN-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'04-JAN-{current_year}', 'DD-MMM-YYYY'),
                 description='Backend design', unit_price=200.0, units='hr',
                 quantity=8, invoice=invoice1, customer=customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('06-JAN-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'06-JAN-{current_year}', 'DD-MMM-YYYY'),
                 description='Frontend design', unit_price=200.0, units='hr',
                 quantity=8, invoice=invoice1, customer=customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('10-JAN-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'10-JAN-{current_year}', 'DD-MMM-YYYY'),
                 description='Frontend design', unit_price=200.0, units='hr',
                 quantity=8, invoice=invoice1, customer=customer1
             ),
@@ -141,31 +143,31 @@ def init_db(sample_data=False):
 
         invoice2 = invoicer.models.Invoice(
             customer=customer1,
-            submitted_date=arrow.get('20-FEB-2018-2018', 'DD-MMM-YYYY'),
-            description='2018 Website Development',
+            submitted_date=arrow.get(f'20-FEB-{current_year}', 'DD-MMM-YYYY'),
+            description=f'{current_year} Website Development',
             paid_date=None,
-            number='1010-2018-002',
+            number=f'1010-{current_year}-002',
             terms=45,
             user=user)
 
         db.session.add_all([
             invoicer.models.Item(
-                date=arrow.get('01-FEB-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'01-FEB-{current_year}', 'DD-MMM-YYYY'),
                 description='Backend development', unit_price=250, units='hr',
                 quantity=8, invoice=invoice2, customer=customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('04-FEB-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'04-FEB-{current_year}', 'DD-MMM-YYYY'),
                 description='Backend development', unit_price=250, units='hr',
                 quantity=8, invoice=invoice2, customer=customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('05-FEB-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'05-FEB-{current_year}', 'DD-MMM-YYYY'),
                 description='Frontend development', unit_price=250, units='hr',
                 quantity=8, invoice=invoice2, customer=customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('06-FEB-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'06-FEB-{current_year}', 'DD-MMM-YYYY'),
                 description='Frontend development', unit_price=250, units='hr',
                 quantity=8, invoice=invoice2, customer=customer1
             ),
@@ -176,14 +178,14 @@ def init_db(sample_data=False):
         invoice3 = invoicer.models.Invoice(
             customer=customer1,
             submitted_date=None,
-            description='2018 Website Maintenance',
+            description=f'{current_year} Website Maintenance',
             paid_date=None,
-            number='1010-2018-003',
+            number=f'1010-{current_year}-003',
             terms=22,
             user=user)
 
         lots_of_items = []
-        item_date = arrow.get('01-MAR-2018', 'DD-MMM-YYYY')
+        item_date = arrow.get(f'01-MAR-{current_year}', 'DD-MMM-YYYY')
         for x in range(lots_of_items_count):
             lots_of_items.append(
                 invoicer.models.Item(
@@ -204,30 +206,30 @@ def init_db(sample_data=False):
         invoice4 = invoicer.models.Invoice(
             customer=customer2,
             submitted_date=None,
-            description='2018 Website Maintenance',
+            description=f'{current_year} Website Maintenance',
             paid_date=None,
-            number='1020-2018-001',
+            number=f'1020-{current_year}-001',
             terms=45,
             user=user)
 
         db.session.add_all([
             invoicer.models.Item(
-                date=arrow.get('01-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'01-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=invoice4, customer=customer2
             ),
             invoicer.models.Item(
-                date=arrow.get('04-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'04-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=invoice4, customer=customer2
             ),
             invoicer.models.Item(
-                date=arrow.get('05-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'05-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=invoice4, customer=customer2
             ),
             invoicer.models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'06-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=invoice4, customer=customer2
             ),
@@ -275,30 +277,30 @@ def init_db(sample_data=False):
         user2_invoice1 = invoicer.models.Invoice(
             customer=user2_customer1,
             submitted_date=None,
-            description='2018 Website Maintenance',
+            description=f'{current_year} Website Maintenance',
             paid_date=None,
-            number='1010-2018-001',
+            number=f'1010-{current_year}-001',
             terms=45,
             user=user2)
 
         db.session.add_all([
             invoicer.models.Item(
-                date=arrow.get('01-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'01-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=user2_invoice1, customer=user2_customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('04-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'04-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=user2_invoice1, customer=user2_customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('05-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'05-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=user2_invoice1, customer=user2_customer1
             ),
             invoicer.models.Item(
-                date=arrow.get('06-MAR-2018', 'DD-MMM-YYYY'),
+                date=arrow.get(f'06-MAR-{current_year}', 'DD-MMM-YYYY'),
                 description='Website maintenance', unit_price=75, units='hr',
                 quantity=8, invoice=user2_invoice1, customer=user2_customer1
             ),
