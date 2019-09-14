@@ -6,8 +6,6 @@ from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from flask import session
 
-from invoicer.arrow_ignore import ignore_ArrowParseWarning
-
 from .database import db
 
 
@@ -175,7 +173,6 @@ class Invoice(db.Model):
 
 @event.listens_for(Invoice, 'before_insert')
 def receive_before_insert(mapper, connection, invoice):
-    ignore_ArrowParseWarning()
     if isinstance(invoice.submitted_date, basestring):
         invoice.submitted_date = arrow.get(invoice.submitted_date)
 
@@ -192,7 +189,6 @@ def receive_before_insert(mapper, connection, invoice):
 # will fire, however, if you use: `invoice.description = 'asdf'; db.session.commit()`
 @event.listens_for(Invoice, 'before_update')
 def receive_before_update(mapper, connection, invoice):
-    ignore_ArrowParseWarning()
     if isinstance(invoice.submitted_date, basestring):
         invoice.submitted_date = arrow.get(invoice.submitted_date)
 

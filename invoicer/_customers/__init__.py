@@ -3,8 +3,6 @@ from flask import (
 from flask_login import login_required, current_user
 import arrow
 
-from invoicer.arrow_ignore import ignore_ArrowParseWarning
-
 from ..common import form_is_deleting
 from ..models import Customer, Invoice, User, InvoiceTheme
 from ..database import db
@@ -107,7 +105,6 @@ def index():
 @customers_page.route('/<number>')
 @login_required
 def detail(number):
-    ignore_ArrowParseWarning()
     customer = Customer.query.filter_by(user_id=current_user.id, number=number).first_or_404()
     summary = {}
 

@@ -5,8 +5,6 @@ from flask import Flask, current_app, session
 from werkzeug.routing import BaseConverter
 from flask_migrate import Migrate
 from flask_qrcode import QRcode
-import warnings
-from arrow.factory import ArrowParseWarning
 
 from .database import db
 from .cache import app_cache
@@ -21,8 +19,6 @@ from ._login import login_page
 from ._invoice import invoice_page
 from ._settings import settings_page
 
-
-warnings.simplefilter("ignore", ArrowParseWarning)
 
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
