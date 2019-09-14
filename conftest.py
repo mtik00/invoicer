@@ -3,11 +3,6 @@ from flask import url_for, session
 from invoicer import app as the_app
 from invoicer.database import init_db
 
-import arrow
-import warnings
-from arrow.factory import ArrowParseWarning
-warnings.simplefilter("ignore", ArrowParseWarning)
-
 
 @pytest.fixture(scope="module")
 def app():
