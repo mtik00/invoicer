@@ -35,11 +35,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(__name__)
 
+    instance_path = os.path.abspath(app.instance_path)
+
     # Load default config and override config from an environment variable
     app.config.update(dict(
-        DATABASE=os.path.abspath(os.path.join(app.instance_path, 'invoicer.db')),
+        DATABASE=os.path.join(instance_path, 'invoicer.db'),
         SECRET_KEY='development key',  # NOTE: This should be overriden by `application.cfg`
-        BACKUP_DIR=app.instance_path,
+        BACKUP_DIR=instance_path,
         SESSION_TIMEOUT_MINUTES=30,
 
         # https://www.w3schools.com/w3css/w3css_color_themes.asp
@@ -66,7 +68,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 
-    app.config.from_pyfile(os.path.join(app.instance_path, 'application.cfg'), silent=True)
+    app.config.from_pyfile(os.path.join(instance_path, 'application.cfg'), silent=True)
     password_hasher.reset(**app.config.get('ARGON2_CONFIG', {}))
 
     app.url_map.converters['regex'] = RegexConverter

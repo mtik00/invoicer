@@ -22,6 +22,7 @@ from ..models import (
     Item, Invoice, Customer, UnitPrice, InvoicePaidDate, User, InvoiceTheme)
 from ..cache import app_cache
 from .forms import InvoiceForm, ItemForm
+from ..logger import LOGGER
 
 
 invoice_page = Blueprint('invoice_page', __name__, template_folder='templates')
@@ -75,10 +76,12 @@ def can_submit(customer_id):
         current_app.config.get('EMAIL_USERNAME') and
         current_app.config.get('EMAIL_SERVER')
     ):
+        LOGGER.warning("Can't submit due to one or more missing `EMAIL` config options")
         return False
 
     customer = Customer.query.filter_by(id=customer_id).first()
     if not (customer and customer.email):
+        LOGGER.debug("Can't submit due to either no customer or no customer email")
         return False
 
     return True
