@@ -37,7 +37,7 @@ def create_app():
 
     # Load default config and override config from an environment variable
     app.config.update(dict(
-        DATABASE=os.path.join(app.instance_path, 'invoicer.db'),
+        DATABASE=os.path.abspath(os.path.join(app.instance_path, 'invoicer.db')),
         SECRET_KEY='development key',  # NOTE: This should be overriden by `application.cfg`
         BACKUP_DIR=app.instance_path,
         SESSION_TIMEOUT_MINUTES=30,
