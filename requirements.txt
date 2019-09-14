@@ -15,5 +15,4 @@ pyotp
 python-memcached
 ruamel.yaml
 SQLAlchemy-Utils
-ipython
 black
