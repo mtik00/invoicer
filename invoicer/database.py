@@ -6,8 +6,6 @@ import arrow
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import stamp
 
-from invoicer.arrow_ignore import ignore_ArrowParseWarning
-
 from .password import hash_password
 
 db = SQLAlchemy()
@@ -79,8 +77,6 @@ def init_db(sample_data=False):
     # other that the "latest".  Tell alembic this by stamping the DB with the
     # latest migration so it will be "up to date".
     stamp()
-
-    ignore_ArrowParseWarning()
 
     if sample_data:
         current_year = arrow.now().year

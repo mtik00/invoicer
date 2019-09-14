@@ -15,8 +15,6 @@ from flask import (
 from sqlalchemy.orm import joinedload
 from flask_login import login_required, current_user
 
-from invoicer.arrow_ignore import ignore_ArrowParseWarning
-
 from ..forms import EmptyForm
 from ..submitter import sendmail
 from ..database import db
@@ -165,7 +163,6 @@ def create_item(invoice_number):
 
         date = arrow.now()
         if form.date.data:
-            ignore_ArrowParseWarning()
             date = arrow.get(form.date.data, 'DD-MMM-YYYY')
 
         item = Item(
@@ -236,7 +233,6 @@ def update_item(invoice_number, item_id):
         units = request.form['unit_price_units']
         unit_price = request.form['unit_pricex']
 
-        ignore_ArrowParseWarning()
         item.date = arrow.get(form.date.data, 'DD-MMM-YYYY')
         item.description = form.description.data
 
@@ -306,7 +302,6 @@ def update(invoice_number):
         form.customer.process_data(invoice.customer_id)
         form.invoice_theme.process_data(selected_theme)
     elif form.validate_on_submit():
-        ignore_ArrowParseWarning()
         submitted_date = invoice.submitted_date
         if form.submitted_date.data:
             submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
@@ -424,7 +419,6 @@ def create():
         customer = Customer.query.filter_by(id=customer_id, user_id=current_user.id).first_or_404()
 
         submitted_date = None
-        ignore_ArrowParseWarning()
         if form.submitted_date.data:
             submitted_date = arrow.get(form.submitted_date.data, 'DD-MMM-YYYY')
 
