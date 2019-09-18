@@ -584,7 +584,7 @@ def submit_invoice(invoice_number):
             'no-outline': None,
             'quiet': None
         }
-        pdf_bytes = str(pdfkit.from_string(bs4_body, None, options=options, configuration=config))
+        pdf_bytes = pdfkit.from_string(bs4_body, None, options=options, configuration=config)
         pdf_fh = BytesIO()
 
         pdf_fh.write(pdf_bytes)
