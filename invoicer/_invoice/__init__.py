@@ -1,9 +1,6 @@
 import os
 import re
-try:
-    from cStringIO import StringIO
-except Exception:
-    from io import StringIO
+from io import BytesIO
 
 import arrow
 import pdfkit
@@ -587,10 +584,10 @@ def submit_invoice(invoice_number):
             'no-outline': None,
             'quiet': None
         }
-        pdf_text = str(pdfkit.from_string(bs4_body, None, options=options, configuration=config))
-        pdf_fh = StringIO()
+        pdf_bytes = str(pdfkit.from_string(bs4_body, None, options=options, configuration=config))
+        pdf_fh = BytesIO()
 
-        pdf_fh.write(pdf_text)
+        pdf_fh.write(pdf_bytes)
         pdf_fh.seek(0)  # Ensure `sendmail` gets the whole thing
 
         stream_attachments = [(fname, pdf_fh)]
