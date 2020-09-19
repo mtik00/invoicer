@@ -3,15 +3,9 @@ FROM python:3.8-buster as builder
 # Build our app inside a virtual environment so we can copy
 # it out later.
 RUN apt-get upgrade && apt-get update -y \
-    && apt-get install -y python-virtualenv wget
+    && apt-get install -y python-virtualenv wget vim
 
-RUN virtualenv --python=python3 --always-copy /tmp/app-env
-
-# Make the virtual env portable
-RUN sed -i '43s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' /tmp/app-env/bin/activate \
-    && sed -i '1s/.*/#!\/usr\/bin\/env python/' /tmp/app-env/bin/pip*
-
-ENV PATH="/tmp/app-env/bin:$PATH"
+RUN python -m venv --copies  /tmp/app-env
 
 WORKDIR /tmp/app-builder
 
@@ -19,8 +13,13 @@ COPY ./requirements.txt .
 COPY ./setup.py .
 COPY ./invoicer ./invoicer
 
-RUN /tmp/app-env/bin/python -m pip install --no-cache-dir -r requirements.txt
+RUN /tmp/app-env/bin/python -m pip install --upgrade pip
+RUN /tmp/app-env/bin/python -m pip install -r requirements.txt
 RUN /tmp/app-env/bin/python -m pip install .
+
+# Make the virtual env portable
+RUN sed -i '40s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' /tmp/app-env/bin/activate
+RUN sed -i '1s|.*|#!/usr/bin/env python|' /tmp/app-env/bin/pip*
 
 #################################################################################
 # All we need to do is to set up the container and copy the pre-built virtual env
