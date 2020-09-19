@@ -1,2 +1,2 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 from invoicer import app as application  # noqa
