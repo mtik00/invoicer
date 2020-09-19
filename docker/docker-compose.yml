@@ -1,0 +1,10 @@
+version: '3'
+services:
+  web:
+    image: "invoicer:latest"
+    ports:
+        - "8080:8112"
+  wkhtmltopdf:
+    image: openlabs/docker-wkhtmltopdf-aas
+    ports:
+        - "8081:80"
