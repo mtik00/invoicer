@@ -2,20 +2,18 @@ FROM python:3.8-buster as builder
 
 # Build our app inside a virtual environment so we can copy
 # it out later.
-RUN apt-get upgrade && apt-get update -y \
-    && apt-get install -y python-virtualenv wget vim
+# RUN apt-get update && apt-get upgrade -y \
+#     && apt-get install -y python-virtualenv wget vim
 
 RUN python -m venv --copies  /tmp/app-env
 
 WORKDIR /tmp/app-builder
 
-COPY ./requirements.txt .
-COPY ./setup.py .
-COPY ./invoicer ./invoicer
+COPY ./requirements.txt ./setup.py ./invoicer ./
 
-RUN /tmp/app-env/bin/python -m pip install --upgrade pip
-RUN /tmp/app-env/bin/python -m pip install -r requirements.txt
-RUN /tmp/app-env/bin/python -m pip install .
+RUN /tmp/app-env/bin/python -m pip install --upgrade pip && \
+    /tmp/app-env/bin/python -m pip install -r requirements.txt && \
+    /tmp/app-env/bin/python -m pip install .
 
 # Make the virtual env portable
 RUN sed -i '40s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' /tmp/app-env/bin/activate
@@ -31,8 +29,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 LABEL maintainer="tim@timandjamie.com"
 
-RUN apt-get upgrade && apt-get update -y \
-    && apt-get install -y locales \
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y locales libxml2 \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
@@ -42,6 +40,14 @@ RUN useradd -ms /bin/bash webapp-user \
     && echo 'PATH="/usr/src/app/.venv/bin:$PATH"' >> /home/webapp-user/.bashrc \
     && mkdir /var/log/invoicer && chown webapp-user:webapp-user /var/log/invoicer
 
-USER webapp-user
 WORKDIR /usr/src/app
+
+COPY ./wsgi.py ./run.sh ./
+
 COPY --from=builder /tmp/app-env /usr/src/app/.venv
+ENTRYPOINT [ "bash" ]
+CMD [ "/usr/src/app/run.sh" ]
+
+RUN chown webapp-user:webapp-user /usr/src/app
+
+USER webapp-user
