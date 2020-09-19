@@ -20,3 +20,4 @@ python-memcached
 ruamel.yaml
 SQLAlchemy-Utils
 SQLAlchemy
+uwsgi
