@@ -34,7 +34,7 @@ ENV PYTHONUNBUFFERED=1 \
 LABEL maintainer="tim@timandjamie.com"
 
 RUN apt-get update && apt-get upgrade -y \
-    && apt-get install -y locales libxml2 \
+    && apt-get install -y locales libxml2 tini \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
@@ -49,8 +49,9 @@ WORKDIR /usr/src/app
 COPY ./wsgi.py ./run.sh ./
 
 COPY --from=builder /tmp/app-env /usr/src/app/.venv
-ENTRYPOINT [ "bash" ]
-CMD [ "/usr/src/app/run.sh" ]
+
+ENTRYPOINT [ "/usr/bin/tini", "--" ]
+CMD [ "uwsgi", "--http", ":9090", "--wsgi-file", "wsgi.py" ]
 
 RUN chown webapp-user:webapp-user /usr/src/app
 
