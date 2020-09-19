@@ -3,7 +3,7 @@ FROM python:3.8-buster as builder
 # Build our app inside a virtual environment so we can copy
 # it out later.
 RUN apt-get upgrade && apt-get update -y \
-    && apt-get install -y python-virtualenv
+    && apt-get install -y python-virtualenv wget
 
 RUN virtualenv --python=python3 /tmp/app-env
 
@@ -28,9 +28,16 @@ ENV PYTHONUNBUFFERED=1 \
 
 LABEL maintainer="tim@timandjamie.com"
 
+RUN apt-get upgrade && apt-get update -y \
+    && apt-get install -y locales \
+    && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
+    && locale-gen en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN useradd -ms /bin/bash webapp-user \
     && echo "alias ll='ls -alh'" >> /home/webapp-user/.bashrc \
-    && echo 'PATH="/usr/src/app/.venv/bin:$PATH"' >> /home/webapp-user/.bashrc
+    && echo 'PATH="/usr/src/app/.venv/bin:$PATH"' >> /home/webapp-user/.bashrc \
+    && mkdir /var/log/invoicer && chown webapp-user:webapp-user /var/log/invoicer
 
 USER webapp-user
 WORKDIR /usr/src/app
