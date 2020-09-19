@@ -5,7 +5,11 @@ FROM python:3.8-buster as builder
 RUN apt-get upgrade && apt-get update -y \
     && apt-get install -y python-virtualenv wget
 
-RUN virtualenv --python=python3 /tmp/app-env
+RUN virtualenv --python=python3 --always-copy /tmp/app-env
+
+# Make the virtual env portable
+RUN sed -i '43s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' /tmp/app-env/bin/activate \
+    && sed -i '1s/.*/#!\/usr\/bin\/env python/' /tmp/app-env/bin/pip*
 
 ENV PATH="/tmp/app-env/bin:$PATH"
 
