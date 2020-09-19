@@ -2,22 +2,26 @@ FROM python:3.8-buster as builder
 
 # Build our app inside a virtual environment so we can copy
 # it out later.
-# RUN apt-get update && apt-get upgrade -y \
-#     && apt-get install -y python-virtualenv wget vim
 
 RUN python -m venv --copies  /tmp/app-env
 
 WORKDIR /tmp/app-builder
 
-COPY ./requirements.txt ./setup.py ./invoicer ./
+COPY ./requirements.txt ./setup.py MANIFEST.in ./
+COPY ./invoicer ./invoicer
 
 RUN /tmp/app-env/bin/python -m pip install --upgrade pip && \
     /tmp/app-env/bin/python -m pip install -r requirements.txt && \
-    /tmp/app-env/bin/python -m pip install .
+    /tmp/app-env/bin/python -m pip install . && \
+    find . -name "*.py[co]" -o -name __pycache__ -exec rm -rf {} +
 
 # Make the virtual env portable
 RUN sed -i '40s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' /tmp/app-env/bin/activate
 RUN sed -i '1s|.*|#!/usr/bin/env python|' /tmp/app-env/bin/pip*
+
+# Stuff to help debug
+# RUN apt-get update && apt-get install -y vim wget curl && \
+#     echo "alias ll='ls -alh'" >> /root/.bashrc
 
 #################################################################################
 # All we need to do is to set up the container and copy the pre-built virtual env

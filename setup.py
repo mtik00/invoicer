@@ -1,8 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='invoicer',
-    packages=find_packages(),
+    packages=['invoicer'],
     include_package_data=True,
-    package_data={'': ['templates/*.html'] }
 )
