@@ -32,6 +32,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/usr/src/app/.venv/bin:$PATH"
 
 LABEL maintainer="tim@timandjamie.com"
+LABEL app="invoicer"
 
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y locales libxml2 tini \
@@ -46,12 +47,12 @@ RUN useradd -ms /bin/bash webapp-user \
 
 WORKDIR /usr/src/app
 
-COPY ./wsgi.py ./run.sh ./
+COPY ./wsgi.py docker/uwsgi.ini ./
 
 COPY --from=builder /tmp/app-env /usr/src/app/.venv
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
-CMD [ "uwsgi", "--http", ":9090", "--wsgi-file", "wsgi.py" ]
+CMD [ "uwsgi", "--ini", "uwsgi.ini" ]
 
 RUN chown webapp-user:webapp-user /usr/src/app
 
