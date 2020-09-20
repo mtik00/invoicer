@@ -18,6 +18,7 @@ RUN /tmp/app-env/bin/python -m pip install --upgrade pip && \
 # Make the virtual env portable
 RUN sed -i '40s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' /tmp/app-env/bin/activate
 RUN sed -i '1s|.*|#!/usr/bin/env python|' /tmp/app-env/bin/pip*
+RUN sed -i '1s/.*python$/#!\/usr\/bin\/env python/' /tmp/app-env/bin/*
 
 # Stuff to help debug
 # RUN apt-get update && apt-get install -y vim wget curl && \
