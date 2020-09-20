@@ -21,7 +21,7 @@ RUN sed -i '1s|.*|#!/usr/bin/env python|' /tmp/app-env/bin/pip*
 RUN sed -i '1s/.*python$/#!\/usr\/bin\/env python/' /tmp/app-env/bin/*
 
 # Stuff to help debug
-# RUN apt-get update && apt-get install -y vim wget curl && \
+# RUN apt-get update && apt-get install -y vim wget curl dnsutils && \
 #     echo "alias ll='ls -alh'" >> /root/.bashrc
 
 #################################################################################
