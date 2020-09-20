@@ -36,7 +36,7 @@ LABEL maintainer="tim@timandjamie.com"
 LABEL app="invoicer"
 
 RUN apt-get update && apt-get upgrade -y \
-    && apt-get install -y locales libxml2 tini \
+    && apt-get install -y locales libxml2 tini dnsutils  \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*

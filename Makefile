@@ -2,6 +2,7 @@
 
 build:
 	docker build -t invoicer -f docker/Dockerfile .
+	docker build -t invoicer-wkhtmltopdf -f docker/wkhtmltopdf/Dockerfile docker/wkhtmltopdf
 
 clean_build:
 	docker build --no-cache -t invoicer -f docker/Dockerfile .

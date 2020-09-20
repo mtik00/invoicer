@@ -54,6 +54,7 @@ def create_app():
 
         # You must add this to your configuration to enable PDF functionality
         WKHTMLTOPDF=None,
+        WKHTMLTOPDF_URI=None,
 
         EMAIL_FROM=None,
         EMAIL_USERNAME=None,
@@ -69,6 +70,11 @@ def create_app():
     app.config.from_envvar('INVOICER_SETTINGS', silent=True)
 
     app.config.from_pyfile(os.path.join(instance_path, 'application.cfg'), silent=True)
+
+    # Allow env overrides
+    for key in ('WKHTMLTOPDF_URI',):
+        app.config[key] = os.environ.get(key, app.config[key])
+
     password_hasher.reset(**app.config.get('ARGON2_CONFIG', {}))
 
     app.url_map.converters['regex'] = RegexConverter

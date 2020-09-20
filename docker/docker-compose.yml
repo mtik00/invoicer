@@ -8,6 +8,7 @@ services:
         - "../instance:/usr/src/app/instance"
     environment: 
         - INVOICER_APP_INSTANCE_PATH=/usr/src/app/instance
+        - WKHTMLTOPDF_URI=http://wkhtmltopdf
   wkhtmltopdf:
     image: invoicer-wkhtmltopdf
     ports:

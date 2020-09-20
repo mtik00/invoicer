@@ -1,6 +1,9 @@
 import os
 import re
 from io import BytesIO
+import json
+import requests
+
 
 import arrow
 import pdfkit
@@ -57,7 +60,7 @@ def user_invoices(user_id, order_by='desc'):
 
 
 def pdf_ok():
-    return bool(
+    return current_app.config.get('WKHTMLTOPDF_URI') or (
         os.path.exists(current_app.config.get('WKHTMLTOPDF') or '') and
         os.access(current_app.config['WKHTMLTOPDF'], os.R_OK)
     )
@@ -495,18 +498,43 @@ def to_pdf(invoice_number):
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
     text = bs4_invoice(current_user.id, invoice_number)
-    config = Configuration(current_app.config['WKHTMLTOPDF'])
-    options = {
-        'print-media-type': None,
-        'page-size': 'letter',
-        'no-outline': None,
-        'quiet': None
-    }
 
-    response = Response(
-        pdfkit.from_string(text, False, options=options, configuration=config),
-        mimetype='application/pdf',
-    )
+    if current_app.config['WKHTMLTOPDF_URI']:
+        url = current_app.config['WKHTMLTOPDF_URI']
+        data = {
+            'contents': text,
+            'options': {
+                'print-media-type': None,
+                'page-size': 'letter',
+                'no-outline': None,
+                'quiet': None
+            }
+        }
+        headers = {
+            'Content-Type': 'application/json',    # This is important
+        }
+        wk_response = requests.post(url, data=json.dumps(data), headers=headers)
+
+        response = Response(
+            wk_response.content,
+            mimetype='application/pdf',
+        )
+        # Save the response contents to a file
+        # with open('/path/to/local/file.pdf', 'wb') as f:
+        #     f.write(response.content)
+    else:
+        config = Configuration(current_app.config['WKHTMLTOPDF'])
+        options = {
+            'print-media-type': None,
+            'page-size': 'letter',
+            'no-outline': None,
+            'quiet': None
+        }
+
+        response = Response(
+            pdfkit.from_string(text, False, options=options, configuration=config),
+            mimetype='application/pdf',
+        )
 
     # response.headers['Content-Disposition'] = 'attachment; filename=invoice-%s.pdf' % invoice_number
 
