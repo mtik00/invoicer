@@ -46,15 +46,5 @@ def get_logger(name=None, screen_level=logging.INFO,
     return _logger
 
 
-# I'm cheating a little bit here.  This allows me to run the app directly on
-# my Windows machine to make debugging a little bit easier.  Normally, though,
-# the app is run on Ubuntu.
-if "lin" in sys.platform:
-    LOGGER = get_logger(name="invoicer-debug", logfile_path="/var/log/invoicer/debug.log")
-    AUTH_LOG = get_logger(name="invoicer-auth", logfile_path="/var/log/invoicer/auth.log")
-else:
-    if not os.path.isdir(os.path.join(APPDIR, "..", "log")):
-        os.makedirs(os.path.join(APPDIR, "..", "log"))
-
-    LOGGER = get_logger(name="invoicer-debug", logfile_path=os.path.join(APPDIR, "..", "log", "debug.log"))
-    AUTH_LOG = get_logger(name="invoicer-auth", logfile_path=os.path.join(APPDIR, "..", "log", "auth.log"))
+LOGGER = get_logger(name="invoicer-debug")
+AUTH_LOG = get_logger(name="invoicer-auth")
