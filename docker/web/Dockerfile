@@ -48,7 +48,7 @@ RUN useradd -ms /bin/bash webapp-user \
 
 WORKDIR /usr/src/app
 
-COPY ./wsgi.py docker/uwsgi.ini ./
+COPY ./wsgi.py docker/web/uwsgi.ini ./
 
 COPY --from=builder /tmp/app-env /usr/src/app/.venv
 
