@@ -32,7 +32,7 @@ def make_session_permanent():
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, instance_path=os.environ.get('INVOICER_APP_INSTANCE_PATH'))
     app.config.from_object(__name__)
 
     instance_path = os.path.abspath(app.instance_path)
