@@ -4,6 +4,8 @@ services:
     image: "invoicer:latest"
     ports:
         - "8080:8112"
+    volumes:
+        - "../instance:/usr/src/app/instance"
   wkhtmltopdf:
     image: openlabs/docker-wkhtmltopdf-aas
     ports:
