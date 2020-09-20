@@ -3,12 +3,12 @@ services:
   web:
     image: "invoicer:latest"
     ports:
-        - "8080:8112"
+        - "8080:5000"
     volumes:
         - "../instance:/usr/src/app/instance"
     environment: 
         - INVOICER_APP_INSTANCE_PATH=/usr/src/app/instance
   wkhtmltopdf:
-    image: openlabs/docker-wkhtmltopdf-aas
+    image: invoicer-wkhtmltopdf
     ports:
         - "8081:80"
