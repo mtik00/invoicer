@@ -98,8 +98,9 @@ def two_fa(next=None):
     user = User.query.get(session['user_id'])
     form = TwoFAEnableForm()
 
+    # import ipdb; ipdb.set_trace()
     if form.validate_on_submit():
-        if current_user.verify_totp(form.token.data):
+        if user.verify_totp(form.token.data):
             return complete_login(user)
         else:
             flash('Invalid 2FA token', 'error')
