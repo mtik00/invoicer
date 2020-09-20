@@ -490,6 +490,46 @@ def delete(invoice_number):
         return redirect(url_for('invoice_page.invoice_by_number', invoice_number=invoice_number))
 
 
+def get_pdf_from_kit(text: str):
+    config = Configuration(current_app.config['WKHTMLTOPDF'])
+    options = {
+        'print-media-type': None,
+        'page-size': 'letter',
+        'no-outline': None,
+        'quiet': None
+    }
+    return pdfkit.from_string(text, False, options=options, configuration=config)
+
+
+def get_pdf_from_url(text: str, url: str) -> bytes:
+    data = {
+        'contents': text,
+        'options': {
+            'print-media-type': None,
+            'page-size': 'letter',
+            'no-outline': None,
+            'quiet': None
+        }
+    }
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    wk_response = requests.post(url, data=json.dumps(data), headers=headers)
+
+    wk_response.raise_for_status()
+
+    return wk_response.content
+
+
+def get_pdf_bytes(invoice_number) -> bytes:
+    text = bs4_invoice(current_user.id, invoice_number)
+    
+    if current_app.config['WKHTMLTOPDF_URI']:
+        return get_pdf_from_url(text, current_app.config['WKHTMLTOPDF_URI'])    
+    
+    return get_pdf_from_kit(text)
+
+
 @invoice_page.route('/<regex("\d+-\d+-\d+"):invoice_number>/pdf')
 @login_required
 def to_pdf(invoice_number):
@@ -497,48 +537,12 @@ def to_pdf(invoice_number):
         flash('PDF configuration not supported', 'error')
         return redirect(url_for('.invoice_by_number', invoice_number=invoice_by_number))
 
-    text = bs4_invoice(current_user.id, invoice_number)
+    pdf_bytes = get_pdf_bytes(invoice_number)
 
-    if current_app.config['WKHTMLTOPDF_URI']:
-        url = current_app.config['WKHTMLTOPDF_URI']
-        data = {
-            'contents': text,
-            'options': {
-                'print-media-type': None,
-                'page-size': 'letter',
-                'no-outline': None,
-                'quiet': None
-            }
-        }
-        headers = {
-            'Content-Type': 'application/json',    # This is important
-        }
-        wk_response = requests.post(url, data=json.dumps(data), headers=headers)
-
-        response = Response(
-            wk_response.content,
-            mimetype='application/pdf',
-        )
-        # Save the response contents to a file
-        # with open('/path/to/local/file.pdf', 'wb') as f:
-        #     f.write(response.content)
-    else:
-        config = Configuration(current_app.config['WKHTMLTOPDF'])
-        options = {
-            'print-media-type': None,
-            'page-size': 'letter',
-            'no-outline': None,
-            'quiet': None
-        }
-
-        response = Response(
-            pdfkit.from_string(text, False, options=options, configuration=config),
-            mimetype='application/pdf',
-        )
-
-    # response.headers['Content-Disposition'] = 'attachment; filename=invoice-%s.pdf' % invoice_number
-
-    return response
+    return Response(
+        pdf_bytes,
+        mimetype='application/pdf',
+    )
 
 
 def get_address_emails(customer_id):
@@ -603,16 +607,8 @@ def submit_invoice(invoice_number):
     stream_attachments = []
     pdf_fh = None
     if pdf_ok():
-        bs4_body = bs4_invoice(current_user.id, invoice_number)
         fname = "invoice-%s.pdf" % invoice_number
-        config = Configuration(current_app.config['WKHTMLTOPDF'])
-        options = {
-            'print-media-type': None,
-            'page-size': 'letter',
-            'no-outline': None,
-            'quiet': None
-        }
-        pdf_bytes = pdfkit.from_string(bs4_body, None, options=options, configuration=config)
+        pdf_bytes = get_pdf_bytes(invoice_number)
         pdf_fh = BytesIO()
 
         pdf_fh.write(pdf_bytes)
