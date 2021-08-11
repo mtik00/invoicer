@@ -1,7 +1,7 @@
 # Ripped from https://github.com/lucenarenato/docker-alpine-wkhtmltopdf/blob/master/Dockerfile
 # and added the service from https://github.com/openlabs/docker-wkhtmltopdf-aas/blob/master/app.py
 
-FROM python:3.8-alpine3.12
+FROM python:rc-alpine3.12
 LABEL maintainer="Timothy McFadden <tim@timandjamie.com>"
 
 RUN apk add --update --no-cache \
